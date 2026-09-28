@@ -40,6 +40,48 @@ export interface Taxonomy {
   title: string;
 }
 
+export interface Shot {
+  /** Unique ID identifying the shot. */
+  id: string;
+  /** URL-friendly slug derived from the file name. */
+  slug: string;
+  /** Fully resolved permalink, always under /shots/. */
+  permalink: string;
+
+  publishDate: Date;
+  updateDate?: Date;
+
+  title: string;
+  /** Optional summary shown on cards. */
+  excerpt?: string;
+  image?: ImageMetadata | string;
+  imageAlt?: string;
+
+  /** The exact one-shot prompt that generated the artifact. */
+  prompt: string;
+  /** Agent harness that drove the generation, e.g. "ZCode", "Claude Code". */
+  harness?: string;
+  /** Model/agent that produced the artifact. */
+  model?: string;
+  /** Number of conversation turns actually used (1 = true one-shot). */
+  turns?: number;
+
+  /** Artifact HTML file name served from /shots/<file>. */
+  html?: string;
+  /** External live URL when there is no local HTML file. */
+  externalUrl?: string;
+
+  tags?: Taxonomy[];
+  featured?: boolean;
+
+  metadata?: MetaData;
+
+  draft?: boolean;
+
+  /** Rendered Astro component factory for the optional notes body. */
+  Content?: AstroComponentFactory;
+}
+
 export interface MetaData {
   title?: string;
   ignoreTitleTemplate?: boolean;

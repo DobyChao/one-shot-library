@@ -68,6 +68,40 @@ const postCollection = defineCollection({
   }),
 });
 
+const shotCollection = defineCollection({
+  loader: glob({ pattern: ['*.md'], base: 'src/data/shot' }),
+  schema: z.object({
+    publishDate: z.date().optional(),
+    updateDate: z.date().optional(),
+    draft: z.boolean().optional(),
+
+    title: z.string(),
+    excerpt: z.string().optional(),
+    image: z.string().optional(),
+    imageAlt: z.string().optional(),
+
+    /** The exact one-shot prompt that generated the artifact. */
+    prompt: z.string(),
+    /** Agent harness that drove the generation, e.g. "ZCode", "Claude Code", "v0". */
+    harness: z.string().optional(),
+    /** Model/agent that produced the artifact, e.g. "GLM-5.3-Flash". */
+    model: z.string().optional(),
+    /** Number of conversation turns actually used (1 = true one-shot). */
+    turns: z.number().int().optional(),
+
+    /** Artifact HTML file served from /artifacts/<file> (public/artifacts). */
+    html: z.string().optional(),
+    /** External live URL, used when there is no local HTML file. */
+    externalUrl: z.string().url().optional(),
+
+    tags: z.array(z.string()).optional(),
+    featured: z.boolean().optional(),
+
+    metadata: metadataDefinition(),
+  }),
+});
+
 export const collections = {
   post: postCollection,
+  shot: shotCollection,
 };

@@ -1,0 +1,312 @@
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import Layout from '~/layouts/PageLayout.astro';
+import PromptBox from '~/components/shots/PromptBox.astro';
+import Breadcrumbs from '~/components/common/Breadcrumbs.astro';
+import { Icon } from 'astro-icon/components';
+import type { ImageMetadata } from 'astro';
+
+import { getStaticPathsShots } from '~/utils/shots';
+import { findImage } from '~/utils/images';
+import { getAsset, getPermalink } from '~/utils/permalinks';
+import { truncateAtWord } from '~/utils/utils';
+
+export const prerender = true;
+
+export const getStaticPaths = (async () => {
+  return await getStaticPathsShots();
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { shot } = Astro.props as Props;
+
+const image = (await findImage(shot.image)) as ImageMetadata | string | undefined;
+// Artifacts live in public/artifacts/ so their URLs (/artifacts/<file>.html) can
+// never collide with these detail routes under /shots/.
+const liveUrl = shot.html ? getAsset(`/artifacts/${shot.html}`) : shot.externalUrl;
+const isLocalFile = Boolean(shot.html);
+
+const metadata = {
+  title: shot.title,
+  description: truncateAtWord(shot.excerpt, 155),
+};
+
+const breadcrumbs = [
+  { text: 'Home', href: getPermalink('/') },
+  { text: '画廊', href: getPermalink('/shots') },
+  { text: shot.title },
+];
+
+const formatDate = (d: Date) =>
+  d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+
+// Cells of the "生成信息" panel; optional fields are appended only when present.
+const infoCells: Array<{ label: string; value: string; icon: string }> = [];
+if (shot.harness) {
+  infoCells.push({ label: 'Agent Harness', value: shot.harness, icon: 'tabler:robot' });
+}
+if (shot.model) {
+  infoCells.push({ label: '模型', value: shot.model, icon: 'tabler:cpu' });
+}
+infoCells.push({
+  label: '对话轮数',
+  value: (shot.turns ?? 1) === 1 ? '1 轮 (真 one-shot)' : `${shot.turns} 轮`,
+  icon: 'tabler:messages',
+});
+infoCells.push({ label: '生成日期', value: formatDate(shot.publishDate), icon: 'tabler:calendar' });
+if (shot.updateDate) {
+  infoCells.push({ label: '最后更新', value: formatDate(shot.updateDate), icon: 'tabler:refresh' });
+}
+infoCells.push({
+  label: '产物形式',
+  value: isLocalFile ? '本站托管 HTML 页面' : shot.externalUrl ? '外部链接' : '仅截图存档',
+  icon: 'tabler:file-code',
+});
+---
+
+<Layout metadata={metadata}>
+  <Breadcrumbs bar items={breadcrumbs} />
+
+  <article class="px-4 py-10 sm:px-6 mx-auto max-w-6xl lg:px-8">
+    <!-- Header -->
+    <header class="mb-10">
+      <div class="mb-4 flex flex-wrap items-center gap-2 text-sm">
+        {
+          shot.harness && (
+            <span class="inline-flex items-center rounded-full bg-violet-500/10 px-3 py-1 font-medium text-violet-600 dark:bg-violet-500/20 dark:text-violet-300">
+              <Icon name="tabler:robot" class="mr-1.5 h-4 w-4" />
+              {shot.harness}
+            </span>
+          )
+        }
+        {
+          shot.model && (
+            <span class="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 font-medium text-primary dark:bg-primary/20 dark:text-blue-300">
+              <Icon name="tabler:cpu" class="mr-1.5 h-4 w-4" />
+              {shot.model}
+            </span>
+          )
+        }
+        {
+          (shot.turns ?? 1) === 1 ? (
+            <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 font-medium text-emerald-600 dark:text-emerald-400">
+              <Icon name="tabler:bolt" class="mr-1.5 h-4 w-4" />
+              one-shot
+            </span>
+          ) : (
+            <span class="inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 font-medium text-amber-600 dark:text-amber-400">
+              {shot.turns} 轮对话
+            </span>
+          )
+        }
+        {
+          (shot.tags ?? []).map((tag) => (
+            <span class="rounded-full bg-gray-100 px-3 py-1 text-gray-600 dark:bg-slate-800 dark:text-slate-300">{tag.title}</span>
+          ))
+        }
+      </div>
+
+      <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl dark:text-white md:text-5xl">{shot.title}</h1>
+
+      {
+        shot.excerpt && (
+          <p class="mt-4 max-w-3xl text-lg text-gray-600 dark:text-slate-400">{shot.excerpt}</p>
+        )
+      }
+
+      <p class="mt-4 flex items-center gap-2 text-sm text-gray-500 dark:text-slate-500">
+        <Icon name="tabler:calendar" class="h-4 w-4" />
+        {formatDate(shot.publishDate)}
+      </p>
+    </header>
+
+    <!-- Generation info -->
+    <section class="mb-12" aria-label="生成信息">
+      <div class="grid gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200 sm:grid-cols-2 lg:grid-cols-4 dark:border-slate-700 dark:bg-slate-700">
+        {
+          infoCells.map((cell) => (
+            <div class="flex items-start gap-3 bg-white p-4 dark:bg-slate-800">
+              <Icon name={cell.icon} class="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <div class="min-w-0">
+                <p class="text-xs uppercase tracking-wider text-gray-400 dark:text-slate-500">{cell.label}</p>
+                <p class="truncate text-sm font-semibold text-gray-900 dark:text-slate-100" title={cell.value}>
+                  {cell.value}
+                </p>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Screenshot -->
+    {
+      image && (
+        <figure class="mb-12">
+          <div class="overflow-hidden rounded-xl border border-gray-200 shadow-lg dark:border-slate-700">
+            <img src={typeof image === 'string' ? image : image.src} alt={shot.imageAlt || shot.title} class="w-full" width={1440} height={900} loading="eager" />
+          </div>
+          <figcaption class="mt-2 text-center text-sm text-gray-500 dark:text-slate-500">生成结果首屏截图</figcaption>
+        </figure>
+      )
+    }
+
+    <!-- Prompt -->
+    <section class="mb-12">
+      <h2 class="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
+        <Icon name="tabler:message-chatbot" class="h-5 w-5 text-primary" />
+        生成它的 Prompt
+      </h2>
+      <PromptBox prompt={shot.prompt} />
+    </section>
+
+    <!-- Live preview -->
+    {
+      liveUrl && (
+        <section class="mb-12" id="live-preview">
+          <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 class="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
+              <Icon name="tabler:app-window" class="h-5 w-5 text-primary" />
+              在线预览
+            </h2>
+
+            <div class="flex flex-wrap items-center gap-2">
+              {isLocalFile && (
+                <div
+                  class="inline-flex overflow-hidden rounded-md border border-gray-300 text-sm dark:border-slate-600"
+                  role="group"
+                  aria-label="切换预览宽度"
+                >
+                  <button
+                    type="button"
+                    data-width-toggle="100%"
+                    class="bg-primary px-3 py-1.5 font-medium text-white"
+                    aria-pressed="true"
+                  >
+                    桌面
+                  </button>
+                  <button
+                    type="button"
+                    data-width-toggle="390px"
+                    class="bg-white px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-100 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                    aria-pressed="false"
+                  >
+                    手机
+                  </button>
+                </div>
+              )}
+              <a
+                href={liveUrl}
+                target="_blank"
+                rel="noopener"
+                class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                <Icon name="tabler:external-link" class="h-4 w-4" />
+                新窗口打开
+              </a>
+              {isLocalFile && (
+                <a
+                  href={liveUrl}
+                  download={shot.html}
+                  class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  <Icon name="tabler:download" class="h-4 w-4" />
+                  下载 HTML
+                </a>
+              )}
+            </div>
+          </div>
+
+          <div
+            class="mx-auto overflow-hidden rounded-xl border border-gray-200 shadow-lg transition-all duration-300 dark:border-slate-700"
+            data-preview-frame
+            style="width: 100%; max-width: 100%;"
+          >
+            <div class="flex items-center gap-2 border-b border-gray-200 bg-gray-100 px-4 py-2.5 dark:border-slate-700 dark:bg-slate-800">
+              <span class="h-3 w-3 rounded-full bg-red-400"></span>
+              <span class="h-3 w-3 rounded-full bg-amber-400"></span>
+              <span class="h-3 w-3 rounded-full bg-green-400"></span>
+              <span class="ml-3 flex-1 truncate rounded bg-white px-3 py-1 text-xs text-gray-500 dark:bg-slate-900 dark:text-slate-400">
+                {liveUrl}
+              </span>
+            </div>
+            <iframe
+              src={liveUrl}
+              title={`${shot.title} 实时预览`}
+              loading="lazy"
+              class="block h-[70vh] min-h-[480px] w-full bg-white"
+            ></iframe>
+          </div>
+          {!isLocalFile && (
+            <p class="mt-2 text-center text-xs text-gray-500 dark:text-slate-500">
+              部分站点禁止被 iframe 嵌入,若预览空白请点「新窗口打开」。
+            </p>
+          )}
+        </section>
+      )
+    }
+
+    <!-- Optional notes body -->
+    {
+      shot.Content && (
+        <section class="mb-12">
+          <h2 class="mb-4 flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
+            <Icon name="tabler:notes" class="h-5 w-5 text-primary" />
+            备注
+          </h2>
+          <div class="prose prose-lg max-w-none dark:prose-invert">
+            <shot.Content />
+          </div>
+        </section>
+      )
+    }
+
+    <!-- Prev / next -->
+    <nav class="mt-16 border-t border-gray-200 pt-8 dark:border-slate-700">
+      <a
+        href={getPermalink('/shots')}
+        class="inline-flex items-center gap-2 font-medium text-primary hover:underline dark:text-blue-400"
+      >
+        <Icon name="tabler:arrow-left" class="h-4 w-4" />
+        返回画廊
+      </a>
+    </nav>
+  </article>
+</Layout>
+
+<script>
+  // Device-width toggle for the preview frame. Bound on `astro:page-load`
+  // because the ClientRouter skips identical inline scripts on revisits.
+  function initPreviewToggle() {
+    const frame = document.querySelector<HTMLElement>('[data-preview-frame]');
+    const toggles = document.querySelectorAll<HTMLButtonElement>('[data-width-toggle]');
+    if (!frame || !toggles.length) return;
+
+    const activeClasses = ['bg-primary', 'text-white'];
+    const inactiveClasses = [
+      'bg-white',
+      'text-gray-700',
+      'hover:bg-gray-100',
+      'dark:bg-slate-800',
+      'dark:text-slate-300',
+      'dark:hover:bg-slate-700',
+    ];
+
+    toggles.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const width = btn.dataset.widthToggle ?? '100%';
+        frame.style.width = width;
+        frame.style.maxWidth = width;
+        toggles.forEach((b) => {
+          const isActive = b === btn;
+          b.setAttribute('aria-pressed', String(isActive));
+          b.classList.remove(...activeClasses, ...inactiveClasses);
+          b.classList.add(...(isActive ? activeClasses : inactiveClasses));
+        });
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initPreviewToggle);
+</script>

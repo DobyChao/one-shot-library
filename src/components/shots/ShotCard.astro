@@ -1,0 +1,102 @@
+---
+import type { Shot } from '~/types';
+import Image from '~/components/common/Image.astro';
+import { Icon } from 'astro-icon/components';
+import { findImage } from '~/utils/images';
+import { getPermalink } from '~/utils/permalinks';
+
+export interface Props {
+  shot: Shot;
+}
+
+const { shot } = Astro.props;
+const image = await findImage(shot.image);
+const link = getPermalink(shot.permalink);
+
+const initials = shot.title
+  .split(/\s+/)
+  .slice(0, 2)
+  .map((w) => w[0])
+  .join('')
+  .toUpperCase();
+---
+
+<article
+  class="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-700 dark:bg-slate-800"
+>
+  <a href={link} class="relative block aspect-[3/2] overflow-hidden bg-gray-100 dark:bg-slate-700" aria-label={shot.title}>
+    {
+      image ? (
+        <Image
+          src={image}
+          class="h-full w-full object-cover object-top transition duration-300 group-hover:scale-[1.03]"
+          widths={[400, 800]}
+          width={800}
+          height={533}
+          sizes="(max-width: 768px) 100vw, 400px"
+          alt={shot.imageAlt || shot.title}
+          format="webp"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
+          <span class="text-5xl font-bold text-white/90">{initials}</span>
+        </div>
+      )
+    }
+  </a>
+
+  <div class="flex flex-1 flex-col gap-3 p-5">
+    <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-slate-400">
+      {
+        shot.harness && (
+          <span class="inline-flex items-center rounded-full bg-violet-500/10 px-2.5 py-0.5 font-medium text-violet-600 dark:bg-violet-500/20 dark:text-violet-300">
+            <Icon name="tabler:robot" class="mr-1 h-3.5 w-3.5" />
+            {shot.harness}
+          </span>
+        )
+      }
+      {
+        shot.model && (
+          <span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary dark:bg-primary/20 dark:text-blue-300">
+            <Icon name="tabler:cpu" class="mr-1 h-3.5 w-3.5" />
+            {shot.model}
+          </span>
+        )
+      }
+      {
+        (shot.turns ?? 1) === 1 ? (
+          <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 font-medium text-emerald-600 dark:text-emerald-400">
+            <Icon name="tabler:bolt" class="h-3.5 w-3.5" />
+            one-shot
+          </span>
+        ) : (
+          <span class="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 font-medium text-amber-600 dark:text-amber-400">
+            {shot.turns} 轮对话
+          </span>
+        )
+      }
+    </div>
+
+    <h3 class="text-lg font-bold leading-tight text-gray-900 dark:text-slate-100">
+      <a href={link} class="transition hover:text-primary dark:hover:text-blue-400">{shot.title}</a>
+    </h3>
+
+    {
+      shot.excerpt && <p class="line-clamp-2 text-sm text-gray-600 dark:text-slate-400">{shot.excerpt}</p>
+    }
+
+    {
+      shot.tags && shot.tags.length > 0 && (
+        <div class="mt-auto flex flex-wrap gap-2 pt-2">
+          {shot.tags.map((tag) => (
+            <span class="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-slate-700 dark:text-slate-300">
+              {tag.title}
+            </span>
+          ))}
+        </div>
+      )
+    }
+  </div>
+</article>

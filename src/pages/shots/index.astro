@@ -1,0 +1,172 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import ShotCard from '~/components/shots/ShotCard.astro';
+import { fetchShots } from '~/utils/shots';
+
+export const prerender = true;
+
+const shots = await fetchShots();
+
+// Distinct values per filter dimension, ordered by frequency.
+const countBy = (values: Array<string | undefined>) => {
+  const m = new Map<string, number>();
+  for (const v of values) {
+    if (!v) continue;
+    m.set(v, (m.get(v) ?? 0) + 1);
+  }
+  return [...m.entries()].sort((a, b) => b[1] - a[1]).map(([value, count]) => ({ value, count }));
+};
+
+const contentTags = countBy(shots.flatMap((shot) => (shot.tags ?? []).map((t) => t.title)));
+const models = countBy(shots.map((s) => s.model));
+const harnesses = countBy(shots.map((s) => s.harness));
+
+const metadata = {
+  title: '画廊',
+  description: '全部 one-shot 前端作品:一条 prompt,一次生成。可按类型、模型与 Agent Harness 筛选。',
+};
+
+const chipActive = 'bg-primary text-white';
+const chipInactive =
+  'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700';
+---
+
+<Layout metadata={metadata}>
+  <section class="px-4 py-16 sm:px-6 mx-auto max-w-6xl lg:px-8">
+    <header class="mb-10 text-center">
+      <p class="mb-2 text-sm font-semibold uppercase tracking-wider text-primary">One-Shot Gallery</p>
+      <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl dark:text-white md:text-5xl">作品画廊</h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-600 dark:text-slate-400">
+        每件作品都由一条 prompt 一次生成,点开可以查看原始 prompt、生成信息和在线预览。
+      </p>
+    </header>
+
+    {
+      (contentTags.length > 0 || models.length > 0 || harnesses.length > 0) && (
+        <div class="mb-10 space-y-3" role="group" aria-label="筛选作品">
+          {[
+            { label: '类型', key: 'type', values: contentTags, prefix: '' },
+            { label: '模型', key: 'model', values: models, prefix: '' },
+            { label: 'Agent', key: 'harness', values: harnesses, prefix: '' },
+          ]
+            .filter((group) => group.values.length > 0)
+            .map((group) => (
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="mr-1 w-12 shrink-0 text-right text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+                  {group.label}
+                </span>
+                <button
+                  type="button"
+                  data-filter-group={group.key}
+                  data-filter-value="*"
+                  class={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${chipActive}`}
+                  aria-pressed="true"
+                >
+                  全部
+                </button>
+                {group.values.map(({ value, count }) => (
+                  <button
+                    type="button"
+                    data-filter-group={group.key}
+                    data-filter-value={value}
+                    class={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${chipInactive}`}
+                    aria-pressed="false"
+                  >
+                    {value} ({count})
+                  </button>
+                ))}
+              </div>
+            ))}
+        </div>
+      )
+    }
+
+    <div id="shots-grid" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        shots.map((shot) => (
+          <div
+            data-shot-tags={(shot.tags ?? []).map((t) => t.title).join('|')}
+            data-shot-model={shot.model ?? ''}
+            data-shot-harness={shot.harness ?? ''}
+            data-shot-item
+            class="flex"
+          >
+            <ShotCard shot={shot} />
+          </div>
+        ))
+      }
+    </div>
+
+    <p id="shots-empty" class="hidden py-16 text-center text-gray-500 dark:text-slate-400">
+      没有符合筛选条件的作品,换个组合试试。
+    </p>
+
+    {
+      shots.length === 0 && (
+        <p class="text-center text-gray-500 dark:text-slate-400">
+          还没有作品。往 <code>src/data/shot/</code> 里加一个 markdown 文件试试。
+        </p>
+      )
+    }
+  </section>
+</Layout>
+
+<script>
+  // Three filter dimensions (type / model / harness), AND-combined across
+  // groups, single-select within a group ("*" = 全部).
+  //
+  // Binding must happen on `astro:page-load`: the ClientRouter swaps the DOM
+  // on in-site navigation and skips identical inline scripts on revisits, so
+  // parse-time binding leaves the buttons dead after coming back to this page.
+  // `astro:page-load` fires on first load and after every client-side swap,
+  // and the document-level listener survives the swap.
+  function initShotsFilter() {
+    const state: Record<string, string> = { type: '*', model: '*', harness: '*' };
+    const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter-group]');
+    const items = document.querySelectorAll<HTMLElement>('[data-shot-item]');
+    const empty = document.querySelector<HTMLElement>('#shots-empty');
+    if (!buttons.length) return;
+
+    const activeClasses = ['bg-primary', 'text-white'];
+    const inactiveClasses = [
+      'bg-gray-100',
+      'text-gray-700',
+      'hover:bg-gray-200',
+      'dark:bg-slate-800',
+      'dark:text-slate-300',
+      'dark:hover:bg-slate-700',
+    ];
+
+    const apply = () => {
+      buttons.forEach((btn) => {
+        const isActive = state[btn.dataset.filterGroup ?? ''] === btn.dataset.filterValue;
+        btn.setAttribute('aria-pressed', String(isActive));
+        btn.classList.remove(...activeClasses, ...inactiveClasses);
+        btn.classList.add(...(isActive ? activeClasses : inactiveClasses));
+      });
+
+      let visibleCount = 0;
+      items.forEach((item) => {
+        const tags = (item.dataset.shotTags ?? '').split('|').filter(Boolean);
+        const ok =
+          (state.type === '*' || tags.includes(state.type)) &&
+          (state.model === '*' || item.dataset.shotModel === state.model) &&
+          (state.harness === '*' || item.dataset.shotHarness === state.harness);
+        item.classList.toggle('hidden', !ok);
+        if (ok) visibleCount += 1;
+      });
+      empty?.classList.toggle('hidden', visibleCount > 0);
+    };
+
+    buttons.forEach((btn) =>
+      btn.addEventListener('click', () => {
+        state[btn.dataset.filterGroup ?? ''] = btn.dataset.filterValue ?? '*';
+        apply();
+      })
+    );
+
+    apply();
+  }
+
+  document.addEventListener('astro:page-load', initShotsFilter);
+</script>

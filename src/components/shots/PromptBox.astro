@@ -1,0 +1,72 @@
+---
+import { Icon } from 'astro-icon/components';
+
+export interface Props {
+  prompt: string;
+  /** Optional label above the box. */
+  label?: string;
+}
+
+const { prompt, label = '原始 Prompt' } = Astro.props;
+---
+
+<div data-prompt-box class="overflow-hidden rounded-xl border border-gray-200 bg-gray-50 dark:border-slate-700 dark:bg-slate-900">
+  <div class="flex items-center justify-between border-b border-gray-200 px-4 py-2.5 dark:border-slate-700">
+    <div class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-slate-300">
+      <Icon name="tabler:message-chatbot" class="h-4 w-4 text-primary" />
+      {label}
+    </div>
+    <button
+      type="button"
+      data-prompt-copy
+      class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+      aria-label="复制 Prompt"
+    >
+      <Icon name="tabler:copy" class="h-3.5 w-3.5" data-copy-icon />
+      <span data-copy-text>复制</span>
+    </button>
+  </div>
+  <pre
+    class="max-h-80 overflow-auto whitespace-pre-wrap break-words px-4 py-3 font-mono text-sm leading-relaxed text-gray-800 dark:text-slate-200"><code
+      data-prompt-text>{prompt}</code></pre>
+</div>
+
+<script>
+  // navigator.clipboard requires a focused document and a user gesture; fall
+  // back to the legacy execCommand path so older/embedded browsers still copy.
+  async function copyText(text: string): Promise<boolean> {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      ta.remove();
+      return ok;
+    }
+  }
+
+  // Bind on `astro:page-load`: the ClientRouter swaps the DOM on in-site
+  // navigation and skips identical inline scripts on revisits.
+  function initPromptCopy() {
+    document.querySelectorAll('[data-prompt-copy]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const code = btn.closest('[data-prompt-box]')?.querySelector('[data-prompt-text]');
+        if (!code) return;
+        const ok = await copyText(code.textContent ?? '');
+        const label = btn.querySelector('[data-copy-text]');
+        if (label) {
+          label.textContent = ok ? '已复制 ✓' : '复制失败';
+          setTimeout(() => (label.textContent = '复制'), 2000);
+        }
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initPromptCopy);
+</script>

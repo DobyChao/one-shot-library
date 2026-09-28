@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nimbus 运营看板</title>
+<style>
+  :root {
+    --bg: #f5f7fb; --card: #ffffff; --ink: #1c2333; --muted: #7a839e; --line: #e8ecf4;
+    --blue: #3b6ef6; --blue-soft: #e9effe; --green: #22a06b; --green-soft: #e4f5ed;
+    --amber: #d98a06; --amber-soft: #fcf1dc; --red: #d6455d; --red-soft: #fbe7ea;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); display: flex; min-height: 100vh;
+  }
+  aside {
+    width: 220px; background: #fff; border-right: 1px solid var(--line); padding: 24px 14px;
+    display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;
+  }
+  .brand { font-size: 19px; font-weight: 800; padding: 0 12px 22px; }
+  .brand i { color: var(--blue); font-style: normal; }
+  aside a {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+    text-decoration: none; color: var(--muted); font-size: 14px; transition: background .15s;
+  }
+  aside a .dot { width: 18px; height: 18px; border-radius: 6px; background: var(--line); flex-shrink: 0; }
+  aside a.active { background: var(--blue-soft); color: var(--blue); font-weight: 600; }
+  aside a.active .dot { background: var(--blue); }
+  aside a:hover:not(.active) { background: #f2f5fa; }
+  .profile { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px; border-top: 1px solid var(--line); }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #3b6ef6, #7c4df0); color: #fff; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+  .profile small { color: var(--muted); display: block; font-size: 12px; }
+  main { flex: 1; padding: 26px 30px; min-width: 0; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+  .topbar h1 { font-size: 22px; }
+  .topbar p { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .range { display: inline-flex; background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .range button { border: 0; background: transparent; padding: 8px 16px; font-size: 13px; color: var(--muted); cursor: pointer; font-family: inherit; }
+  .range button.on { background: var(--blue); color: #fff; font-weight: 600; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 22px; }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+  .kpi small { color: var(--muted); font-size: 13px; }
+  .kpi .v { font-size: 26px; font-weight: 800; margin: 6px 0 4px; font-variant-numeric: tabular-nums; }
+  .delta { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+  .up { color: var(--green); background: var(--green-soft); }
+  .down { color: var(--red); background: var(--red-soft); }
+  .panels { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+  .panel h2 { font-size: 15px; margin-bottom: 16px; }
+  .chart { display: flex; align-items: flex-end; gap: 12px; height: 210px; padding-top: 10px; }
+  .col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+  .col i {
+    width: 100%; max-width: 34px; border-radius: 8px 8px 3px 3px;
+    background: linear-gradient(180deg, #6f95fa, var(--blue)); transform-origin: bottom; animation: grow .7s ease both;
+  }
+  @keyframes grow { from { transform: scaleY(0); } }
+  .col span { font-size: 12px; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+  td { padding: 11px 6px; border-bottom: 1px solid var(--line); }
+  tr:last-child td { border-bottom: 0; }
+  .badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+  .b-green { color: var(--green); background: var(--green-soft); }
+  .b-amber { color: var(--amber); background: var(--amber-soft); }
+  .b-red { color: var(--red); background: var(--red-soft); }
+  @media (max-width: 860px) { aside { display: none; } .panels { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand"><i>◆</i> Nimbus</div>
+  <a href="#" class="active"><span class="dot"></span>数据总览</a>
+  <a href="#"><span class="dot"></span>订单管理</a>
+  <a href="#"><span class="dot"></span>用户分析</a>
+  <a href="#"><span class="dot"></span>商品库存</a>
+  <a href="#"><span class="dot"></span>营销活动</a>
+  <a href="#"><span class="dot"></span>系统设置</a>
+  <div class="profile">
+    <div class="avatar">林</div>
+    <div><b style="font-size:13px">林小满</b><small>运营负责人</small></div>
+  </div>
+</aside>
+
+<main>
+  <div class="topbar">
+    <div>
+      <h1>数据总览</h1>
+      <p>2026 年 9 月 28 日 · 数据每 10 分钟更新一次</p>
+    </div>
+    <div class="range">
+      <button>今日</button><button class="on">近 7 日</button><button>近 30 日</button>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><small>总营收 (GMV)</small><div class="v">¥ 486,320</div><span class="delta up">▲ 12.4%</span></div>
+    <div class="kpi"><small>有效订单</small><div class="v">3,264</div><span class="delta up">▲ 8.1%</span></div>
+    <div class="kpi"><small>支付转化率</small><div class="v">4.7%</div><span class="delta down">▼ 0.3%</span></div>
+    <div class="kpi"><small>客单价</small><div class="v">¥ 149</div><span class="delta up">▲ 3.9%</span></div>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <h2>近 7 日营收趋势(万元)</h2>
+      <div class="chart">
+        <div class="col"><i style="height:52%"></i><span>周一</span></div>
+        <div class="col"><i style="height:64%"></i><span>周二</span></div>
+        <div class="col"><i style="height:48%"></i><span>周三</span></div>
+        <div class="col"><i style="height:78%"></i><span>周四</span></div>
+        <div class="col"><i style="height:70%"></i><span>周五</span></div>
+        <div class="col"><i style="height:96%"></i><span>周六</span></div>
+        <div class="col"><i style="height:88%"></i><span>周日</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>最新订单</h2>
+      <table>
+        <thead><tr><th>订单号</th><th>客户</th><th>金额</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>#10246</td><td>陈先生</td><td>¥ 299</td><td><span class="badge b-green">已支付</span></td></tr>
+          <tr><td>#10245</td><td>王女士</td><td>¥ 1,280</td><td><span class="badge b-green">已支付</span></td></tr>
+          <tr><td>#10244</td><td>李女士</td><td>¥ 89</td><td><span class="badge b-amber">待支付</span></td></tr>
+          <tr><td>#10243</td><td>赵先生</td><td>¥ 456</td><td><span class="badge b-red">已退款</span></td></tr>
+          <tr><td>#10242</td><td>刘先生</td><td>¥ 1,999</td><td><span class="badge b-green">已支付</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+</body>
+</html>
