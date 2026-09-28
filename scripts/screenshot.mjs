@@ -12,7 +12,7 @@
  * `~/assets/images/shots/<name>.png`.
  */
 import { chromium } from 'playwright';
-import { existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { mkdirSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -26,10 +26,10 @@ const walk = (dir) =>
   );
 
 const only = process.argv.slice(2);
-const files = walk(srcDir).filter((f) => f.endsWith('.html')).map((f) => path.relative(srcDir, f));
-const targets = only.length
-  ? files.filter((f) => only.some((o) => f.replaceAll('\\', '/').startsWith(o)))
-  : files;
+const files = walk(srcDir)
+  .filter((f) => f.endsWith('.html'))
+  .map((f) => path.relative(srcDir, f));
+const targets = only.length ? files.filter((f) => only.some((o) => f.replaceAll('\\', '/').startsWith(o))) : files;
 
 if (targets.length === 0) {
   console.error('No artifact HTML files matched in public/artifacts/.');
