@@ -38,8 +38,7 @@ const breadcrumbs = [
   { text: shot.title },
 ];
 
-const formatDate = (d: Date) =>
-  d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+const formatDate = (d: Date) => d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
 
 // Cells of the "生成信息" panel; optional fields are appended only when present.
 const infoCells: Array<{ label: string; value: string; icon: string }> = [];
@@ -102,18 +101,16 @@ infoCells.push({
         }
         {
           (shot.tags ?? []).map((tag) => (
-            <span class="rounded-full bg-gray-100 px-3 py-1 text-gray-600 dark:bg-slate-800 dark:text-slate-300">{tag.title}</span>
+            <span class="rounded-full bg-gray-100 px-3 py-1 text-gray-600 dark:bg-slate-800 dark:text-slate-300">
+              {tag.title}
+            </span>
           ))
         }
       </div>
 
       <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl dark:text-white md:text-5xl">{shot.title}</h1>
 
-      {
-        shot.excerpt && (
-          <p class="mt-4 max-w-3xl text-lg text-gray-600 dark:text-slate-400">{shot.excerpt}</p>
-        )
-      }
+      {shot.excerpt && <p class="mt-4 max-w-3xl text-lg text-gray-600 dark:text-slate-400">{shot.excerpt}</p>}
 
       <p class="mt-4 flex items-center gap-2 text-sm text-gray-500 dark:text-slate-500">
         <Icon name="tabler:calendar" class="h-4 w-4" />
@@ -123,7 +120,9 @@ infoCells.push({
 
     <!-- Generation info -->
     <section class="mb-12" aria-label="生成信息">
-      <div class="grid gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200 sm:grid-cols-2 lg:grid-cols-4 dark:border-slate-700 dark:bg-slate-700">
+      <div
+        class="grid gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200 sm:grid-cols-2 lg:grid-cols-4 dark:border-slate-700 dark:bg-slate-700"
+      >
         {
           infoCells.map((cell) => (
             <div class="flex items-start gap-3 bg-white p-4 dark:bg-slate-800">
@@ -145,7 +144,14 @@ infoCells.push({
       image && (
         <figure class="mb-12">
           <div class="overflow-hidden rounded-xl border border-gray-200 shadow-lg dark:border-slate-700">
-            <img src={typeof image === 'string' ? image : image.src} alt={shot.imageAlt || shot.title} class="w-full" width={1440} height={900} loading="eager" />
+            <img
+              src={typeof image === 'string' ? image : image.src}
+              alt={shot.imageAlt || shot.title}
+              class="w-full"
+              width={1440}
+              height={900}
+              loading="eager"
+            />
           </div>
           <figcaption class="mt-2 text-center text-sm text-gray-500 dark:text-slate-500">生成结果首屏截图</figcaption>
         </figure>
@@ -224,9 +230,9 @@ infoCells.push({
             style="width: 100%; max-width: 100%;"
           >
             <div class="flex items-center gap-2 border-b border-gray-200 bg-gray-100 px-4 py-2.5 dark:border-slate-700 dark:bg-slate-800">
-              <span class="h-3 w-3 rounded-full bg-red-400"></span>
-              <span class="h-3 w-3 rounded-full bg-amber-400"></span>
-              <span class="h-3 w-3 rounded-full bg-green-400"></span>
+              <span class="h-3 w-3 rounded-full bg-red-400" />
+              <span class="h-3 w-3 rounded-full bg-amber-400" />
+              <span class="h-3 w-3 rounded-full bg-green-400" />
               <span class="ml-3 flex-1 truncate rounded bg-white px-3 py-1 text-xs text-gray-500 dark:bg-slate-900 dark:text-slate-400">
                 {liveUrl}
               </span>
@@ -236,7 +242,7 @@ infoCells.push({
               title={`${shot.title} 实时预览`}
               loading="lazy"
               class="block h-[70vh] min-h-[480px] w-full bg-white"
-            ></iframe>
+            />
           </div>
           {!isLocalFile && (
             <p class="mt-2 text-center text-xs text-gray-500 dark:text-slate-500">

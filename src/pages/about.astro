@@ -16,28 +16,45 @@ const metadata = {
 
     <div class="prose prose-lg dark:prose-invert mx-auto">
       <p>
-        <strong>One-Shot Library</strong> 收藏 AI 在一条 prompt 内直接生成的前端产物:落地页、仪表盘、小工具。
-        我们相信「一次成型的质量」本身就是一种值得展示的东西——所以每件作品都同时展示三个东西:
+        <strong>One-Shot Library</strong> 收藏 AI 在一条 prompt 内直接生成的前端产物:落地页、仪表盘、小工具。 我们相信「一次成型的质量」本身就是一种值得展示的东西——所以每件作品都同时展示三个东西:
         <strong>原始 prompt、使用的模型、生成结果</strong>。
       </p>
       <p>
-        站点基于 <a href="https://github.com/onwidget/astrowind">AstroWind</a>(Astro + Tailwind CSS)构建,
-        产物以单文件 HTML 的形式随站点静态分发,详情页内嵌 iframe 实时预览。
+        站点基于 <a href="https://github.com/onwidget/astrowind">AstroWind</a>(Astro + Tailwind CSS)构建, 产物以静态
+        HTML 形式随站点分发(单文件或子目录),详情页内嵌 iframe 实时预览。
       </p>
 
       <h2 id="submit">如何提交作品</h2>
+      <p>两种方式,任选其一:</p>
+
+      <h3>方式一:提 Pull Request(推荐)</h3>
       <ol>
-        <li>把产物放进 <code>public/artifacts/</code>:单文件直接放(例如 <code>my-landing.html</code>);
-          多文件/带本地 JS 的产物整目录放(例如 <code>th-game/index.html</code>),frontmatter 的 <code>html</code> 写相对路径;<br />
-        <small>产物走 <code>/artifacts/</code> 路径,与详情页 <code>/shots/</code> 路由隔离,避免静态文件抢先命中。</small></li>
         <li>
-          在 <code>src/data/shot/</code> 新建同名 markdown 文件,填好 frontmatter(见下);<br />
-          截图可运行 <code>npm run screenshots</code> 自动生成,输出到 <code>src/assets/images/shots/</code>;
+          Fork 本仓库,产物放进 <code>public/artifacts/</code>:单文件直接放(例如 <code>my-landing.html</code>);
+          多文件/带本地 JS 的产物整目录放(例如 <code>th-game/index.html</code>),frontmatter 的 <code>html</code> 写相对路径;<br
+          />
+          <small
+            >产物走 <code>/artifacts/</code> 路径,与详情页 <code>/shots/</code> 路由隔离,避免静态文件抢先命中。<code
+              >public/</code
+            > 下的产物代码不参与 lint,原样收录即可。</small
+          >
         </li>
-        <li><code>npm run dev</code> 本地预览,确认后正常提交/部署。</li>
+        <li>新建 <code>src/data/shot/&lt;slug&gt;.md</code>,填好 frontmatter(字段表见下);</li>
+        <li>
+          本地 <code>npm install &amp;&amp; npm run dev</code> 自测画廊与详情页;封面截图可跑
+          <code>npm run screenshots</code>(首次需 <code>npx playwright install chromium</code>),
+          没条件跑也没关系,卡片会显示渐变占位图,由维护者代补;
+        </li>
+        <li>提交 PR(模板里有核对清单),合并后站点自动重新部署。</li>
       </ol>
 
-      <h2>frontmatter 字段</h2>
+      <h3>方式二:开 Issue 代录</h3>
+      <p>
+        不想折腾仓库?直接 <a href="https://github.com/DobyChao/one-shot-library/issues/new">开一个 Issue</a>, 附上原始
+        prompt、使用的 harness / 模型、产物链接(或文件),由维护者代为收录。
+      </p>
+
+      <h3>frontmatter 字段</h3>
       <pre><code>---
 title: 作品标题
 excerpt: 一句话介绍
@@ -54,8 +71,8 @@ featured: false          # 首页精选
 
       <p>
         <code>harness</code> 与 <code>model</code> 会作为标签展示,并参与画廊的分组筛选;
-        <code>turns</code>、生成日期、产物形式会出现在详情页的「生成信息」面板里。
-        markdown 正文可选,显示在详情页「备注」区(生成细节、人工改动说明等)。
+        <code>turns</code>、生成日期、产物形式会出现在详情页的「生成信息」面板里。 markdown
+        正文可选,显示在详情页「备注」区(生成细节、人工改动说明等)。
       </p>
     </div>
   </section>

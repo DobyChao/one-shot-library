@@ -35,7 +35,7 @@ export const footerData = {
   ],
   secondaryLinks: [],
   socialLinks: [
-    { ariaLabel: 'Github', icon: 'tabler:brand-github', href: 'https://github.com' },
+    { ariaLabel: 'Github', icon: 'tabler:brand-github', href: 'https://github.com/DobyChao/one-shot-library' },
   ],
   footNote: `
     One-Shot Library · 每条 prompt 都值得一个展厅

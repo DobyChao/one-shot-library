@@ -26,13 +26,13 @@ title: 作品标题
 excerpt: 一句话介绍
 prompt: |
   生成它的那条完整 prompt(原样粘贴)
-harness: ZCode           # 驱动生成的 agent harness(ZCode / Claude Code / Cursor / v0 …)
-model: GLM-5.3-Flash     # 使用的模型
-turns: 1                 # 实际对话轮数,1 = 真 one-shot
-html: my-landing.html    # public/artifacts/ 下的文件名
+harness: ZCode # 驱动生成的 agent harness(ZCode / Claude Code / Cursor / v0 …)
+model: GLM-5.3-Flash # 使用的模型
+turns: 1 # 实际对话轮数,1 = 真 one-shot
+html: my-landing.html # public/artifacts/ 下的文件名
 image: '~/assets/images/shots/my-landing.png'
 tags: [landing-page, saas]
-featured: false          # 首页精选
+featured: false # 首页精选
 ---
 ```
 
@@ -42,14 +42,14 @@ markdown 正文可选,显示在详情页「备注」区。
 
 ## 目录速览
 
-| 路径 | 作用 |
-| --- | --- |
-| `src/data/shot/` | 作品条目(markdown) |
-| `public/artifacts/` | 产物 HTML(单文件或子目录,`/artifacts/` 路径) |
-| `src/assets/images/shots/` | 作品截图(由脚本生成) |
-| `src/components/shots/` | ShotCard / PromptBox 组件 |
-| `src/pages/shots/` | 画廊列表页 + 详情页 |
-| `src/config.yaml` | 站点名 / SEO / 主题 |
+| 路径                       | 作用                                         |
+| -------------------------- | -------------------------------------------- |
+| `src/data/shot/`           | 作品条目(markdown)                           |
+| `public/artifacts/`        | 产物 HTML(单文件或子目录,`/artifacts/` 路径) |
+| `src/assets/images/shots/` | 作品截图(由脚本生成)                         |
+| `src/components/shots/`    | ShotCard / PromptBox 组件                    |
+| `src/pages/shots/`         | 画廊列表页 + 详情页                          |
+| `src/config.yaml`          | 站点名 / SEO / 主题                          |
 
 ## 部署
 
@@ -57,10 +57,10 @@ markdown 正文可选,显示在详情页「备注」区。
 
 **部署前必改**(`src/config.yaml`):
 
-| 字段 | 改成 | 说明 |
-| --- | --- | --- |
-| `site.site` | `https://<user>.github.io`(纯 origin,不含仓库路径) | canonical / sitemap / 结构化数据用;注意 AstroWind 会把它设为 Astro 原生 `site` |
-| `site.base` | `/` 或 `/<repo>` | **GitHub Pages 项目页必须设为 `/<repo>`(不带尾斜杠)**,否则所有资源 404;带尾斜杠会让首页被 Astro 的尾斜杠重定向页覆盖(死循环)。自定义域名或用户主站保持 `/` |
+| 字段        | 改成                                               | 说明                                                                                                                                                       |
+| ----------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `site.site` | `https://<user>.github.io`(纯 origin,不含仓库路径) | canonical / sitemap / 结构化数据用;注意 AstroWind 会把它设为 Astro 原生 `site`                                                                             |
+| `site.base` | `/` 或 `/<repo>`                                   | **GitHub Pages 项目页必须设为 `/<repo>`(不带尾斜杠)**,否则所有资源 404;带尾斜杠会让首页被 Astro 的尾斜杠重定向页覆盖(死循环)。自定义域名或用户主站保持 `/` |
 
 - **GitHub Pages**:设置上面两项后,把 `dist/` 发布到 gh-pages 分支,或加一个 `actions/upload-pages-artifact` + `actions/deploy-pages` 的 workflow(可参考 `.github/workflows/actions.yaml` 的构建步骤改)。访问 `/shots` 这类无斜杠路径时 GH Pages 会 301 到 `/shots/`,属正常行为。
 - **Vercel / Cloudflare Pages / Netlify**:连上仓库零配置即可,`site.base` 保持 `/`,只改 `site.site`。

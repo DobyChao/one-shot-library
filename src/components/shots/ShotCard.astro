@@ -24,7 +24,11 @@ const initials = shot.title
 <article
   class="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-700 dark:bg-slate-800"
 >
-  <a href={link} class="relative block aspect-[3/2] overflow-hidden bg-gray-100 dark:bg-slate-700" aria-label={shot.title}>
+  <a
+    href={link}
+    class="relative block aspect-[3/2] overflow-hidden bg-gray-100 dark:bg-slate-700"
+    aria-label={shot.title}
+  >
     {
       image ? (
         <Image
@@ -83,9 +87,7 @@ const initials = shot.title
       <a href={link} class="transition hover:text-primary dark:hover:text-blue-400">{shot.title}</a>
     </h3>
 
-    {
-      shot.excerpt && <p class="line-clamp-2 text-sm text-gray-600 dark:text-slate-400">{shot.excerpt}</p>
-    }
+    {shot.excerpt && <p class="line-clamp-2 text-sm text-gray-600 dark:text-slate-400">{shot.excerpt}</p>}
 
     {
       shot.tags && shot.tags.length > 0 && (

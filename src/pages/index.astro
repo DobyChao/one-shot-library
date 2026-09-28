@@ -31,8 +31,8 @@ const oneShotCount = allShots.filter((s) => (s.turns ?? 1) === 1).length;
     </Fragment>
 
     <Fragment slot="subtitle">
-      这里收藏 AI 在<strong>一条 prompt 内</strong>直接生成的前端作品:落地页、仪表盘、小工具。
-      每件作品都附原始 prompt、使用的模型和可交互的在线预览——所见即所得,没有返工。
+      这里收藏 AI 在<strong>一条 prompt 内</strong>直接生成的前端作品:落地页、仪表盘、小工具。 每件作品都附原始
+      prompt、使用的模型和可交互的在线预览——所见即所得,没有返工。
     </Fragment>
   </Hero>
 
@@ -68,7 +68,9 @@ const oneShotCount = allShots.filter((s) => (s.turns ?? 1) === 1).length;
   >
     <Fragment slot="title">下一个 one-shot 就在你手里</Fragment>
     <Fragment slot="subtitle">
-      已收录 {allShots.length} 件作品,其中 {oneShotCount} 件是真正的 zero-touch one-shot。<br class="hidden md:inline" />
+      已收录 {allShots.length} 件作品,其中 {oneShotCount} 件是真正的 zero-touch one-shot。<br
+        class="hidden md:inline"
+      />
       把你最好的那条 prompt 和产物交出来,让它们被看见。
     </Fragment>
   </CallToAction>

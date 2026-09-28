@@ -10,7 +10,10 @@ export interface Props {
 const { prompt, label = '原始 Prompt' } = Astro.props;
 ---
 
-<div data-prompt-box class="overflow-hidden rounded-xl border border-gray-200 bg-gray-50 dark:border-slate-700 dark:bg-slate-900">
+<div
+  data-prompt-box
+  class="overflow-hidden rounded-xl border border-gray-200 bg-gray-50 dark:border-slate-700 dark:bg-slate-900"
+>
   <div class="flex items-center justify-between border-b border-gray-200 px-4 py-2.5 dark:border-slate-700">
     <div class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-slate-300">
       <Icon name="tabler:message-chatbot" class="h-4 w-4 text-primary" />
@@ -27,8 +30,7 @@ const { prompt, label = '原始 Prompt' } = Astro.props;
     </button>
   </div>
   <pre
-    class="max-h-80 overflow-auto whitespace-pre-wrap break-words px-4 py-3 font-mono text-sm leading-relaxed text-gray-800 dark:text-slate-200"><code
-      data-prompt-text>{prompt}</code></pre>
+    class="max-h-80 overflow-auto whitespace-pre-wrap break-words px-4 py-3 font-mono text-sm leading-relaxed text-gray-800 dark:text-slate-200"><code data-prompt-text>{prompt}</code></pre>
 </div>
 
 <script>

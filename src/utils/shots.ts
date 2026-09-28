@@ -38,7 +38,10 @@ const getNormalizedShot = async (shot: CollectionEntry<'shot'>): Promise<Shot> =
   return {
     id,
     slug,
-    permalink: ['shots', slug].map((el) => trimSlash(el)).filter((el) => !!el).join('/'),
+    permalink: ['shots', slug]
+      .map((el) => trimSlash(el))
+      .filter((el) => !!el)
+      .join('/'),
 
     publishDate,
     updateDate,
