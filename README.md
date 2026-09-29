@@ -10,10 +10,14 @@
 npm run dev          # 本地开发 http://localhost:4321
 npm run build        # 构建到 dist/
 npm run preview      # 预览构建产物
-npm run screenshots  # 批量生成作品首屏截图(Playwright)
+npm run screenshots  # 批量生成作品封面(Playwright,video: true 的录循环视频)
+npm run audit        # 批量跑 Lighthouse,分数进详情页(首次需 npx playwright install chromium)
+npm run new          # 脚手架:新建条目骨架并格式化
 ```
 
 ## 如何添加一件作品
+
+最快路径:`npm run new -- <slug> "作品标题"`,然后按提示填 TODO。完整流程:
 
 1. **放产物**:`public/artifacts/` 下——单文件直接放(`my-landing.html`),多文件/带本地 JS 的整目录放(`th-game/index.html`,`html` 字段写相对路径);产物走 `/artifacts/` 路径,与 `/shots/` 详情路由隔离;
 2. **写条目**:在 `src/data/shot/` 新建同名 `my-landing.md`,frontmatter 字段见下方;
@@ -37,8 +41,11 @@ featured: false # 首页精选
 ---
 ```
 
-可选字段:`externalUrl`(外部链接代替本地 HTML)、`imageAlt`、`updateDate`、`draft: true`(隐藏)。
-`harness` / `model` 会成为卡片徽章并参与画廊分组筛选;`turns`、日期、产物形式出现在详情页「生成信息」面板;
+可选字段:`externalUrl`(外部链接代替本地 HTML)、`imageAlt`、`updateDate`、`draft: true`(隐藏)、
+`video: true` + `videoKey`(录循环视频封面,录制时按该键或点击画面启动产物)、
+`series`(同 prompt 对照系列的组名,详情页互链)。
+`harness` / `model` 会成为卡片徽章并参与画廊分组筛选,请用规范写法(见 `src/data/taxonomy.ts` 或站内关于页);
+`turns`、日期、产物形式出现在详情页「生成信息」面板;`npm run audit` 的 Lighthouse 分数有则自动展示;
 markdown 正文可选,显示在详情页「备注」区。
 
 ## 目录速览

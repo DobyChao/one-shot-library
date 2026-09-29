@@ -12,6 +12,8 @@ html: th-game/index.html
 image: '~/assets/images/shots/th-game/index.png'
 imageAlt: 東方星塵録游戏标题画面截图
 tags: [game, canvas, webaudio]
+video: true
+videoKey: Enter
 featured: true
 ---
 

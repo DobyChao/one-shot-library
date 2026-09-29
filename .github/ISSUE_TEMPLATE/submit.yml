@@ -1,0 +1,66 @@
+name: 作品提交
+description: 提交一个 one-shot 作品,由维护者代为收录进画廊
+title: '[作品提交] '
+labels: ['submission']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢投稿!收录后会展示在你的作品页并署上 harness / 模型信息。
+        想自己动手也可以走 PR 流程,见 [README](https://github.com/DobyChao/one-shot-library#如何添加一件作品)。
+
+  - type: input
+    id: title
+    attributes:
+      label: 作品标题
+      description: 展示在画廊卡片上的名字
+    validations:
+      required: true
+
+  - type: textarea
+    id: prompt
+    attributes:
+      label: 原始 Prompt
+      description: 生成它的一条 prompt,一字不改地粘贴
+      placeholder: |
+        一句话生成一个……
+    validations:
+      required: true
+
+  - type: dropdown
+    id: harness
+    attributes:
+      label: Agent Harness
+      description: 驱动生成的工具(规范写法)
+      options:
+        - ZCode
+        - Claude Code
+        - Cursor
+        - v0
+        - Bolt
+        - Copilot
+        - 其他(在模型/备注里说明)
+    validations:
+      required: true
+
+  - type: input
+    id: model
+    attributes:
+      label: 模型
+      description: 如 GLM-5.3-Flash / Claude Sonnet 4.5
+    validations:
+      required: true
+
+  - type: textarea
+    id: artifact
+    attributes:
+      label: 产物
+      description: HTML 附件 / 在线链接 / 仓库地址,任一形式
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 其他备注
+      description: 实际对话轮数、人工改动、运行注意事项等(可选)

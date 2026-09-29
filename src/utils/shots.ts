@@ -22,6 +22,9 @@ const getNormalizedShot = async (shot: CollectionEntry<'shot'>): Promise<Shot> =
     externalUrl,
     tags: rawTags = [],
     featured = false,
+    video,
+    videoKey,
+    series,
     draft = false,
     metadata = {},
   } = data;
@@ -61,6 +64,10 @@ const getNormalizedShot = async (shot: CollectionEntry<'shot'>): Promise<Shot> =
 
     tags,
     featured,
+
+    video,
+    videoKey,
+    series,
 
     draft,
 

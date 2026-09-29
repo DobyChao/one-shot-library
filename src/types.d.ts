@@ -74,6 +74,13 @@ export interface Shot {
   tags?: Taxonomy[];
   featured?: boolean;
 
+  /** Render a looping video cover (recorded by `npm run screenshots`). */
+  video?: boolean;
+  /** Keyboard key the recorder presses to start interactive artifacts (e.g. "Enter", "Space"). */
+  videoKey?: string;
+  /** Groups works generated from the same prompt for side-by-side comparison. */
+  series?: string;
+
   metadata?: MetaData;
 
   draft?: boolean;

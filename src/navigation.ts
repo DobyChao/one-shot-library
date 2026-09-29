@@ -1,4 +1,4 @@
-import { getPermalink } from './utils/permalinks';
+import { getAsset, getPermalink } from './utils/permalinks';
 
 export const headerData = {
   links: [
@@ -22,6 +22,7 @@ export const footerData = {
         { text: '首页', href: getPermalink('/') },
         { text: '画廊', href: getPermalink('/shots') },
         { text: '关于 / 提交作品', href: getPermalink('/about') },
+        { text: 'RSS 订阅', href: getAsset('/rss.xml') },
       ],
     },
     {

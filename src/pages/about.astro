@@ -1,5 +1,6 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
+import { HARNESSES, MODELS } from '~/data/taxonomy';
 
 const metadata = {
   title: '关于 / 提交作品',
@@ -36,7 +37,7 @@ const metadata = {
           <small
             >产物走 <code>/artifacts/</code> 路径,与详情页 <code>/shots/</code> 路由隔离,避免静态文件抢先命中。<code
               >public/</code
-            > 下的产物代码不参与 lint,原样收录即可。</small
+            > 下的产物代码不参与 lint,原样收录即可;详情页会把它放进沙箱 iframe(禁止站内跳转 / 表单 / 弹窗)。</small
           >
         </li>
         <li>新建 <code>src/data/shot/&lt;slug&gt;.md</code>,填好 frontmatter(字段表见下);</li>
@@ -50,8 +51,9 @@ const metadata = {
 
       <h3>方式二:开 Issue 代录</h3>
       <p>
-        不想折腾仓库?直接 <a href="https://github.com/DobyChao/one-shot-library/issues/new">开一个 Issue</a>, 附上原始
-        prompt、使用的 harness / 模型、产物链接(或文件),由维护者代为收录。
+        不想折腾仓库?直接
+        <a href="https://github.com/DobyChao/one-shot-library/issues/new?template=submit.yml">用表单开一个 Issue</a>,
+        附上原始 prompt、使用的 harness / 模型、产物链接(或文件),由维护者代为收录。
       </p>
 
       <h3>frontmatter 字段</h3>
@@ -70,9 +72,28 @@ featured: false          # 首页精选
 ---</code></pre>
 
       <p>
-        <code>harness</code> 与 <code>model</code> 会作为标签展示,并参与画廊的分组筛选;
-        <code>turns</code>、生成日期、产物形式会出现在详情页的「生成信息」面板里。 markdown
-        正文可选,显示在详情页「备注」区(生成细节、人工改动说明等)。
+        <code>harness</code> 与 <code>model</code> 会作为标签展示,并参与画廊的分组筛选——请使用规范写法:
+      </p>
+      <p class="flex flex-wrap items-center gap-2">
+        {
+          HARNESSES.map((h) => (
+            <span class="rounded-full bg-violet-500/10 px-3 py-1 text-sm font-medium text-violet-600 dark:bg-violet-500/20 dark:text-violet-300">
+              {h}
+            </span>
+          ))
+        }
+        {
+          MODELS.map((m) => (
+            <span class="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary dark:bg-primary/20 dark:text-blue-300">
+              {m}
+            </span>
+          ))
+        }
+      </p>
+      <p>
+        <code>turns</code>、生成日期、产物形式会出现在详情页的「生成信息」面板里;frontmatter 加 <code>video: true</code> 时,收录流程会用
+        Playwright 录制一段循环动画作为卡片封面(可用 <code>videoKey</code>
+        指定开始交互的按键)。 markdown 正文可选,显示在详情页「备注」区(生成细节、人工改动说明等)。
       </p>
     </div>
   </section>

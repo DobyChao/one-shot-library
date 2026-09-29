@@ -11,6 +11,8 @@ html: world-execute/index.html
 image: '~/assets/images/shots/world-execute/index.png'
 imageAlt: WORLD EXECUTE ME PV 开场画面,大字排版与播放按钮
 tags: [pv, animation, music]
+video: true
+videoKey: Space
 featured: true
 ---
 

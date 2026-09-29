@@ -1,4 +1,5 @@
 ---
+import type { ImageMetadata } from 'astro';
 import type { Shot } from '~/types';
 import Image from '~/components/common/Image.astro';
 import { Icon } from 'astro-icon/components';
@@ -12,6 +13,14 @@ export interface Props {
 const { shot } = Astro.props;
 const image = await findImage(shot.image);
 const link = getPermalink(shot.permalink);
+
+// Looping video covers recorded by `npm run screenshots -- <slug>` for entries
+// with `video: true` in frontmatter.
+const videoCovers = import.meta.glob<{ default: ImageMetadata }>('/src/assets/covers/*.webm');
+const coverLoader = videoCovers[`/src/assets/covers/${shot.slug}.webm`];
+const cover = coverLoader ? (await coverLoader()).default : undefined;
+
+const poster = typeof image === 'string' ? image : image?.src;
 
 const initials = shot.title
   .split(/\s+/)
@@ -30,7 +39,17 @@ const initials = shot.title
     aria-label={shot.title}
   >
     {
-      image ? (
+      cover ? (
+        <video
+          src={cover.src}
+          poster={poster}
+          autoplay
+          muted
+          loop
+          playsinline
+          class="h-full w-full object-cover object-top"
+        />
+      ) : image ? (
         <Image
           src={image}
           class="h-full w-full object-cover object-top transition duration-300 group-hover:scale-[1.03]"
@@ -47,6 +66,14 @@ const initials = shot.title
         <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
           <span class="text-5xl font-bold text-white/90">{initials}</span>
         </div>
+      )
+    }
+    {
+      cover && (
+        <span class="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-medium text-white">
+          <Icon name="tabler:movie" class="h-3 w-3" />
+          动态预览
+        </span>
       )
     }
   </a>

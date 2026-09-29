@@ -97,6 +97,13 @@ const shotCollection = defineCollection({
     tags: z.array(z.string()).optional(),
     featured: z.boolean().optional(),
 
+    /** Render a looping video cover (recorded by `npm run screenshots`). */
+    video: z.boolean().optional(),
+    /** Keyboard key the recorder presses to start interactive artifacts (e.g. "Enter", "Space"). */
+    videoKey: z.string().optional(),
+    /** Groups works generated from the same prompt for side-by-side comparison. */
+    series: z.string().optional(),
+
     metadata: metadataDefinition(),
   }),
 });
