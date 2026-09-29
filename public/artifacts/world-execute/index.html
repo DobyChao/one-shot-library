@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>WORLD EXECUTE ME — PV</title>
+<!--
+  WORLD EXECUTE ME — procedural web PV
+  All visuals are drawn in real time on a single <canvas>. No video files.
+  MUSIC: "Volatile Reaction" — Kevin MacLeod (incompetech.com)
+         Licensed under Creative Commons: By Attribution 4.0
+         https://creativecommons.org/licenses/by/4.0/
+  Keyboard: [SPACE] play/pause  [R] restart  [F] fullscreen  [←/→] seek ±5s
+  Test hooks: ?autostart=1  ?t=SECONDS   window.__seek(sec)  window.__state()
+-->
+<style>
+  :root{
+    --red:#ff2440; --ink:#0a0a0c; --paper:#f2efe6; --dim:#9a97a0;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; background:var(--ink); overflow:hidden; }
+  body{ font-family:Consolas,"Cascadia Mono","Courier New",monospace; -webkit-user-select:none; user-select:none; }
+  #cv{ position:fixed; inset:0; width:100vw; height:100vh; display:block; background:var(--ink); }
+  #scan{ position:fixed; inset:0; pointer-events:none; z-index:30;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,.20) 0 1px, transparent 1px 3px);
+    mix-blend-mode:multiply; }
+  /* ---------- HUD ---------- */
+  #hud{ position:fixed; left:0; right:0; bottom:0; z-index:40; display:flex; align-items:center;
+    gap:14px; padding:10px 16px 12px; color:#ddd; font-size:12px; letter-spacing:.08em;
+    background:linear-gradient(transparent, rgba(0,0,0,.62) 55%); transition:opacity .35s; }
+  #hud.hide{ opacity:0; pointer-events:none; }
+  #hud button{ background:none; border:1px solid #555; color:#ddd; font:inherit; padding:4px 10px;
+    cursor:pointer; letter-spacing:.08em; }
+  #hud button:hover{ border-color:var(--red); color:var(--red); }
+  #bar{ flex:1; height:4px; background:#3a3a40; cursor:pointer; position:relative; }
+  #barfill{ height:100%; width:0%; background:var(--red); }
+  #bar:hover #barfill{ box-shadow:0 0 8px var(--red); }
+  #time{ min-width:110px; text-align:center; color:#bbb; }
+  #scn{ color:var(--red); min-width:70px; }
+  #vol{ width:90px; accent-color:var(--red); cursor:pointer; }
+  /* ---------- start overlay ---------- */
+  #start{ position:fixed; inset:0; z-index:50; background:var(--ink); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:26px; text-align:center; transition:opacity .45s; }
+  #start.gone{ opacity:0; pointer-events:none; }
+  #start .pre{ color:var(--dim); font-size:13px; letter-spacing:.35em; }
+  #start h1{ color:var(--paper); font-family:Impact,"Arial Black",sans-serif; font-weight:900;
+    font-size:clamp(56px, 11vw, 150px); line-height:.94; letter-spacing:.02em; }
+  #start h1 .ex{ color:var(--red); display:inline-block; transform:skewX(-7deg);
+    text-shadow:6px 0 0 rgba(0,229,255,.45), -6px 0 0 rgba(255,36,64,.45); }
+  #start .sub{ color:var(--dim); font-size:13px; letter-spacing:.5em; }
+  #go{ width:118px; height:118px; border-radius:50%; border:3px solid var(--red); background:none;
+    color:var(--red); font-size:40px; cursor:pointer; line-height:1; transition:all .15s; }
+  #go:hover{ background:var(--red); color:var(--ink); transform:scale(1.07); box-shadow:0 0 40px rgba(255,36,64,.5); }
+  #go:active{ transform:scale(.97); }
+  .warn{ color:#ffd400; font-size:12px; letter-spacing:.2em; animation:blink 1.6s steps(2) infinite; }
+  @keyframes blink{ 50%{ opacity:.25; } }
+  .credit{ color:#6f6d75; font-size:11px; letter-spacing:.12em; line-height:1.9; }
+  @media (max-width:640px){ #start h1{ font-size:17vw; } }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="scan"></div>
+
+<audio id="bgm" src="assets/volatile-reaction.mp3" preload="auto"></audio>
+
+<div id="hud" class="hide">
+  <button id="bPlay" title="space">▶</button>
+  <button id="bRe" title="R">↻</button>
+  <div id="bar"><div id="barfill"></div></div>
+  <span id="time">00:00 / 00:00</span>
+  <span id="scn">STBY</span>
+  <input id="vol" type="range" min="0" max="1" step="0.05" value="0.85" title="volume">
+  <button id="bFs" title="F">⛶</button>
+</div>
+
+<div id="start">
+  <div class="pre">PV-0001 // TRIBUNAL OF THE WORLD PRESENTS</div>
+  <h1>WORLD<br><span class="ex">EXECUTE</span><br>ME</h1>
+  <div class="sub">ワールド・エグゼキュート・ミー</div>
+  <button id="go" title="execute">▶</button>
+  <div class="warn">⚠ 点滅注意 / FLASHING LIGHTS &nbsp;·&nbsp; 音量注意 / LOUD</div>
+  <div class="credit" id="credit">MUSIC: “Volatile Reaction” — Kevin MacLeod (incompetech.com)<br>CC BY 4.0 · visuals are 100% procedural canvas</div>
+</div>
+
+<script>
+'use strict';
+/* ================================================================
+   WORLD EXECUTE ME — procedural PV engine (canvas 2D + web audio)
+   ================================================================ */
+const VW = 1920, VH = 1080;                       // virtual design space
+const COL = { ink:'#050507', red:'#ff2440', red2:'#8f0d20', yel:'#ffd400',
+              cyan:'#00e5ff', white:'#f4f1ea', dim:'#9a97a0', paper:'#f2efe6', inkblk:'#121016' };
+const FAM = { imp:'Impact,"Arial Black",sans-serif',
+              jp:'"Yu Gothic","Meiryo","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif',
+              mono:'Consolas,"Cascadia Mono","Courier New",monospace' };
+const TAU = Math.PI*2;
+const R = (a=1,b)=> b===undefined ? Math.random()*a : a+Math.random()*(b-a);
+const clamp=(v,a,b)=> v<a?a:v>b?b:v, lerp=(a,b,k)=> a+(b-a)*k;
+const eo = x => 1-Math.pow(1-clamp(x,0,1),3);          // easeOutCubic
+const $  = id => document.getElementById(id);
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const qp = new URLSearchParams(location.search);
+
+const cv = $('cv'), ctx = cv.getContext('2d');
+let SCALE=1, DPR=1;
+function resize(){
+  DPR = Math.min(devicePixelRatio||1, 2);
+  cv.width  = innerWidth  * DPR;  cv.height = innerHeight * DPR;
+  SCALE = Math.max(cv.width/VW, cv.height/VH);      // cover
+  vignette = null;
+}
+addEventListener('resize', resize);
+
+/* ---------------- noise tiles (film grain) ---------------- */
+const grains = [];
+for(let g=0; g<3; g++){
+  const c=document.createElement('canvas'); c.width=c.height=256;
+  const gx=c.getContext('2d'), im=gx.createImageData(256,256), d=im.data;
+  for(let i=0;i<d.length;i+=4){ const v=Math.random()*255|0; d[i]=d[i+1]=d[i+2]=v; d[i+3]=255; }
+  gx.putImageData(im,0,0); grains.push(ctx.createPattern(c,'repeat'));
+}
+/* ---------------- globe wireframe ---------------- */
+const RINGS=[], MERS=[];
+for(let la=-75; la<=75; la+=15){
+  const ring=[], rad=la*Math.PI/180;
+  for(let lo=0; lo<360; lo+=10){ const r=lo*Math.PI/180;
+    ring.push({x:Math.cos(rad)*Math.sin(r), y:Math.sin(rad), z:Math.cos(rad)*Math.cos(r)}); }
+  RINGS.push(ring);
+}
+for(let lo=0; lo<180; lo+=30){
+  const m=[], r=lo*Math.PI/180;
+  for(let la=-84; la<=84; la+=12){ const p=la*Math.PI/180;
+    m.push({x:Math.cos(p)*Math.sin(r), y:Math.sin(p), z:Math.cos(p)*Math.cos(r)}); }
+  MERS.push(m);
+}
+let spherePts=[]; RINGS.forEach(r=>spherePts.push(...r));
+function proj(u, cx,cy,RR,rot){
+  const cr=Math.cos(rot), sr=Math.sin(rot), cp=Math.cos(.42), sp=Math.sin(.42);
+  const x1=u.x*cr+u.z*sr, z1=-u.x*sr+u.z*cr;
+  const y2=u.y*cp - z1*sp, z2=u.y*sp + z1*cp;
+  const k=1/(1-z2*.28);
+  return {x:cx+x1*RR*k, y:cy+y2*RR*k, z:z2};
+}
+function drawGlobe(cx,cy,RR,rot,alpha,col){
+  ctx.lineWidth=2;
+  const pass=(ring,a)=>{ ctx.globalAlpha=a; ctx.strokeStyle=col;
+    for(let i=0;i<ring.length;i++){
+      const p=proj(ring[i],cx,cy,RR,rot), q=proj(ring[(i+1)%ring.length],cx,cy,RR,rot);
+      if((p.z>-.05)===(q.z>-.05)){ ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke(); }
+    }};
+  for(const r of RINGS){ pass(r, alpha*.22); pass(r, alpha); }
+  for(const m of MERS){ pass(m, alpha*.18); pass(m, alpha*.7); }
+  ctx.globalAlpha=1;
+}
+
+/* ---------------- audio ---------------- */
+const bgm=$('bgm');
+let AC=null, analyser=null, gainN=null, freq=null, OFFLINE=false;
+try{ bgm.volume=.85; }catch(e){}
+bgm.addEventListener('error', ()=>{ OFFLINE=true;
+  $('credit').innerHTML='AUDIO OFFLINE — visual-only mode<br>(assets/volatile-reaction.mp3 not found)'; });
+function initAudio(){
+  if(AC || OFFLINE) return;
+  try{
+    AC = new (window.AudioContext||window.webkitAudioContext)();
+    const src = AC.createMediaElementSource(bgm);
+    analyser = AC.createAnalyser(); analyser.fftSize=2048; analyser.smoothingTimeConstant=.5;
+    gainN = AC.createGain(); gainN.gain.value = parseFloat($('vol').value);
+    src.connect(analyser); analyser.connect(gainN); gainN.connect(AC.destination);
+    freq = new Uint8Array(analyser.frequencyBinCount);
+  }catch(e){ AC=null; }
+}
+
+/* ---------------- global FX state ---------------- */
+const S = { t:0, dur:0, playing:false, started:false, ended:false,
+            shake:0, flashA:0, invertA:0, bass:0, strength:0, lowfi:false };
+let stamps=[], shards=[], rain=[], gaps=[], waves=[], wf=null, lastBeat=-9, beatCount=0;
+let exploded=false, lastScene='', frame=0;
+const bassHist=[]; let lastSlice=-9;
+
+function resetFX(){ stamps=[]; shards=[]; rain=[]; gaps=[]; waves=[]; wf=null; exploded=false; stampMemo=null;
+  S.flashA=S.invertA=S.shake=0; lastScene=''; }
+
+/* ---------------- timeline (fractions of track length) ---------------- */
+let TL=null;
+function buildTimeline(D){
+  const f=(x,min,max)=>clamp(D*x,min,max);
+  TL={ introEnd:f(.075,4,12), drop1:f(.27,20,D*.45-5), drop1End:f(.43,26,D*.55),
+       breakS :f(.555,30,D*.68),  drop2  :f(.665,34,D*.80),  drop2End:f(.875,D*.75,D-8),
+       finEnd :f(.945,D*.85,D-3), end:D };
+  TL.drop1=Math.max(TL.drop1, TL.introEnd+6);
+  TL.drop2=Math.max(TL.drop2, TL.breakS+6);
+}
+function sceneAt(t){
+  if(t<TL.introEnd) return 'intro';
+  if(t<TL.drop1-3.6) return 'title';
+  if(t<TL.drop1)     return 'count';
+  if(t<TL.drop1End)  return 'drop1';
+  if(t<TL.breakS)    return 'post1';
+  if(t<TL.drop2)     return 'break';
+  if(t<TL.drop2End)  return 'drop2';
+  return 'finale';
+}
+const SCN_LABEL={intro:'DOCKET',title:'OPENING',count:'STAND-BY',drop1:'EXECUTE-1',
+                 post1:'VERDICT?',break:'INTERVAL',drop2:'EXECUTE-2',finale:'FINAL',end:'EXECUTED'};
+
+/* ---------------- text helpers ---------------- */
+function txt(str,x,y,sz,o={}){
+  ctx.font = (o.w||900)+' '+sz+'px '+(o.f||FAM.imp);
+  ctx.textAlign=o.al||'center'; ctx.textBaseline=o.bl||'alphabetic';
+  if(o.ls && 'letterSpacing' in ctx) ctx.letterSpacing = o.ls+'px';
+  if(o.stroke){ ctx.lineWidth=o.lw||3; ctx.strokeStyle=o.stroke; ctx.strokeText(str,x,y); }
+  ctx.fillStyle=o.c||COL.white; ctx.fillText(str,x,y);
+  if('letterSpacing' in ctx) ctx.letterSpacing='0px';
+}
+function splitTxt(str,x,y,sz,o={}){
+  const sp=o.split||0;
+  if(sp>.6){
+    ctx.globalCompositeOperation='lighter';
+    txt(str,x-sp,y,sz,{...o,c:'#ff2050'});
+    txt(str,x+sp,y,sz,{...o,c:'#00d5ff'});
+    ctx.globalCompositeOperation='source-over';
+  }
+  txt(str,x,y,sz,{...o,c:o.c||COL.white});
+}
+
+/* ---------------- FX: stamps / shards / rain / slices / words ---------------- */
+function addStamp(t,text,x,y,rot,sz){ stamps.push({t0:t,text,x,y,rot,sz}); if(stamps.length>7) stamps.shift(); }
+function drawStamps(t){
+  for(const s of stamps){
+    const a=t-s.t0, pop=1+.45*Math.exp(-a*7), al=clamp(a*6,0,.92);
+    ctx.save(); ctx.translate(s.x,s.y); ctx.rotate(s.rot); ctx.scale(pop,pop);
+    ctx.globalAlpha=al; const w=s.sz*s.text.length*.62;
+    ctx.fillStyle=COL.red;
+    ctx.font='700 '+s.sz+'px '+FAM.jp; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.strokeStyle=COL.red; ctx.lineWidth=5; ctx.strokeRect(-w/2-14,-s.sz*.72,w+28,s.sz*1.44);
+    ctx.lineWidth=2.5; ctx.strokeRect(-w/2-6,-s.sz*.72+8,w+12,s.sz*1.44-16);
+    ctx.fillText(s.text,0,4);
+    ctx.restore();
+  }
+  ctx.globalAlpha=1;
+}
+function seedShards(cx,cy,RR,rot){
+  shards = spherePts.map(u=>{
+    const p=proj(u,cx,cy,RR,rot), dx=p.x-cx, dy=p.y-cy, L=Math.hypot(dx,dy)||1;
+    const sp=R(500,1250);
+    return { x:p.x,y:p.y, tx:u, vx:dx/L*sp+R(-160,160), vy:dy/L*sp+R(-460,-40),
+             rot:R(TAU), vr:R(-7,7), w:R(2,5), h:R(10,30),
+             c:Math.random()<.72?COL.white:(Math.random()<.5?COL.red:COL.yel) };
+  });
+}
+function updateShards(dt, grav){
+  for(const p of shards){ p.vy+=grav*dt; p.vx*=.995; p.vy*=.995; p.x+=p.vx*dt; p.y+=p.vy*dt; p.rot+=p.vr*dt; }
+}
+function drawShards(alpha=1){
+  for(const p of shards){ ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+    ctx.globalAlpha=alpha; ctx.fillStyle=p.c; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); }
+  ctx.globalAlpha=1;
+}
+function addGap(t, ang){
+  gaps.push({t0:t, ang, cy:R(VH*.28,VH*.72), dir:Math.random()<.5?1:-1});
+  if(gaps.length>3) gaps.shift();
+}
+function drawGaps(t){
+  for(const g of gaps){
+    const a=t-g.t0; if(a>.6) continue;
+    ctx.save(); ctx.translate(VW/2,g.cy); ctx.rotate(g.ang);
+    if(a<.14){                                        // blade sweep
+      const L=eo(a/.14)*2400, x=g.dir*(L-1200);
+      ctx.globalAlpha=1; ctx.strokeStyle=COL.white; ctx.lineWidth=6;
+      ctx.shadowColor=COL.red; ctx.shadowBlur=26;
+      ctx.beginPath(); ctx.moveTo(x-1100*g.dir,0); ctx.lineTo(x,0); ctx.stroke();
+      ctx.shadowBlur=0;
+    }else{                                            // split gap
+      const w=Math.min(95,(a-.14)*620), fade=clamp(1-(a-.34)/.26,0,1);
+      ctx.globalAlpha=fade; ctx.fillStyle=COL.ink; ctx.fillRect(-1400,-w/2,2800,w);
+      ctx.strokeStyle=COL.white; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(-1400,-w/2); ctx.lineTo(1400,-w/2);
+      ctx.moveTo(-1400, w/2); ctx.lineTo(1400, w/2); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  ctx.globalAlpha=1;
+}
+const WORDS=['EXECUTE','処刑','斬','GUILTY','有罪','裁く','SMASH','零','執行'];
+function burstShards(n,x,y,sp=750){
+  for(let i=0;i<n;i++){ const a=R(TAU), v=R(sp*.35,sp);
+    shards.push({ x,y, tx:null, vx:Math.cos(a)*v, vy:Math.sin(a)*v-R(0,300),
+      rot:R(TAU), vr:R(-9,9), w:R(2,5), h:R(8,24),
+      c:Math.random()<.6?COL.white:(Math.random()<.5?COL.red:COL.yel) }); }
+  if(shards.length>700) shards.splice(0, shards.length-700);
+}
+function addWave(t){ waves.push({t0:t, c:beatCount%2?COL.red:COL.white}); if(waves.length>6) waves.shift(); }
+function drawWaves(t){
+  for(const w of waves){ const a=t-w.t0; if(a>1.1) continue;
+    const r=a*1500+30, al=clamp(1-a/1.1,0,1)*.5;
+    ctx.globalAlpha=al; ctx.strokeStyle=w.c; ctx.lineWidth=3.5*(1-a/1.1)+.5;
+    ctx.beginPath(); ctx.arc(VW/2,VH*.52,r,0,TAU); ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+}
+function beatWord(t){
+  wf={ t0:t, txt:WORDS[Math.random()*WORDS.length|0], x:R(VW*.25,VW*.75), y:R(VH*.3,VH*.66),
+       rot:R(-.18,.18), sz:R(240,360), col:[COL.white,COL.red,COL.yel][Math.random()*3|0] };
+}
+function drawWord(t){
+  if(!wf) return; const a=t-wf.t0; if(a>.42){ wf=null; return; }
+  const al=clamp(1-a/.42,0,1), sc=1+.25*eo(Math.min(1,a*6));
+  ctx.save(); ctx.translate(wf.x,wf.y); ctx.rotate(wf.rot); ctx.scale(sc,sc);
+  splitTxt(wf.txt,0,0,wf.sz,{c:wf.col,split:al*22});
+  ctx.restore();
+}
+function initRain(){
+  rain=[]; const pool='ワールドエグゼキュートミー執行有罪裁零';
+  for(let i=0;i<26;i++) rain.push({ x:R(VW), y:R(-VH,VH), v:R(220,720), sz:R(22,64), ch:pool[Math.random()*pool.length|0] });
+}
+function drawRain(dt){
+  ctx.font='700 30px '+FAM.jp; ctx.textAlign='center';
+  for(const d of rain){
+    d.y+=d.v*dt; if(d.y-d.sz>VH){ d.y=-40; d.x=R(VW); d.ch='ワールドエグゼキュートミー執行有罪裁零'[Math.random()*15|0]; }
+    ctx.globalAlpha=.13+d.sz/64*.1; ctx.fillStyle=COL.cyan; ctx.font='700 '+d.sz+'px '+FAM.jp;
+    ctx.fillText(d.ch,d.x,d.y);
+  }
+  ctx.globalAlpha=1;
+}
+const TICK='WORLD EXECUTE ME /// 世界対全人類・第一回公判 /// CASE NO.0001 /// 陪審員：全人類 /// 判決：有罪（確定） /// 拡散自由 /// ';
+function drawTicker(t){
+  ctx.font='700 24px '+FAM.jp; ctx.textBaseline='middle'; ctx.fillStyle=COL.dim;
+  const w=ctx.measureText(TICK).width, x1=-(t*240)%w;
+  ctx.textAlign='left'; ctx.globalAlpha=.8;
+  for(let x=x1; x<VW; x+=w) ctx.fillText(TICK,x,46);
+  const x2=(t*240)%w;
+  for(let x=x2-w; x<VW; x+=w) ctx.fillText(TICK,x,VH-46);
+  ctx.globalAlpha=1; ctx.textBaseline='alphabetic';
+}
+
+/* ---------------- post FX ---------------- */
+let vignette=null;
+function postFX(t){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  if(!S.lowfi || frame%2===0){                       // grain
+    ctx.globalAlpha=.055; ctx.globalCompositeOperation='overlay';
+    ctx.fillStyle=grains[frame%3];
+    ctx.save(); ctx.translate(R(256),R(256)); ctx.fillRect(-512,-512,cv.width+1024,cv.height+1024); ctx.restore();
+    ctx.globalCompositeOperation='source-over'; ctx.globalAlpha=1;
+  }
+  if(!vignette){ vignette=ctx.createRadialGradient(cv.width/2,cv.height/2,cv.height*.42, cv.width/2,cv.height/2,cv.height*.85);
+    vignette.addColorStop(0,'rgba(0,0,0,0)'); vignette.addColorStop(1,'rgba(0,0,0,.5)'); }
+  ctx.fillStyle=vignette; ctx.fillRect(0,0,cv.width,cv.height);
+  if(S.flashA>0){ ctx.globalAlpha=S.flashA; ctx.fillStyle=COL.white; ctx.fillRect(0,0,cv.width,cv.height); ctx.globalAlpha=1; }
+  if(S.invertA>0 && !REDUCED){ ctx.globalAlpha=clamp(S.invertA,0,1);
+    ctx.globalCompositeOperation='difference'; ctx.fillStyle='#e8e8e8';
+    ctx.fillRect(0,0,cv.width,cv.height); ctx.globalCompositeOperation='source-over'; ctx.globalAlpha=1; }
+}
+
+/* ---------------- scenes ---------------- */
+const SCENES={
+  intro:{ draw(a,t){
+    ctx.fillStyle=COL.ink; ctx.fillRect(0,0,VW,VH);
+    ctx.globalAlpha=.05; txt('0001',VW/2,VH*.86,560,{c:COL.white,al:'center'}); ctx.globalAlpha=1;
+    ctx.strokeStyle='#26262c'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(240,190); ctx.lineTo(VW-240,190); ctx.moveTo(240,VH-210); ctx.lineTo(VW-240,VH-210); ctx.stroke();
+    const lines=[
+      ['TRIBUNAL OF THE WORLD — 公判記録',34,FAM.mono,COL.dim],
+      ['FILE NO. 0001',52,FAM.mono,COL.yel],
+      ['原告：WORLD（世界そのもの）',44,FAM.jp,COL.white],
+      ['被告：ME（私、他・全人類に準ずる）',44,FAM.jp,COL.white],
+      ['起訴事由：存在、及び日常の反復',44,FAM.jp,COL.white],
+      ['証拠 A：昨日の私　　証拠 B：明日の私',44,FAM.jp,COL.white]];
+    let y=380;
+    lines.forEach((L,i)=>{
+      const n=clamp(((a-.7-i*.62)*22)|0,0,L[0].length);
+      txt(L[0].slice(0,n),260,y,34+i*10>i?L[1]:L[1],{f:L[2],c:L[3],w:700,al:'left',ls:2});
+      y+=92;
+    });
+    if(a>5.2) addStampOnce(t,'受理',VW-420,520,-.16,86);
+    drawStamps(t);
+    if(a>6.4) txt('— 開廷まで、あと少し。',260,880,26,{f:FAM.jp,c:COL.dim,w:700,al:'left'});
+    if(Math.random()<.1) ctx.globalAlpha=.04, ctx.fillStyle=COL.white, ctx.fillRect(0,R(VH),VW,2), ctx.globalAlpha=1;
+  }},
+  title:{ enter(){ stamps=[]; },
+    draw(a,t){
+      ctx.fillStyle=COL.ink; ctx.fillRect(0,0,VW,VH);
+      drawGlobe(VW*.70,VH*.54,360,t*.22,.5,'#3c3c46');
+      drawTicker(t);
+      const k=eo(clamp((a-.15)/.9,0,1)), sp=(1-k)*20;
+      splitTxt('WORLD', 170,430,205,{al:'left', split:sp*clamp((a-.15)/.4,0,1)});
+      splitTxt('EXECUTE',170,650,238,{al:'left', split:sp*clamp((a-.27)/.4,0,1), c:COL.red});
+      splitTxt('ME.',  170,840,205,{al:'left', split:sp*clamp((a-.39)/.4,0,1)});
+      if(a>.8) txt('ワールド・エグゼキュート・ミー',178,905,30,{f:FAM.mono,c:COL.dim,w:700,al:'left',ls:6});
+      if(a>1.2) txt('— 世界よ、私を処刑せよ —',178,955,24,{f:FAM.jp,c:'#6f6d75',w:700,al:'left'});
+      drawStamps(t);
+    }},
+  count:{ draw(a,t){
+    ctx.fillStyle=COL.ink; ctx.fillRect(0,0,VW,VH);
+    const remain=TL.drop1-t, n=Math.max(0,Math.ceil(remain)), fr=remain-Math.floor(remain);
+    drawGlobe(VW/2,VH*.52,330+(3.6-remain)*95,t*.3,.22,'#4a4a55');
+    txt('EXECUTION IN — 執行まで',VW/2,300,30,{f:FAM.mono,c:COL.dim,w:700,ls:8});
+    const sc=1.15+.35*eo(1-fr);
+    ctx.save(); ctx.translate(VW/2,VH*.62); ctx.scale(sc,sc);
+    splitTxt(String(Math.min(3,n)),0,0,470,{split:8+(1-fr)*14, c:n===1?COL.red:COL.white});
+    ctx.restore();
+    ctx.strokeStyle=COL.red; ctx.lineWidth=3; ctx.globalAlpha=.7;
+    ctx.beginPath(); ctx.arc(VW/2,VH*.62-140,300+40*(1-fr),-Math.PI/2,-Math.PI/2+TAU*fr); ctx.stroke(); ctx.globalAlpha=1;
+    if(n!==this._ln){ this._ln=n; S.flashA=Math.max(S.flashA,.4); S.shake+=10; }
+  }},
+  drop1:{ enter(t){ exploded=true; seedShards(VW/2,VH*.52,360,tl().drop1*.22); S.flashA=.85; S.shake=26; stamps=[]; },
+    draw(a,t){
+      const g=ctx.createRadialGradient(VW/2,VH*.52,80,VW/2,VH*.52,VH*.8);
+      g.addColorStop(0,'#2c0510'); g.addColorStop(1,COL.ink);
+      ctx.fillStyle=g; ctx.fillRect(0,0,VW,VH);
+      ctx.save(); ctx.translate(VW/2,VH*.52); ctx.rotate(Math.sin(t*.4)*.15); ctx.globalAlpha=.07;
+      txt('執',0,190,900,{f:FAM.jp,c:COL.red}); ctx.restore();
+      updateShards(dtGlobal,520); drawShards();
+      drawWaves(t); drawGaps(t); drawWord(t); drawTicker(t);
+    }},
+  post1:{ draw(a,t){
+    ctx.fillStyle=COL.ink; ctx.fillRect(0,0,VW,VH);
+    updateShards(dtGlobal,160); drawShards(.55);
+    const n=clamp(((a-.4)*20)|0,0,12);
+    txt('……判決、保留中。'.slice(0,n),VW/2,500,64,{f:FAM.jp,c:COL.white,w:700,split:0});
+    if(a>2.2) txt('無罪の可能性：極めて低い',VW/2,580,30,{f:FAM.jp,c:COL.dim,w:700});
+    const hb=Math.pow(1-((t*1.7)%1),6);
+    ctx.globalAlpha=.25+.55*hb; ctx.strokeStyle=COL.red; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(VW/2,VH*.72,14+26*hb,0,TAU); ctx.stroke(); ctx.globalAlpha=1;
+  }},
+  break:{ draw(a,t){
+    ctx.fillStyle=COL.ink; ctx.fillRect(0,0,VW,VH);
+    const al=clamp(a*2,0,1), pulse=Math.pow(1-((t*1.9)%1),8);
+    ctx.globalAlpha=al*(.6+.4*pulse); ctx.strokeStyle=COL.white; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(VW*.2,VH*.5); ctx.lineTo(VW*.8,VH*.5); ctx.stroke();
+    ctx.globalAlpha=al; txt('最終判決まで',VW/2,VH*.5-60,36,{f:FAM.jp,c:COL.dim,w:700,ls:10});
+    txt('T-'+Math.max(0,TL.drop2-t).toFixed(1),VW/2,VH*.5+120,86,{f:FAM.mono,c:COL.white,w:700});
+    if(Math.random()<.02) ctx.globalAlpha=.12, ctx.fillStyle=COL.white, ctx.fillRect(0,R(VH),VW,1.5);
+    ctx.globalAlpha=1;
+  }},
+  drop2:{ enter(){ rain=[]; initRain(); stamps=[]; S.flashA=1; this._slammed=false; this._formed=false; },
+    draw(a,t){
+      ctx.fillStyle=COL.ink; ctx.fillRect(0,0,VW,VH);
+      drawRain(dtGlobal);
+      if(!this._formed){                                   // shards fly home
+        const k=eo(a/1.3), rot=t*.8, done=a>1.35;
+        for(const p of shards){ const tg=proj(p.tx,VW/2,VH*.52,360,rot);
+          p.x=lerp(p.x,tg.x,k*.35); p.y=lerp(p.y,tg.y,k*.35); }
+        drawShards(.9);
+        if(done){ this._formed=true; exploded=false; shards=[]; }
+      }else drawGlobe(VW/2,VH*.52,360,t*.8,.35,'#55203a');
+      drawGaps(t);
+      if(a>1.6 && !this._slammed){ this._slammed=true; S.shake=30; S.invertA=REDUCED?0:.9; }
+      if(this._slammed){
+        const k=eo(clamp((a-1.6)/.5,0,1));
+        ctx.save(); ctx.translate(VW/2,VH*.42); ctx.scale(.9+.1*k,.9+.1*k);
+        splitTxt('FINAL SENTENCE',0,0,178,{split:14,c:COL.white}); ctx.restore();
+        txt('最終判決 — 即時執行',VW/2,VH*.42+64,40,{f:FAM.jp,c:COL.red,w:700});
+      }
+      const mx=-(t*520)%(VW+900);
+      ctx.font='900 84px '+FAM.imp; ctx.fillStyle=COL.red; ctx.textAlign='left';
+      ctx.fillText('NO APPEAL 控訴不可 NO APPEAL 控訴不可 NO APPEAL', mx%1800-900, VH-150);
+      drawWaves(t); drawWord(t); drawStamps(t);
+    }},
+  finale:{ enter(){ S.flashA=1; stamps=[]; shards=[]; gaps=[]; rain=[]; },
+    draw(a,t){
+      ctx.fillStyle=COL.paper; ctx.fillRect(0,0,VW,VH);
+      ctx.save(); ctx.translate(VW/2,VH*.55); ctx.rotate(t*.25);
+      ctx.font='700 26px '+FAM.mono; ctx.fillStyle=COL.red; ctx.textAlign='center'; ctx.textBaseline='middle';
+      for(let i=0;i<12;i++){ const ang=i/12*TAU;
+        ctx.save(); ctx.rotate(ang); ctx.globalAlpha=.75; ctx.fillText('執行済 EXECUTED ·',0,-360); ctx.restore(); }
+      ctx.restore(); ctx.textBaseline='alphabetic';
+      const br=6+4*Math.sin(t*3);
+      ctx.save(); ctx.translate(VW/2,VH*.44);
+      splitTxt('WORLD EXECUTE ME',0,-40,138,{c:COL.inkblk, split:br});
+      ctx.restore();
+      txt('全て、両手で。',VW/2,VH*.44+50,34,{f:FAM.jp,c:'#6b6759',w:700});
+      if(a>.8) addStampOnce(t,'執行済',VW*.74,VH*.30,-.2,110);
+      drawStamps(t);
+      if(Math.random()<.3){ ctx.globalAlpha=.05; ctx.fillStyle=COL.inkblk;
+        ctx.fillRect(R(VW),R(VH),R(40,160),1); ctx.globalAlpha=1; }
+    }}
+};
+let stampMemo=null;
+function addStampOnce(t,text,x,y,rot,sz){ const key=text+'@'+(x|0)+','+(y|0);
+  if(stampMemo===key) return; stampMemo=key; addStamp(t,text,x,y,rot,sz); }
+function tl(){ return TL; }
+
+/* ---------------- beat handling ---------------- */
+const SCN_AMP={intro:.3,title:.6,count:.5,drop1:1,post1:.35,break:.12,drop2:1,finale:.4,end:0};
+function onBeat(str){
+  S.shake += (5+9*str) * (SCN_AMP[lastScene]??1) * (REDUCED?.3:1);
+  const sc=lastScene;
+  if(sc==='drop1'||sc==='drop2'){
+    addWave(S.t);
+    burstShards(18, VW/2+R(-500,500), VH*.52+R(-260,260), 900);
+    const slam = sc==='drop2' && (S.t-TL.drop2)<4.5;   // keep the hero text clean
+    if(!slam){
+      if(beatCount%2===0) beatWord(S.t);
+      else if(S.t-lastSlice>.3){ addGap(S.t, R(-.42,.42)); lastSlice=S.t; }
+      if(beatCount%3===0) S.invertA=REDUCED?0:.75;
+      if(Math.random()<.4) addStamp(S.t, Math.random()<.5?'有罪':'GUILTY', R(VW*.2,VW*.8), R(VH*.25,VH*.7), R(-.35,.35), R(70,120));
+    }
+  }else if(sc==='title' && stamps.length<6){
+    addStamp(S.t, Math.random()<.5?'有罪':'GUILTY', R(VW*.55,VW*.85), R(VH*.2,VH*.6), R(-.3,.3), R(70,110));
+  }
+}
+let prevF=null;
+function analyse(){
+  if(!analyser){ S.bass*= .92; return; }
+  analyser.getByteFrequencyData(freq);
+  if(!prevF) prevF=new Uint8Array(freq.length);
+  let fl=0;                                   // spectral flux (positive), low band 43~520Hz
+  for(let i=2;i<26;i++){ const d=freq[i]-prevF[i]; if(d>0) fl+=d; prevF[i]=freq[i]; }
+  fl/=24;
+  bassHist.push(fl); if(bassHist.length>45) bassHist.shift();
+  let m=0; for(const v of bassHist) m+=v; m/=bassHist.length;
+  S.bass=clamp(m/28,0,1); S.strength=clamp((fl-m)/10,0,1);
+  if(S.playing && fl>5 && fl>m*1.45+1.5 && S.t-lastBeat>.15){
+    lastBeat=S.t; beatCount++; onBeat(S.strength);
+  }
+}
+
+/* ---------------- main loop ---------------- */
+let dtGlobal=1/60, lastNow=performance.now(), silentClock=0;
+function loop(now){
+  requestAnimationFrame(loop);
+  dtGlobal=clamp((now-lastNow)/1000,.001,.05); lastNow=now; frame++;
+  const dt=dtGlobal;
+  if(S.lowfi = dt>0.045 && frame%120===0 ? true : (dt<0.03?false:S.lowfi)); // rough adaptive
+
+  if(S.started && !S.ended){
+    if(OFFLINE){ if(S.playing){ silentClock+=dt; S.t=silentClock; } }
+    else S.t = bgm.currentTime;
+    if(!OFFLINE && bgm.ended){ S.ended=true; S.playing=false; }
+    if(OFFLINE && S.t>=S.dur){ S.ended=true; S.playing=false; }
+  }
+  if(!TL && S.dur) buildTimeline(S.dur);
+
+  analyse();
+  S.shake*=Math.pow(.86,dt*60); S.flashA*=Math.pow(.82,dt*60); S.invertA*=Math.pow(.72,dt*60);
+  if(S.flashA<.02)S.flashA=0; if(S.invertA<.02)S.invertA=0;
+
+  ctx.setTransform(SCALE,0,0,SCALE,0,0);   // cv.width already includes DPR — no extra DPR factor
+  const sh=S.shake*(REDUCED?.3:1);
+  ctx.translate(R(-sh,sh),R(-sh,sh));
+
+  if(TL){
+    const sc=S.ended||S.t>=TL.end ? 'end' : sceneAt(S.t);
+    if(sc!==lastScene){ SCENES[sc] && SCENES[sc].enter && SCENES[sc].enter(S.t); lastScene=sc; }
+    if(sc==='end') drawEnd(); else SCENES[sc].draw(S.t-(sc==='intro'?0:sceneStart(S.t)), S.t);
+  }else{ ctx.fillStyle=COL.ink; ctx.fillRect(0,0,VW,VH); }
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  postFX(S.t);
+  hudTick();
+}
+function sceneStart(t){ const sc=sceneAt(t);
+  return {intro:0,title:0,count:TL.drop1-3.6,drop1:TL.drop1,post1:TL.drop1End,break:TL.breakS,drop2:TL.drop2,finale:TL.drop2End}[sc]||0; }
+
+function drawEnd(){
+  ctx.fillStyle=COL.paper; ctx.fillRect(0,0,VW,VH);
+  txt('WORLD EXECUTE ME',VW/2,VH*.34,96,{c:COL.inkblk});
+  txt('— PV / 全編リアルタイム描画 —',VW/2,VH*.34+54,26,{f:FAM.jp,c:'#8b8779',w:700});
+  const bl=.55+.45*Math.sin(performance.now()/300);
+  ctx.globalAlpha=bl; txt('REPLAY ▶',VW/2,VH*.58,64,{c:COL.red}); ctx.globalAlpha=1;
+  txt('click / [SPACE] で再生',VW/2,VH*.58+44,22,{f:FAM.jp,c:'#9a9585',w:700});
+  txt("MUSIC: 'Volatile Reaction' — Kevin MacLeod (incompetech.com) · CC BY 4.0",VW/2,VH*.78,22,{f:FAM.mono,c:'#7a766a'});
+  txt('VISUAL: procedural canvas — no video files · generated by ZCode',VW/2,VH*.78+34,22,{f:FAM.mono,c:'#7a766a'});
+}
+
+/* ---------------- HUD / controls ---------------- */
+const hud=$('hud'), elT=$('time'), elF=$('barfill'), elS=$('scn'), bPlay=$('bPlay');
+function fmt(x){ x=Math.max(0,x|0); return String(x/60|0).padStart(2,'0')+':'+String(x%60).padStart(2,'0'); }
+function hudTick(){
+  if(!TL) return;
+  elF.style.width=(clamp(S.t/TL.end,0,1)*100)+'%';
+  elT.textContent=fmt(S.t)+' / '+fmt(TL.end);
+  elS.textContent=SCN_LABEL[S.ended?'end':lastScene]||'—';
+  bPlay.textContent=S.playing?'⏸':'▶';
+}
+bPlay.onclick=()=> S.playing?pause():play();
+$('bRe').onclick=()=>restart();
+$('bFs').onclick=()=>{ document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{}); };
+$('vol').oninput=e=>{ const v=parseFloat(e.target.value); if(gainN) gainN.gain.value=v; else bgm.volume=v; };
+$('bar').addEventListener('pointerdown',e=>{ seekTo(frac(e)*TL.end);
+  const mv=ev=>seekTo(frac(ev)*TL.end), up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);};
+  addEventListener('pointermove',mv); addEventListener('pointerup',up); });
+function frac(e){ const r=$('bar').getBoundingClientRect(); return clamp((e.clientX-r.left)/r.width,0,1); }
+function seekTo(x){ if(!TL)return; resetFX(); S.ended=false; if(OFFLINE){silentClock=x;S.t=x;} else bgm.currentTime=x; }
+addEventListener('keydown',e=>{
+  if(e.code==='Space'){ e.preventDefault(); S.ended?restart():S.playing?pause():play(); }
+  else if(e.key==='r'||e.key==='R') restart();
+  else if(e.key==='f'||e.key==='F') $('bFs').click();
+  else if(e.key==='ArrowRight') seekTo((OFFLINE?S.t:bgm.currentTime)+5);
+  else if(e.key==='ArrowLeft')  seekTo((OFFLINE?S.t:bgm.currentTime)-5);
+});
+document.addEventListener('visibilitychange',()=>{ if(document.hidden&&S.playing) pause(); });
+
+function play(){ initAudio(); if(AC&&AC.state==='suspended')AC.resume();
+  S.started=true; S.playing=true; S.ended=false; if(OFFLINE)silentClock=S.t; else bgm.play().catch(()=>{}); }
+function pause(){ S.playing=false; if(!OFFLINE)bgm.pause(); }
+function restart(){ resetFX(); stampMemo=null; S.ended=false;
+  if(OFFLINE){ silentClock=0; S.t=0; } else { bgm.currentTime=0; }
+  if(!S.playing) play(); }
+$('go').onclick=()=>{ $('start').classList.add('gone'); hud.classList.remove('hide'); restart(); };
+addEventListener('click',e=>{ if(S.ended && !$('start').contains(e.target) && !hud.contains(e.target)) restart(); });
+
+bgm.addEventListener('loadedmetadata',()=>{ S.dur=bgm.duration; buildTimeline(S.dur); });
+S.dur=152; // fallback if metadata unavailable (offline mode)
+setTimeout(()=>{ if(!TL) buildTimeline(S.dur); },600);
+
+if(qp.has('t')||qp.has('autostart')){
+  const boot=()=>{ $('start').classList.add('gone'); hud.classList.remove('hide'); restart();
+    if(qp.has('t')) setTimeout(()=>seekTo(parseFloat(qp.get('t'))||0),80); };
+  if(document.readyState==='complete') boot(); else addEventListener('load',boot);
+}
+setInterval(()=>{ document.title = (frame%2? 'WORLD EXECUTE ME':'世界よ、私を執行せよ — PV'); },1400);
+window.__seek=t=>{ seekTo(t); };
+window.__state=()=>({t:S.t,dur:TL&&TL.end,scene:lastScene,bass:+S.bass.toFixed(3),strength:+S.strength.toFixed(3),playing:S.playing,offline:OFFLINE,flash:+S.flashA.toFixed(3),inv:+S.invertA.toFixed(3),shake:+S.shake.toFixed(2),beats:beatCount,nst:stamps.length,memo:stampMemo});
+
+resize(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
