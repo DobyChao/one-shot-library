@@ -28,3 +28,4 @@ pnpm-workspace.yaml
 .astro.lh-
 .lh-*.json
 .playwright-video/
+.astro/
