@@ -18,7 +18,8 @@ npm run screenshots  # 批量生成作品首屏截图(Playwright)
 1. **放产物**:`public/artifacts/` 下——单文件直接放(`my-landing.html`),多文件/带本地 JS 的整目录放(`th-game/index.html`,`html` 字段写相对路径);产物走 `/artifacts/` 路径,与 `/shots/` 详情路由隔离;
 2. **写条目**:在 `src/data/shot/` 新建同名 `my-landing.md`,frontmatter 字段见下方;
 3. **截图**:`npm run screenshots`(首次需 `npx playwright install chromium`);
-4. **验收**:`npm run dev` 打开画廊确认。
+4. **格式化**:`npx prettier --write src/data/shot/<slug>.md`——CI 会跑 `prettier --check`,漏了会红;
+5. **验收**:`npm run dev` 打开画廊确认。
 
 ```yaml
 ---
