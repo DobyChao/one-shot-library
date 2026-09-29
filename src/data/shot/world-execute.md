@@ -1,6 +1,6 @@
 ---
 publishDate: 2026-09-29T14:00:00Z
-title: "world.execute(me); — 网页 PV"
+title: 'world.execute(me); — 网页 PV'
 excerpt: 一句话生成的实时渲染网页 PV:把世界送上被告席。节拍同步动画 + Web Audio 频谱分析,全片 100% 程序化 Canvas,没有任何视频文件。
 prompt: |
   一句话生成一个world execute me 的网页pv动画,风格放飞一点,音乐资源自己下
