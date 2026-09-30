@@ -15,10 +15,12 @@ const image = await findImage(shot.image);
 const link = getPermalink(shot.permalink);
 
 // Looping video covers recorded by `npm run screenshots -- <slug>` for entries
-// with `video: true` in frontmatter.
-const videoCovers = import.meta.glob<{ default: ImageMetadata }>('/src/assets/covers/*.webm');
+// with `video: true` in frontmatter. Non-image assets (webm) import as
+// `{ default: string }` — the URL itself, not an ImageMetadata object.
+const videoCovers = import.meta.glob<{ default: string | ImageMetadata }>('/src/assets/covers/*.webm');
 const coverLoader = videoCovers[`/src/assets/covers/${shot.slug}.webm`];
-const cover = coverLoader ? (await coverLoader()).default : undefined;
+const coverModule = coverLoader ? await coverLoader() : undefined;
+const coverSrc = typeof coverModule?.default === 'string' ? coverModule.default : coverModule?.default?.src;
 
 const poster = typeof image === 'string' ? image : image?.src;
 
@@ -39,9 +41,9 @@ const initials = shot.title
     aria-label={shot.title}
   >
     {
-      cover ? (
+      coverSrc ? (
         <video
-          src={cover.src}
+          src={coverSrc}
           poster={poster}
           autoplay
           muted
@@ -69,7 +71,7 @@ const initials = shot.title
       )
     }
     {
-      cover && (
+      coverSrc && (
         <span class="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-medium text-white">
           <Icon name="tabler:movie" class="h-3 w-3" />
           动态预览
