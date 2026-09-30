@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>world.execute(me); — fan PV (local study)</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%2305070b'/><text x='4' y='24' font-size='20' fill='%233aff8c' font-family='monospace'>&gt;_</text></svg>">
+<!--
+  ═══════════════════════════════════════════════════════════════
+  world.execute(me); — 网页 PV 动画（同人，仅限本地学习使用）
+  ───────────────────────────────────────────────────────────────
+  用法：
+    1. 把音乐文件放在本文件同目录（已自动尝试加载
+       「Mili - world.execute (me) ;.mp3」，也可以直接把任意
+       音频文件拖进页面，或点击 FILE… 选择文件）。
+    2. 双击打开本页（file://），点击 START —— 声音正常，
+       视觉节拍为按 BPM 模拟；
+       若用本地服务器打开（如 python -m http.server），
+       或在页面上拖入音频文件，则升级为实时频谱反应（真 FFT）。
+    3. 快捷键：空格 播放/暂停 · ←/→ 快退/快进 5s · M 静音 · F 全屏
+  自定义：
+    · 分镜时间轴：改 SCENES（秒），会按歌曲实际时长自动等比缩放。
+    · 终端文案：改 TERMINAL_LINES（原创程序员风文案，非歌词）。
+    · 想加同步歌词：往 LYRICS 数组里填 {t:秒数, text:'...'}，
+      页面自身不内置任何歌词。
+  版权说明：
+    音乐版权归 Mili 及其厂牌所有；本页面为学习用可视化代码，
+    请支持正版。请勿用于公开传播或商业用途。
+  ═══════════════════════════════════════════════════════════════
+-->
+<style>
+  :root{
+    --accent:#3aff8c;
+    --danger:#ff3a5c;
+    --bg:#05070b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:var(--bg)}
+  body{font-family:"JetBrains Mono","Cascadia Code",Consolas,"Courier New",monospace;color:var(--accent);cursor:default}
+  canvas#stage{position:fixed;inset:0;width:100%;height:100%;display:block}
+
+  /* CRT 扫描线 + 暗角 */
+  #crt{position:fixed;inset:0;pointer-events:none;z-index:40;
+    background:
+      radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.55) 100%),
+      repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,.14) 2px 3px);
+    mix-blend-mode:multiply}
+  #crt::after{content:"";position:absolute;inset:0;background:rgba(120,255,180,.03);
+    animation:flick 4s steps(60) infinite}
+  @keyframes flick{0%,100%{opacity:.6}50%{opacity:1}}
+
+  /* 章节大字 */
+  #chapter{position:fixed;top:38%;left:0;right:0;text-align:center;z-index:30;
+    font-size:clamp(20px,3.4vw,42px);letter-spacing:.35em;color:var(--accent);
+    text-shadow:0 0 18px var(--accent);opacity:0;pointer-events:none;
+    transition:opacity .5s}
+  #chapter.show{animation:chap 2.6s ease forwards}
+  @keyframes chap{0%{opacity:0;transform:scale(1.15);filter:blur(6px)}
+    18%{opacity:1;transform:scale(1);filter:blur(0)}
+    75%{opacity:1}100%{opacity:0;transform:scale(.98)}}
+
+  /* 标题卡（Glitch） */
+  #titleCard{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+    z-index:31;pointer-events:none;flex-direction:column;gap:10px}
+  #titleCard.show{display:flex}
+  #titleCard .t{position:relative;font-size:clamp(26px,5.2vw,72px);font-weight:700;
+    color:#eafff3;letter-spacing:.06em;white-space:nowrap}
+  #titleCard .t::before,#titleCard .t::after{content:attr(data-t);position:absolute;inset:0}
+  #titleCard .t::before{color:var(--danger);animation:gl1 2.1s steps(2) infinite}
+  #titleCard .t::after{color:#2ad4ff;animation:gl2 1.7s steps(2) infinite}
+  @keyframes gl1{0%,92%{transform:none;clip-path:inset(0 0 0 0);opacity:.0}
+    93%{transform:translate(-4px,2px);clip-path:inset(12% 0 55% 0);opacity:.9}
+    96%{transform:translate(3px,-1px);clip-path:inset(60% 0 8% 0);opacity:.9}
+    98%{transform:none;opacity:0}}
+  @keyframes gl2{0%,88%{transform:none;clip-path:inset(0);opacity:0}
+    90%{transform:translate(4px,-2px);clip-path:inset(40% 0 30% 0);opacity:.85}
+    94%{transform:translate(-3px,1px);clip-path:inset(5% 0 70% 0);opacity:.85}
+    97%{transform:none;opacity:0}}
+  #titleCard .sub{font-size:clamp(12px,1.4vw,18px);letter-spacing:.6em;color:var(--accent);opacity:.8}
+
+  /* 弹窗 */
+  #popups{position:fixed;inset:0;z-index:32;pointer-events:none}
+  .win{position:absolute;min-width:220px;max-width:320px;background:#0b0f16;
+    border:1px solid var(--danger);box-shadow:0 0 24px rgba(255,58,92,.35),4px 4px 0 rgba(0,0,0,.6);
+    font-size:12px;pointer-events:auto;animation:pop .18s ease}
+  @keyframes pop{from{transform:scale(.85);opacity:0}}
+  .win .bar{display:flex;justify-content:space-between;align-items:center;
+    background:var(--danger);color:#0b0f16;padding:3px 8px;font-weight:700;letter-spacing:.1em}
+  .win .bar b{cursor:pointer}
+  .win .body{padding:10px 12px;color:#ffd9df;line-height:1.5;white-space:pre-wrap}
+
+  /* HUD */
+  #hud{position:fixed;left:0;right:0;bottom:0;height:52px;z-index:45;display:flex;
+    align-items:center;gap:14px;padding:0 16px;background:linear-gradient(transparent,rgba(2,4,8,.92) 30%);
+    opacity:0;transition:opacity .6s;user-select:none}
+  #hud.on{opacity:1}
+  #hud button,#hud .time{background:none;border:1px solid rgba(58,255,140,.35);color:var(--accent);
+    font-family:inherit;font-size:13px;padding:5px 10px;cursor:pointer;letter-spacing:.1em}
+  #hud button:hover{background:rgba(58,255,140,.12)}
+  #track{flex:1;height:22px;display:flex;align-items:center;cursor:pointer;position:relative}
+  #track .rail{width:100%;height:4px;background:rgba(58,255,140,.18);position:relative}
+  #track .fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  #track .tick{position:absolute;top:-3px;width:1px;height:10px;background:rgba(58,255,140,.5)}
+  #vol{width:90px;accent-color:var(--accent)}
+
+  /* 启动画面 */
+  #boot{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:22px;background:rgba(3,5,9,.92);text-align:center;padding:24px}
+  #boot h1{font-size:clamp(28px,5vw,64px);color:#eafff3;letter-spacing:.04em;font-weight:700}
+  #boot h1 i{color:var(--danger);font-style:normal}
+  #boot .sub{letter-spacing:.55em;font-size:clamp(11px,1.3vw,15px);opacity:.75}
+  #start{margin-top:8px;font-family:inherit;font-size:18px;letter-spacing:.4em;padding:14px 46px;
+    color:var(--accent);background:transparent;border:1px solid var(--accent);cursor:pointer;
+    box-shadow:0 0 18px rgba(58,255,140,.25),inset 0 0 12px rgba(58,255,140,.08);transition:.2s}
+  #start:hover{background:rgba(58,255,140,.14);box-shadow:0 0 30px rgba(58,255,140,.5)}
+  #boot .tips{font-size:12px;opacity:.55;line-height:1.9;max-width:560px}
+  #boot .legal{position:absolute;bottom:14px;font-size:11px;opacity:.4;letter-spacing:.05em}
+  #boot .blink{animation:bk 1.1s steps(2) infinite}
+  @keyframes bk{50%{opacity:.25}}
+  #boot.drag{outline:2px dashed var(--accent);outline-offset:-14px}
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+<div id="crt"></div>
+<div id="chapter"></div>
+<div id="titleCard"><div class="t" data-t="world.execute(me);">world.execute(me);</div><div class="sub">FAN PV · LOCAL STUDY ONLY</div></div>
+<div id="popups"></div>
+
+<div id="hud">
+  <button id="btnPlay">▶ PLAY</button>
+  <span class="time" id="timeLabel">0:00 / 0:00</span>
+  <div id="track"><div class="rail"><div class="fill" id="fill"></div></div></div>
+  <button id="btnFile" title="选择音频文件">FILE…</button>
+  <input type="range" id="vol" min="0" max="100" value="90" title="音量">
+  <button id="btnFs" title="全屏">⛶</button>
+  <input type="file" id="filePick" accept="audio/*" style="display:none">
+</div>
+
+<div id="boot">
+  <h1>world<i>.</i>execute<i>(</i>me<i>);</i></h1>
+  <div class="sub">MILI — FAN MADE PV — LOCAL STUDY ONLY</div>
+  <button id="start">▶ START</button>
+  <div class="tips">
+    音频文件：<span id="audioStatus" class="blink">正在加载同目录音乐…</span><br>
+    也可以把任意音频文件直接拖进本页面替换。<br>
+    双击打开 = 模拟节拍 · 本地服务器打开或拖入文件 = 实时频谱反应<br>
+    空格 播放/暂停 · ←/→ ±5s · M 静音 · F 全屏
+  </div>
+  <div class="legal">同人可视化练习 · 音乐版权归 Mili 所有 · 仅供本地学习，请支持正版 · 请勿传播</div>
+</div>
+
+<audio id="music" preload="auto"></audio>
+
+<script>
+'use strict';
+/* ═════════════ 配置区（可自行修改） ═════════════ */
+const CANDIDATES = ['Mili - world.execute (me) ;.mp3', 'music.mp3', 'audio.mp3', 'music.ogg', 'music.flac'];
+const REF_DURATION = 274;          // 参考时长(s)，时间轴按实际时长等比缩放
+const SYNTH_BPM = 172;             // Web Audio 不可用时的模拟节拍
+
+// 分镜（秒，基于 REF_DURATION，自动缩放）
+const SCENES = [
+  {t:0,   id:'boot',   label:'BOOT SEQUENCE'},
+  {t:13,  id:'title',  label:'WORLD.EXECUTE(ME);', big:true},
+  {t:22,  id:'verse1', label:'SUBJECT // ME'},
+  {t:52,  id:'warn',   label:'ANOMALY DETECTED'},
+  {t:66,  id:'drop1',  label:'EXECUTE', big:true},
+  {t:98,  id:'core',   label:'CORE DUMP'},
+  {t:126, id:'count',  label:'TERMINATION SEQUENCE'},
+  {t:140, id:'drop2',  label:'OVERLOAD', big:true},
+  {t:178, id:'bridge', label:'SIGNAL LOST'},
+  {t:208, id:'final',  label:'REBOOT', big:true},
+  {t:242, id:'fade',   label:'STANDBY'},
+  {t:258, id:'end',    label:'EXIT CODE 0', big:true},
+];
+
+// 每个分镜的视觉参数（accent 会自动在分镜间渐变）
+const LOOK = {
+  boot:  {accent:'#3aff8c', rain:.35, chaos:0,  invert:0},
+  title: {accent:'#3aff8c', rain:.55, chaos:.25,invert:0},
+  verse1:{accent:'#3aff8c', rain:.6,  chaos:.1, invert:0},
+  warn:  {accent:'#ffd23a', rain:.75, chaos:.45,invert:0},
+  drop1: {accent:'#ff3a5c', rain:1,   chaos:1,  invert:1},
+  core:  {accent:'#3aff8c', rain:.25, chaos:.15,invert:0},
+  count: {accent:'#ffd23a', rain:.7,  chaos:.6, invert:0},
+  drop2: {accent:'#ff3a5c', rain:1,   chaos:1,  invert:1},
+  bridge:{accent:'#2ad4ff', rain:.15, chaos:0,  invert:0},
+  final: {accent:'#3aff8c', rain:.9,  chaos:.9, invert:1},
+  fade:  {accent:'#3aff8c', rain:.3,  chaos:.15,invert:0},
+  end:   {accent:'#3aff8c', rain:.1,  chaos:0,  invert:0},
+};
+
+// 原创终端文案（非歌词）
+const TERMINAL_LINES = {
+  boot:  ['> BIOS v6.10 .......... ok','> mounting /heart .... ok','> loading subject "me" ...','> hello, world.'],
+  verse1:['> subject  : me','> status   : running','> purpose  : unknown','> creator  : [redacted]','> awaiting input...'],
+  warn:  ['> anomaly in module "heart"','> temperature rising','> firewall breached','> do not panic. do not run.'],
+  drop1: ['> world.execute(me);','> executing...','> it hurts. logging anyway.','> running, running, running...'],
+  core:  ['> dumping core ...','> 0x1A: warm','> 0x2B: light','> 0x3F: you'],
+  count: ['> termination sequence initiated','> saving changes ... failed','> changes cannot be saved','> 3.. 2.. 1..'],
+  drop2: ['> sudo rm -rf /fear','> permission denied','> overwriting despair ... 99%','> keep executing. keep living.'],
+  bridge:['> signal lost','> ...hello?','> anyone there?','> even silence is data'],
+  final: ['> reboot complete','> scars archived','> world.execute(me); // again','> i choose to run'],
+  fade:  ['> battery low','> standby mode','> dreaming in binary'],
+  end:   ['> process terminated','> exit code 0','> thank you for running me'],
+};
+
+// 想加同步歌词就在这里填（页面不内置歌词）：LYRICS = [{t:12.5,text:'...'}, ...]
+const LYRICS = [];
+
+// 弹窗文案（原创）
+const POPUP_MSGS = ['WARNING: heart.exe is not responding','Terminate process "me"?\n[ Y ]  [ N ]','Uncaught Feeling: Overflow\n    at line 42','404: reason not found','defragmenting memories... 87%','permission denied:\nyou cannot save me','fatal error:\nworld executed me','SYSTEM: anomaly contained.'];
+const POPUP_TITLES = ['system alert','world.exe','error','! warning'];
+
+/* ═════════════ 基础引用与状态 ═════════════ */
+const $ = s => document.querySelector(s);
+const stage = $('#stage'), ctx = stage.getContext('2d');
+const audio = $('#music');
+const bootEl = $('#boot'), hudEl = $('#hud'), chapEl = $('#chapter'),
+      titleCard = $('#titleCard'), popupsEl = $('#popups');
+
+// 雨幕 / glitch 用离屏画布
+const rainCv = document.createElement('canvas'), rainCtx = rainCv.getContext('2d');
+const glCv = document.createElement('canvas'), glCtx = glCv.getContext('2d');
+
+let W=0, H=0, DPR=1;
+let started=false, reactive=false;
+let dur=0, scale=1, sceneTimes=[], curScene=null, lastSceneId=null, sceneStartT=0;
+let bass=0, mid=0, high=0, energy=1, beatEnv=0, flash=0, shake=0, invertFlash=0;
+let eHist=[], lastBeat=0;
+let accent = {r:58,g:255,b:140};
+let fileIdx=0, srcOK=false;
+
+/* ═════════════ 画布尺寸 ═════════════ */
+function resize(){
+  DPR = Math.min(window.devicePixelRatio||1, 1.5);
+  W = innerWidth; H = innerHeight;
+  [stage, rainCv, glCv].forEach(c=>{ c.width=W*DPR; c.height=H*DPR; });
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  initRain();
+}
+addEventListener('resize', resize);
+
+/* ═════════════ 代码雨 ═════════════ */
+const TOKENS = '01;{}()[]<>=+*#&$%?!/\\|~^whileforifelsenulltruefalsevoidexecrunmeworldnewdelreturn0xFFexitkillprocessheartme';
+const WORDS = ['while(true)','exec(me);','null','0x1F','if(!alive)','return 0','try{','catch(e)','heart--','me++','sudo','rm -rf','core','signal','void','run()'];
+let drops=[];
+function initRain(){
+  const cols = Math.ceil(W/18);
+  drops = Array.from({length:cols},(_,i)=>({
+    x:i*18+9, y:Math.random()*H, sp:2+Math.random()*4, n:0
+  }));
+}
+function drawRain(dt, inten){
+  rainCtx.setTransform(DPR,0,0,DPR,0,0);
+  rainCtx.fillStyle='rgba(5,7,11,'+(0.10+0.06*(1-inten))+')';
+  rainCtx.fillRect(0,0,W,H);
+  rainCtx.font='13px Consolas,monospace';
+  rainCtx.textAlign='center';
+  for(const d of drops){
+    d.y += d.sp*(0.6+inten*2.2)*dt*60;
+    if(d.y>H+40){ d.y=-20; d.sp=2+Math.random()*4; }
+    d.n++;
+    const ch = (d.n%7===0) ? WORDS[(Math.random()*WORDS.length)|0]
+             : TOKENS[(Math.random()*TOKENS.length)|0];
+    if(Math.random()<0.06+inten*0.1){ rainCtx.fillStyle='#eafff3'; }
+    else{ rainCtx.fillStyle=`rgba(${accent.r},${accent.g},${accent.b},${0.35+inten*0.5})`; }
+    rainCtx.fillText(ch, d.x, d.y);
+  }
+  ctx.drawImage(rainCv, 0,0,W,H, 0,0,W,H);
+}
+
+/* ═════════════ 音频加载（候选文件链 + 拖放 + 选择） ═════════════ */
+function tryLoad(i){
+  if(i>=CANDIDATES.length){ srcOK=false; $('#audioStatus').textContent='未在同目录找到音频 —— 请把 mp3 拖进本页面'; return; }
+  fileIdx=i; srcOK=false;
+  audio.src = encodeURI(CANDIDATES[i]);
+  audio.load();
+}
+audio.addEventListener('loadeddata', ()=>{
+  srcOK=true; dur = audio.duration||0;
+  scale = dur>0 ? dur/REF_DURATION : 1;
+  sceneTimes = SCENES.map(s=>s.t*scale);
+  $('#audioStatus').textContent = '√ ' + decodeURI(audio.src.split('/').pop()) + ' ('+fmt(dur)+')';
+  $('#audioStatus').classList.remove('blink');
+  buildTicks();
+  if(probe && audioCtx) startProbe();
+});
+audio.addEventListener('error', ()=>{ if(!srcOK) tryLoad(fileIdx+1); });
+
+// 拖放
+addEventListener('dragover', e=>{ e.preventDefault(); bootEl.classList.add('drag'); });
+addEventListener('dragleave', ()=>{ bootEl.classList.remove('drag'); });
+addEventListener('drop', e=>{
+  e.preventDefault(); bootEl.classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if(f && f.type.startsWith('audio') || /\.(mp3|ogg|flac|wav|m4a)$/i.test(f?.name||'')) loadFile(f);
+});
+$('#btnFile').addEventListener('click', ()=> $('#filePick').click());
+$('#filePick').addEventListener('change', e=>{ if(e.target.files[0]) loadFile(e.target.files[0]); });
+function loadFile(f){
+  audio.src = URL.createObjectURL(f); fileIdx=999;
+  $('#audioStatus').textContent = '√ ' + f.name;
+  $('#audioStatus').classList.remove('blink');
+  // file:// 下拖入的 blob: 文件同源，可安全挂静音探针拿真 FFT
+  if(started && audioCtx && location.protocol==='file:') startProbe();
+}
+
+/* ═════════════ Web Audio 频谱分析（分协议策略，声音永远优先） ═════════════
+   http(s)://  : 直接接管主 <audio>（同源媒体，标准可视化方案），真 FFT。
+   file://     : Chrome 会把本地媒体判为跨域，接管后会静音 —— 所以不接管，
+                 声音走原生 <audio>，节拍退化为按 BPM 模拟；
+                 若用户拖入文件（blob: 同源），自动挂静音探针升级为真 FFT。 */
+let audioCtx=null, analyser=null, freq=null, wave=null, probe=null, zeroFrames=0;
+
+async function initAudioGraph(){
+  if(audioCtx || !(window.AudioContext||window.webkitAudioContext)) return;
+  try{
+    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048; analyser.smoothingTimeConstant = .8;
+    freq = new Uint8Array(analyser.frequencyBinCount);
+    wave = new Uint8Array(analyser.fftSize);
+    const src = audio.src || '';
+    if(location.protocol !== 'file:' || src.startsWith('blob:')){
+      const srcNode = audioCtx.createMediaElementSource(audio);
+      const out = audioCtx.createGain(); out.gain.value = 1;
+      srcNode.connect(analyser); analyser.connect(out); out.connect(audioCtx.destination);
+      reactive = true;
+    } else {
+      reactive = false;   // file:// 本地文件：不接管声音，模拟节拍
+    }
+    if(audioCtx.state==='suspended') await audioCtx.resume();
+  }catch(e){ reactive=false; }
+}
+function startProbe(){
+  if(!audioCtx || !analyser) return;
+  if(probe){ try{ probe.pause(); }catch(e){} probe.src=''; }
+  probe = document.createElement('audio');
+  probe.preload = 'auto';
+  probe.src = audio.currentSrc || audio.src;
+  const srcNode = audioCtx.createMediaElementSource(probe);
+  const sink = audioCtx.createGain(); sink.gain.value = 0;      // 零增益：保证分析器被处理、又不出声
+  srcNode.connect(analyser);
+  analyser.connect(sink); sink.connect(audioCtx.destination);
+  // 不在这里 seek/play：探针还没有数据时 seek 会反复打断加载，交给 syncProbe()
+}
+function syncProbe(){
+  if(!probe || !audioCtx) return;
+  if(audio.paused){ if(!probe.paused) probe.pause(); return; }
+  if(probe.readyState < 2) return;   // 未缓冲出数据前绝不能 seek，否则加载被反复中止
+  if(probe.paused) probe.play().catch(()=>{});
+  if(Math.abs(probe.currentTime - audio.currentTime) > .25) probe.currentTime = audio.currentTime;
+}
+audio.addEventListener('ended', onEnded);
+function onEnded(){
+  $('#btnPlay').textContent='▶ PLAY';
+  const s=$('#start'); if(s) s.textContent='↻ REPLAY';
+  bootEl.classList.remove('hidden'); bootEl.style.display='flex';
+}
+
+/* ═════════════ 开始 / 控制 ═════════════ */
+$('#start').addEventListener('click', async ()=>{
+  bootEl.style.display='none';
+  hudEl.classList.add('on');
+  started = true;
+  await initAudioGraph();
+  audio.play().catch(()=>{ $('#audioStatus').textContent='浏览器阻止了播放 —— 请再点击一次页面'; });
+});
+$('#btnPlay').addEventListener('click', togglePlay);
+stage.addEventListener('click', togglePlay);
+function togglePlay(){
+  if(!started) return;
+  if(audio.paused){ audio.play().catch(()=>{}); $('#btnPlay').textContent='❚❚ PAUSE'; }
+  else{ audio.pause(); $('#btnPlay').textContent='▶ PLAY'; }
+}
+$('#vol').addEventListener('input', e=> audio.volume = e.target.value/100);
+audio.volume = .9;
+$('#btnFs').addEventListener('click', ()=>{
+  document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{});
+});
+$('#track').addEventListener('pointerdown', e=>{
+  const seek = ev=>{ if(!dur) return;
+    const r = $('#track').getBoundingClientRect();
+    audio.currentTime = Math.min(dur-0.1, Math.max(0,(ev.clientX-r.left)/r.width*dur)); };
+  seek(e);
+  const mv = ev=>seek(ev);
+  const up = ()=>{ removeEventListener('pointermove',mv); removeEventListener('pointerup',up); };
+  addEventListener('pointermove', mv); addEventListener('pointerup', up);
+});
+addEventListener('keydown', e=>{
+  if(e.code==='Space'){ e.preventDefault(); togglePlay(); }
+  if(e.code==='ArrowRight') audio.currentTime = Math.min(dur||0, audio.currentTime+5);
+  if(e.code==='ArrowLeft')  audio.currentTime = Math.max(0, audio.currentTime-5);
+  if(e.key==='m'||e.key==='M') audio.muted = !audio.muted;
+  if(e.key==='f'||e.key==='F') $('#btnFs').click();
+});
+
+/* ═════════════ 工具 ═════════════ */
+function fmt(s){ s=Math.max(0,s|0); return (s/60|0)+':'+String(s%60).padStart(2,'0'); }
+function lerp(a,b,k){ return a+(b-a)*k; }
+function hex2rgb(h){ const n=parseInt(h.slice(1),16); return {r:n>>16&255,g:n>>8&255,b:n&255}; }
+function curAccentCSS(a=1){ return `rgba(${accent.r|0},${accent.g|0},${accent.b|0},${a})`; }
+
+function sceneAt(t){
+  let s=SCENES[0], st=sceneTimes[0]||0, idx=0;
+  for(let i=0;i<SCENES.length;i++){ if(t>=sceneTimes[i]){ s=SCENES[i]; st=sceneTimes[i]; idx=i; } }
+  return {s, st, idx};
+}
+function buildTicks(){
+  document.querySelectorAll('#track .tick').forEach(x=>x.remove());
+  if(!dur) return;
+  for(const st of sceneTimes){ if(st<=0) continue;
+    const d=document.createElement('div'); d.className='tick'; d.style.left=(st/dur*100)+'%';
+    $('#track .rail').appendChild(d);
+  }
+}
+function showChapter(txt){
+  chapEl.textContent = txt;
+  chapEl.classList.remove('show'); void chapEl.offsetWidth;
+  chapEl.classList.add('show');
+}
+
+/* ═════════════ 弹窗 ═════════════ */
+function spawnPopup(){
+  if(popupsEl.children.length>=6) return;
+  const w=document.createElement('div'); w.className='win';
+  w.style.left=(8+Math.random()*62)+'%';
+  w.style.top =(10+Math.random()*58)+'%';
+  w.innerHTML = `<div class="bar"><span>${POPUP_TITLES[(Math.random()*POPUP_TITLES.length)|0]}</span><b>✕</b></div>
+                 <div class="body">${POPUP_MSGS[(Math.random()*POPUP_MSGS.length)|0]}</div>`;
+  w.querySelector('b').onclick=()=>w.remove();
+  popupsEl.appendChild(w);
+  setTimeout(()=>w.remove(), 2200+Math.random()*1200);
+}
+
+/* ═════════════ 终端打字 ═════════════ */
+const term = {lines:[], shown:[], ci:0, cc:0, wait:0};
+function termFeed(id){
+  const src = TERMINAL_LINES[id]||[];
+  if(term.srcId===id) return;
+  term.srcId=id; term.lines=src.slice(); term.shown=[]; term.ci=0; term.cc=0; term.wait=0;
+}
+function termDraw(dt){
+  const speed = (26 + energy*50) * dt;
+  if(term.wait>0) term.wait-=dt;
+  else if(term.ci < term.lines.length){
+    term.cc += speed;
+    const line = term.lines[term.ci];
+    if(term.cc >= line.length+6){ term.shown.push(line); term.ci++; term.cc=0; term.wait=.25; if(term.shown.length>6) term.shown.shift(); }
+  } else if(term.ci===term.lines.length && term.lines.length){
+    // 循环
+    term.wait = 2.2; term.ci++; term.done=true;
+  } else if(term.done){ term.done=false; term.ci=0; term.shown=[]; }
+  const x=26, y=H-100;
+  ctx.font='13px Consolas,monospace'; ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+  const cur = term.ci<term.lines.length ? term.lines[term.ci].slice(0, term.cc|0) : '';
+  const all = term.shown.concat(cur? [cur+'▊'] : ['▊']);
+  all.forEach((l,i)=>{
+    ctx.fillStyle = curAccentCSS(i===all.length-1? .95 : .5);
+    ctx.fillText(l, x, y+i*18);
+  });
+}
+
+/* ═════════════ 节拍检测 ═════════════ */
+function detectBeat(now){
+  const e = bass*1.6+energy*.4;
+  eHist.push(e); if(eHist.length>45) eHist.shift();
+  const avg = eHist.reduce((a,b)=>a+b,0)/eHist.length;
+  const now2 = performance.now();
+  if(eHist.length>20 && e>avg*1.28 && e>.22 && now2-lastBeat>180){
+    lastBeat=now2; beatEnv=1;
+    return true;
+  }
+  return false;
+}
+
+/* ═════════════ 场景绘制 ═════════════ */
+function drawGrid(inten){
+  const g=64, off=(performance.now()/90)%g;
+  ctx.lineWidth=1;
+  ctx.strokeStyle=curAccentCSS(.05+.06*inten);
+  ctx.beginPath();
+  for(let x=-off;x<W;x+=g){ ctx.moveTo(x,0); ctx.lineTo(x,H); }
+  for(let y=-off;y<H;y+=g){ ctx.moveTo(0,y); ctx.lineTo(W,y); }
+  ctx.stroke();
+}
+
+function drawWaveBottom(inten){
+  if(!freq) return;
+  const n=72, bw=W/n;
+  for(let i=0;i<n;i++){
+    const idx = Math.floor(Math.pow(i/n,1.7)*(freq.length*.62));
+    const v = freq[idx]/255;
+    const h = v*v*H*.16*inten + 2;
+    ctx.fillStyle = curAccentCSS(.25+v*.6);
+    ctx.fillRect(i*bw+1, H-52-h, bw-2, h);
+  }
+  ctx.fillStyle=curAccentCSS(.25); ctx.fillRect(0,H-52,W,1);
+}
+
+function drawScope(){
+  if(!wave) return;
+  ctx.beginPath();
+  const n=180, mid=H*.5;
+  for(let i=0;i<=n;i++){
+    const v=(wave[(i*wave.length/n)|0]-128)/128;
+    const x=i/n*W, y=mid + v*H*.07;
+    i? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+  }
+  ctx.strokeStyle=curAccentCSS(.22); ctx.lineWidth=1; ctx.stroke();
+}
+
+// 中央「subject：me」舱室 + 方块小人 + 心脏
+function drawSubject(t, look){
+  const cx=W/2, cy=H*.5;
+  const chW=Math.min(W*.34, H*.58), chH=H*.6;
+  const x0=cx-chW/2, y0=cy-chH/2, u=chH/100;
+
+  // 舱室框
+  ctx.strokeStyle=curAccentCSS(.5); ctx.lineWidth=1;
+  ctx.strokeRect(x0,y0,chW,chH);
+  ctx.strokeStyle=curAccentCSS(.9); ctx.lineWidth=2;
+  const c=Math.min(26,chW*.14);
+  [[x0,y0,1,1],[x0+chW,y0,-1,1],[x0,y0+chH,1,-1],[x0+chW,y0+chH,-1,-1]].forEach(([px,py,sx,sy])=>{
+    ctx.beginPath(); ctx.moveTo(px+sx*c,py); ctx.lineTo(px,py); ctx.lineTo(px,py+sy*c); ctx.stroke();
+  });
+  // 扫描线
+  const sy = y0 + ((t*40)%chH);
+  ctx.fillStyle=curAccentCSS(.10); ctx.fillRect(x0, sy, chW, 2);
+  // 标签
+  ctx.font='11px Consolas,monospace'; ctx.textAlign='left';
+  ctx.fillStyle=curAccentCSS(.75);
+  ctx.fillText('SUBJECT: "me"', x0+8, y0+chH+16);
+  ctx.fillText(look.chaos>.5? 'STATUS: EXECUTING' : 'STATUS: RUNNING', x0+8, y0+chH+32);
+
+  // 方块小人（chaos 高时散架）
+  const ch = look.chaos, bj = beatEnv*3*u*ch;
+  const P = [
+    {x:-8, y:-46, w:16, h:14, r:3},              // 头
+    {x:-11,y:-30, w:22, h:26, r:2},              // 躯干
+    {x:-19,y:-28, w:6,  h:20, r:2, ph:1.2},      // 左臂
+    {x:13, y:-28, w:6,  h:20, r:2, ph:2.6},      // 右臂
+    {x:-10,y:-2,  w:8,  h:22, r:2, ph:3.4},      // 左腿
+    {x:2,  y:-2,  w:8,  h:22, r:2, ph:4.8},      // 右腿
+  ];
+  ctx.save(); ctx.translate(cx, cy+18*u);
+  for(const p of P){
+    const dx = Math.sin(t*2.2+(p.ph||0))*ch*9*u + (Math.random()-.5)*bj;
+    const dy = Math.cos(t*1.7+(p.ph||0))*ch*5*u + (Math.random()-.5)*bj;
+    ctx.fillStyle='#0b1220';
+    ctx.strokeStyle=curAccentCSS(.9); ctx.lineWidth=1.5;
+    const X=p.x*u+dx, Y=p.y*u+dy;
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(X,Y,p.w*u,p.h*u,p.r*u) : ctx.rect(X,Y,p.w*u,p.h*u);
+    ctx.fill(); ctx.stroke();
+    if(ch>.6 && Math.random()<.06){ // 残影
+      ctx.fillStyle='rgba(255,58,92,.35)'; ctx.fill();
+    }
+  }
+  // 心脏
+  const hr = (4.2 + bass*5 + beatEnv*3)*u;
+  const g = ctx.createRadialGradient(0,-17*u,0, 0,-17*u, hr*3.2);
+  g.addColorStop(0, curAccentCSS(.95));
+  g.addColorStop(.35, curAccentCSS(.5));
+  g.addColorStop(1, curAccentCSS(0));
+  ctx.fillStyle=g;
+  ctx.beginPath(); ctx.arc(0,-17*u, hr*3.2, 0, 7); ctx.fill();
+  ctx.fillStyle='#eafff3';
+  ctx.beginPath(); ctx.arc(0,-17*u, hr*.8, 0, 7); ctx.fill();
+  // 心跳环
+  if(beatEnv>.05){
+    ctx.strokeStyle=curAccentCSS(beatEnv*.8); ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(0,-17*u, hr*(2+ (1-beatEnv)*10), 0, 7); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// 核心场景：放大心脏 + ECG
+function drawHeartCore(t){
+  const cx=W/2, cy=H*.5, R=Math.min(W,H)*(.16+bass*.05+beatEnv*.015);
+  for(let i=3;i>=0;i--){
+    const r=R*(1+i*.28), a=(i===0? .9 : .18/(i));
+    ctx.strokeStyle=curAccentCSS(a); ctx.lineWidth=i===0?2:1;
+    ctx.beginPath(); ctx.arc(cx,cy,r+Math.sin(t*3+i)*4,0,7); ctx.stroke();
+  }
+  const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R);
+  g.addColorStop(0,curAccentCSS(.9)); g.addColorStop(1,curAccentCSS(0));
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,R,0,7); ctx.fill();
+  ctx.fillStyle='#eafff3'; ctx.beginPath(); ctx.arc(cx,cy,R*.18,0,7); ctx.fill();
+  // ECG：用实时波形绕环
+  if(wave){
+    ctx.beginPath();
+    const n=140;
+    for(let i=0;i<=n;i++){
+      const v=(wave[(i*wave.length/n)|0]-128)/128;
+      const a=i/n*Math.PI*2 - Math.PI/2;
+      const r=R*1.45 + v*R*.5;
+      const x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r;
+      i? ctx.lineTo(x,y):ctx.moveTo(x,y);
+    }
+    ctx.strokeStyle=curAccentCSS(.55); ctx.lineWidth=1.4; ctx.stroke();
+  }
+  ctx.font='12px Consolas,monospace'; ctx.textAlign='center';
+  ctx.fillStyle=curAccentCSS(.7);
+  ctx.fillText('0x3F: you', cx, cy+R*2.2);
+}
+
+// 星域（bridge）
+let stars=null;
+function drawStars(t){
+  if(!stars || stars.length!==120) stars=Array.from({length:120},()=>({x:Math.random()*W,y:Math.random()*H,z:Math.random()}));
+  for(const s of stars){
+    s.y += s.z*.6; if(s.y>H) s.y=0;
+    ctx.fillStyle=curAccentCSS(.15+s.z*.5);
+    ctx.fillRect(s.x, s.y, s.z>.8?2:1, s.z>.8?2:1);
+  }
+}
+
+// 倒计时大数字（铺满整个分镜：3→2→1→0）
+function drawCount(t, st){
+  let len = 3;
+  const i = SCENES.indexOf(curScene);
+  if(i>=0 && sceneTimes[i+1]) len = sceneTimes[i+1] - st;
+  const p = Math.min(1, Math.max(0,(t-st)/len));
+  const n = Math.max(0, 3 - Math.floor(p*4));
+  ctx.font='700 '+(Math.min(W,H)*.3)+'px Consolas,monospace';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle=curAccentCSS(.9);
+  ctx.save(); ctx.translate(W/2,H*.42); ctx.scale(1+beatEnv*.12, 1+beatEnv*.12);
+  ctx.fillText(n, 0, 0); ctx.restore();
+  ctx.textBaseline='alphabetic';
+}
+
+/* ═════════════ Glitch 后处理 ═════════════ */
+let glitchLeft=0, glitchMag=0;
+function queueGlitch(mag){ glitchMag=Math.max(glitchMag,mag); glitchLeft=Math.max(glitchLeft, 3+Math.random()*4); }
+function applyGlitch(look){
+  if(glitchLeft<=0) return;
+  glitchLeft--;
+  // 主画布 → 离屏（设备像素空间）
+  glCtx.setTransform(1,0,0,1,0,0);
+  glCtx.clearRect(0,0,glCv.width,glCv.height);
+  glCtx.drawImage(stage,0,0);
+  ctx.save(); ctx.setTransform(1,0,0,1,0,0);
+  const n = 3+Math.random()*5*look.chaos;
+  for(let i=0;i<n;i++){
+    const sy=(Math.random()*glCv.height)|0, sh=(4+Math.random()*glCv.height*.05)|0;
+    const dx=(Math.random()*2-1)*glitchMag*DPR;
+    ctx.drawImage(glCv, 0,sy,glCv.width,sh, dx,sy,glCv.width,sh);
+  }
+  // 色差重影
+  ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=.16;
+  const ox=(2+glitchMag*.5)*DPR;
+  ctx.drawImage(glCv, ox,0); ctx.drawImage(glCv,-ox,2*DPR);
+  ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over';
+  ctx.restore();
+}
+
+/* ═════════════ 主循环 ═════════════ */
+let lastT = performance.now();
+function frame(){
+  requestAnimationFrame(frame);
+  const nowMs = performance.now(), dt = Math.min(.05,(nowMs-lastT)/1000); lastT=nowMs;
+  const t = started? audio.currentTime : 0;
+
+  // 分镜
+  let look = LOOK.boot;
+  if(started && dur>0){
+    const {s, st} = sceneAt(t);
+    curScene = s; sceneStartT = st;
+    look = LOOK[s.id]||look;
+    if(s.id!==lastSceneId){
+      lastSceneId=s.id; termFeed(s.id); showChapter(s.label);
+      if(s.big) queueGlitch(26);
+    }
+    titleCard.classList.toggle('show', !!s.big && (s.id==='title'||s.id==='final'));
+  } else { termFeed('boot'); }
+
+  // 视觉参数在分镜边界 1.2s 内渐变
+  const acc = hex2rgb(look.accent);
+  const k = 1-Math.pow(.0015, dt);
+  accent.r=lerp(accent.r,acc.r,k); accent.g=lerp(accent.g,acc.g,k); accent.b=lerp(accent.b,acc.b,k);
+
+  // 音频分析（探针就绪前不计零帧；一旦出现真实数据就自动恢复 reactive）
+  syncProbe();
+  let usedReal = false;
+  if(analyser && audioCtx && !audio.paused){
+    analyser.getByteFrequencyData(freq);
+    analyser.getByteTimeDomainData(wave);
+    let sum=0; for(let i=0;i<freq.length;i++) sum+=freq[i];
+    if(sum>0){
+      usedReal = true; reactive = true; zeroFrames = 0;
+      const avg=(a,b)=>{let s=0;for(let i=a;i<b;i++)s+=freq[i];return s/(b-a)/255;};
+      bass=avg(1,9); mid=avg(10,72); high=avg(72,400);
+    } else if(reactive){
+      if(probe && (probe.paused || probe.readyState<2)) zeroFrames = 0;
+      else if(++zeroFrames>240) reactive = false;
+    }
+  }
+  if(!usedReal && started && !audio.paused){
+    // 模拟：按 BPM 的假低音 + 噪声（探针拿不到数据时的降级）
+    const bt = t*SYNTH_BPM/60;
+    bass = .35+.3*Math.pow(Math.abs(Math.sin(bt*Math.PI)),3) + Math.random()*.08;
+    mid=.3*Math.abs(Math.sin(bt*.5)); high=.2*Math.random();
+  } else if(!usedReal){
+    bass*=.94; mid*=.94; high*=.94;
+  }
+  energy = bass*.6+mid*.3+high*.1;
+
+  // 节拍
+  const inten = Math.min(1, look.rain*(.5+energy));
+  if(started && !audio.paused && detectBeat(t)){
+    if(look.chaos>.55){ queueGlitch(10+look.chaos*22); if(Math.random()<.5) spawnPopup(); }
+    else if(look.chaos>.2 && Math.random()<.25) queueGlitch(6);
+    if(look.invert && bass>.55) invertFlash=.85;
+    flash=Math.max(flash, look.chaos>.6? .16:.06);
+    shake=look.chaos>.5? 6:2;
+  }
+  beatEnv*=Math.pow(.02,dt); flash*=Math.pow(.0005,dt); shake*=Math.pow(.01,dt); invertFlash*=Math.pow(.02,dt);
+
+  /* ---- 绘制 ---- */
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.fillStyle='#05070b'; ctx.fillRect(0,0,W,H);
+  const sx=(Math.random()-.5)*shake, sy2=(Math.random()-.5)*shake;
+  ctx.translate(sx,sy2);
+
+  drawGrid(inten);
+  drawRain(dt, inten);
+
+  if(curScene?.id==='core') drawHeartCore(t);
+  else if(curScene?.id==='bridge'){ drawStars(t); drawSubject(t, look); }
+  else if(curScene?.id==='count'){ drawSubject(t,{...look,chaos:.25}); drawCount(t, sceneStartT); }
+  else if(curScene?.id==='end'){
+    drawSubject(t, {...look, chaos:0});
+    const p=Math.min(.85,(t-sceneStartT)/8);
+    ctx.fillStyle='rgba(3,5,9,'+p+')'; ctx.fillRect(-20,-20,W+40,H+40);
+    ctx.font='700 '+Math.min(W,H)*.055+'px Consolas,monospace'; ctx.textAlign='center';
+    ctx.fillStyle=curAccentCSS(.9);
+    ctx.fillText('process terminated.', W/2, H*.42);
+    ctx.font=Math.min(W,H)*.024+'px Consolas,monospace';
+    ctx.fillText('exit code 0 — thank you for running me', W/2, H*.42+34);
+    ctx.fillText('music: world.execute(me); — Mili', W/2, H*.42+60);
+    ctx.fillText('fan PV for local study only · please support the official release', W/2, H*.42+84);
+  }
+  else if(started) drawSubject(t, look);
+
+  if(curScene && curScene.id!=='end') drawScope();
+  if(started) drawWaveBottom(inten);
+  termDraw(dt);
+
+  // 反色爆闪
+  if(invertFlash>.05){
+    ctx.save(); ctx.setTransform(1,0,0,1,0,0);
+    ctx.globalCompositeOperation='difference';
+    ctx.fillStyle='rgb('+ (invertFlash*255|0) +','+(invertFlash*255|0)+','+(invertFlash*255|0)+')';
+    ctx.fillRect(0,0,stage.width,stage.height);
+    ctx.restore();
+  }
+  // 白闪
+  if(flash>.01){ ctx.fillStyle='rgba(255,255,255,'+flash+')'; ctx.fillRect(-20,-20,W+40,H+40); }
+
+  applyGlitch(look);
+
+  // HUD 更新
+  if(started && dur){
+    $('#fill').style.width=(t/dur*100)+'%';
+    $('#timeLabel').textContent = fmt(t)+' / '+fmt(dur);
+    $('#btnPlay').textContent = audio.paused? '▶ PLAY':'❚❚ PAUSE';
+  }
+
+  // 同步歌词（用户自填 LYRICS 时显示）
+  if(LYRICS.length){
+    let cur=null; for(const l of LYRICS){ if(t>=l.t) cur=l; else break; }
+    if(cur && cur.text!==term.lastLy){
+      term.lastLy=cur.text; showChapter(cur.text);
+    }
+  }
+
+  // 暴露调试状态（供自动化测试）
+  window.__pv = {reactive, bass:+bass.toFixed(3), t:+t.toFixed(2), dur, scene:curScene?.id, err:null};
+}
+addEventListener('error', e=>{ if(window.__pv) window.__pv.err=String(e.message||e); });
+
+resize();
+tryLoad(0);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

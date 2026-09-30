@@ -13,6 +13,7 @@ imageAlt: WORLD EXECUTE ME PV 开场画面,大字排版与播放按钮
 tags: [pv, animation, music]
 video: true
 videoKey: Space
+series: world-execute-me
 featured: true
 ---
 
