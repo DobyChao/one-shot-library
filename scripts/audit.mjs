@@ -126,4 +126,5 @@ for (const rel of targets) {
 }
 
 server.close();
+rmSync(path.dirname(tmpReport), { recursive: true, force: true });
 console.log(`\nScores saved to ${path.relative(root, outDir)}`);
