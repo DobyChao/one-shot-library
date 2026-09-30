@@ -26,6 +26,8 @@ const image = (await findImage(shot.image)) as ImageMetadata | string | undefine
 // never collide with these detail routes under /shots/.
 const liveUrl = shot.html ? getAsset(`/artifacts/${shot.html}`) : shot.externalUrl;
 const isLocalFile = Boolean(shot.html);
+// 下载按钮只对单文件产物有意义;多文件(子目录)产物只下一个 index.html 是残缺的。
+const isSingleFile = isLocalFile && !shot.html?.includes('/');
 
 const metadata = {
   title: shot.title,
@@ -262,16 +264,19 @@ const scoreColor = (score: number) =>
                 <Icon name="tabler:external-link" class="h-4 w-4" />
                 新窗口打开
               </a>
-              {isLocalFile && (
-                <a
-                  href={liveUrl}
-                  download={shot.html}
-                  class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-                >
-                  <Icon name="tabler:download" class="h-4 w-4" />
-                  下载 HTML
-                </a>
-              )}
+              {
+                /* 下载按钮只出现在单文件产物上;多文件(子目录)只下一个 index.html 是残缺的。 */
+                isSingleFile && (
+                  <a
+                    href={liveUrl}
+                    download={shot.html}
+                    class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                  >
+                    <Icon name="tabler:download" class="h-4 w-4" />
+                    下载 HTML
+                  </a>
+                )
+              }
             </div>
           </div>
 
