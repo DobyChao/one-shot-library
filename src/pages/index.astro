@@ -1,77 +1,204 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
-import Hero from '~/components/widgets/Hero.astro';
-import CallToAction from '~/components/widgets/CallToAction.astro';
+import StructuredData from '~/components/common/StructuredData.astro';
 import ShotCard from '~/components/shots/ShotCard.astro';
 import { Icon } from 'astro-icon/components';
+import { I18N, METADATA, SITE } from 'astrowind:config';
 
-import { findLatestShots, fetchShots } from '~/utils/shots';
-import { getPermalink } from '~/utils/permalinks';
+import { fetchSeriesGroups, fetchShots, findLatestShots } from '~/utils/shots';
+import { getHomePermalink, getPermalink } from '~/utils/permalinks';
 
 const metadata = {
   title: 'One-Shot Library — 一个 Prompt,一个页面',
   ignoreTitleTemplate: true,
 };
 
-const [latestShots, allShots] = await Promise.all([findLatestShots({ count: 6 }), fetchShots()]);
-const oneShotCount = allShots.filter((s) => (s.turns ?? 1) === 1).length;
+const [latestShots, allShots, seriesGroups] = await Promise.all([
+  findLatestShots({ count: 6 }),
+  fetchShots(),
+  fetchSeriesGroups(),
+]);
+
+const oneShotCount = allShots.filter((shot) => (shot.turns ?? 1) === 1).length;
+const harnessCount = new Set(allShots.map((shot) => shot.harness).filter(Boolean)).size;
+const modelCount = new Set(allShots.map((shot) => shot.model).filter(Boolean)).size;
+const featured = seriesGroups[0];
+const featuredPromptsMatch = featured
+  ? featured.shots.every((shot) => shot.prompt.trim() === featured.shots[0].prompt.trim())
+  : false;
+
+const homeUrl = SITE.site ? new URL(getHomePermalink(), SITE.site).href : getHomePermalink();
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE?.name,
+  url: homeUrl,
+  description: METADATA?.description,
+  inLanguage: I18N?.language,
+  publisher: {
+    '@type': 'Organization',
+    name: SITE?.name,
+    url: homeUrl,
+  },
+};
+
+const stats = [
+  { value: String(allShots.length), label: '件作品', en: 'Shots' },
+  { value: String(oneShotCount), label: '真 one-shot', en: 'Single turn' },
+  { value: String(harnessCount), label: '种 Harness', en: 'Agents' },
+  { value: String(modelCount), label: '个模型', en: 'Models' },
+  { value: String(seriesGroups.length), label: '组对照', en: 'Series' },
+];
 ---
 
 <Layout metadata={metadata}>
-  <Hero
-    tagline="AI one-shot 前端产物画廊"
-    actions={[
-      { variant: 'primary', text: '浏览画廊', href: getPermalink('/shots'), icon: 'tabler:layout-grid' },
-      { text: '提交作品', href: getPermalink('/about#submit') },
-    ]}
-  >
-    <Fragment slot="title">
-      一个 Prompt,<br class="hidden sm:block" />
-      <span class="text-accent dark:text-white">一个页面</span>
-    </Fragment>
+  <StructuredData slot="head" schema={structuredData} />
 
-    <Fragment slot="subtitle">
-      这里收藏 AI 在<strong>一条 prompt 内</strong>直接生成的前端作品:落地页、仪表盘、小工具。 每件作品都附原始
-      prompt、使用的模型和可交互的在线预览——所见即所得,没有返工。
-    </Fragment>
-  </Hero>
+  <section class="osl-grid border-b border-black/10 dark:border-white/10">
+    <div class="mx-auto max-w-7xl px-4 pb-12 pt-14 sm:px-6 lg:px-8 lg:pb-16 lg:pt-20">
+      <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">One-Shot Library · 静态展厅</p>
+      <h1 class="mt-4 max-w-4xl text-5xl font-semibold tracking-tight text-heading sm:text-6xl lg:text-7xl">
+        一个 Prompt,<br />
+        <span class="text-primary">一个页面。</span>
+      </h1>
+      <p class="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
+        收藏 AI 在一条 prompt 里直接生成的落地页、仪表盘和小工具。每件作品都摊开原始
+        prompt、harness、模型、对话轮数,以及可以点开的预览。这是展厅,不是评测台:没有投票,没有排行榜,也没有后端。
+      </p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <a href={getPermalink('/shots')} class="btn-primary w-full sm:w-auto">
+          进入画廊
+          <Icon name="tabler:arrow-right" class="ml-1.5 h-5 w-5" aria-hidden="true" />
+        </a>
+        <a href={`${getPermalink('/about')}#submit`} class="btn w-full sm:w-auto">提交作品</a>
+      </div>
+    </div>
 
-  <section class="px-4 py-16 sm:px-6 mx-auto max-w-6xl lg:px-8">
-    <div class="mb-10 flex flex-wrap items-end justify-between gap-4">
+    <dl
+      class="mx-auto grid max-w-7xl grid-cols-2 gap-px overflow-hidden border-t border-black/10 bg-black/10 sm:grid-cols-3 lg:grid-cols-5 dark:border-white/10 dark:bg-white/10"
+    >
+      {
+        stats.map((stat) => (
+          <div class="bg-page px-4 py-5 sm:px-6 lg:px-8">
+            <dt class="font-mono text-[11px] uppercase tracking-[0.16em] text-muted">{stat.en}</dt>
+            <dd class="mt-1 font-mono text-3xl font-semibold tracking-tight text-heading">{stat.value}</dd>
+            <dd class="text-sm text-muted">{stat.label}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  {
+    featured && (
+      <section class="border-b border-black/10 dark:border-white/10" aria-labelledby="series-heading">
+        <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+          <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <div class="max-w-2xl">
+              <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-primary">Side by side</p>
+              <h2 id="series-heading" class="mt-2 text-3xl font-semibold tracking-tight text-heading">
+                同题对照
+              </h2>
+              <p class="mt-3 text-muted">
+                系列「{featured.series}」把相近命题的产物放在一起。
+                {featuredPromptsMatch
+                  ? '这组共用同一条 prompt,并排就能看出一次生成的差别。'
+                  : 'prompt 并不完全相同,对照页会把各自的原文和预览摆在一起。'}
+              </p>
+            </div>
+            <a
+              href={getPermalink(`/shots/series/${featured.slug}`)}
+              class="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
+            >
+              并排预览
+              <Icon name="tabler:arrows-split" class="h-4 w-4" aria-hidden="true" />
+            </a>
+          </div>
+          <div class="grid gap-6 lg:grid-cols-2">
+            {featured.shots.map((shot, index) => (
+              <ShotCard shot={shot} index={index} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-16" aria-labelledby="latest-heading">
+    <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <p class="mb-2 text-sm font-semibold uppercase tracking-wider text-primary">Latest Shots</p>
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">最新作品</h2>
+        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-primary">Latest shots</p>
+        <h2 id="latest-heading" class="mt-2 text-3xl font-semibold tracking-tight text-heading">最新馆藏</h2>
       </div>
       <a
         href={getPermalink('/shots')}
-        class="inline-flex items-center gap-1.5 font-medium text-primary hover:underline dark:text-blue-400"
+        class="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
       >
-        查看全部 ({allShots.length})
-        <Icon name="tabler:arrow-right" class="h-4 w-4" />
+        查看全部 {allShots.length} 件
+        <Icon name="tabler:arrow-right" class="h-4 w-4" aria-hidden="true" />
       </a>
     </div>
+    {
+      latestShots.length > 0 ? (
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {latestShots.map((shot, index) => (
+            <ShotCard shot={shot} index={index} />
+          ))}
+        </div>
+      ) : (
+        <p class="border border-dashed border-black/15 px-6 py-16 text-center text-muted dark:border-white/15">
+          还没有作品。往 <code class="font-mono text-sm">src/data/shot/</code> 里加一个 markdown 文件即可。
+        </p>
+      )
+    }
+  </section>
 
-    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      {latestShots.map((shot) => <ShotCard shot={shot} />)}
+  <section class="border-t border-black/10 dark:border-white/10" aria-labelledby="read-heading">
+    <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-primary">How to read a shot</p>
+      <h2 id="read-heading" class="mt-2 text-3xl font-semibold tracking-tight text-heading">一件作品看三样东西</h2>
+      <ol
+        class="mt-8 grid gap-px overflow-hidden rounded-md border border-black/10 bg-black/10 sm:grid-cols-3 dark:border-white/10 dark:bg-white/10"
+      >
+        <li class="bg-page p-6">
+          <p class="font-mono text-xs text-primary">01 · Prompt</p>
+          <h3 class="mt-3 text-xl font-semibold text-heading">原文置顶</h3>
+          <p class="mt-2 text-sm leading-relaxed text-muted">
+            生成它的那条 prompt 放在详情页最前面,一键复制。卡片上也能先看到开头几句。
+          </p>
+        </li>
+        <li class="bg-page p-6">
+          <p class="font-mono text-xs text-primary">02 · Harness / Model / Turns</p>
+          <h3 class="mt-3 text-xl font-semibold text-heading">谁生成的,几轮</h3>
+          <p class="mt-2 text-sm leading-relaxed text-muted">
+            Harness、模型和对话轮数写在收录时的 frontmatter 里。1 轮就是真 one-shot,多轮会标出来。
+          </p>
+        </li>
+        <li class="bg-page p-6">
+          <p class="font-mono text-xs text-primary">03 · Live preview</p>
+          <h3 class="mt-3 text-xl font-semibold text-heading">沙箱里打开</h3>
+          <p class="mt-2 text-sm leading-relaxed text-muted">
+            产物以静态 HTML 挂在本站,详情页用沙箱 iframe 预览,可切到手机宽度,也可以新窗口打开。
+          </p>
+        </li>
+      </ol>
     </div>
   </section>
 
-  <CallToAction
-    actions={[
-      {
-        variant: 'primary',
-        text: '了解如何提交',
-        href: `${getPermalink('/about')}#submit`,
-        icon: 'tabler:upload',
-      },
-    ]}
-  >
-    <Fragment slot="title">下一个 one-shot 就在你手里</Fragment>
-    <Fragment slot="subtitle">
-      已收录 {allShots.length} 件作品,其中 {oneShotCount} 件是真正的 zero-touch one-shot。<br
-        class="hidden md:inline"
-      />
-      把你最好的那条 prompt 和产物交出来,让它们被看见。
-    </Fragment>
-  </CallToAction>
+  <section class="border-t border-black/10 dark:border-white/10">
+    <div
+      class="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-14 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8"
+    >
+      <div class="max-w-xl">
+        <h2 class="text-3xl font-semibold tracking-tight text-heading">下一件,从你的 prompt 开始</h2>
+        <p class="mt-3 text-muted">
+          已收录 {allShots.length} 件,其中 {oneShotCount} 件是一轮生成。把原始 prompt 和产物交出来,它们会以同样的方式被展出。
+        </p>
+      </div>
+      <a href={`${getPermalink('/about')}#submit`} class="btn-primary w-full shrink-0 sm:w-auto">
+        了解如何提交
+        <Icon name="tabler:upload" class="ml-1.5 h-5 w-5" aria-hidden="true" />
+      </a>
+    </div>
+  </section>
 </Layout>

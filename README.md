@@ -43,21 +43,22 @@ featured: false # 首页精选
 
 可选字段:`externalUrl`(外部链接代替本地 HTML)、`imageAlt`、`updateDate`、`draft: true`(隐藏)、
 `video: true` + `videoKey`(录循环视频封面,录制时按该键或点击画面启动产物)、
-`series`(同 prompt 对照系列的组名,详情页互链)。
-`harness` / `model` 会成为卡片徽章并参与画廊分组筛选,请用规范写法(见 `src/data/taxonomy.ts` 或站内关于页);
+`series`(同题对照系列的组名;prompt 相同或只是相近都可以,详情页与对照页互链)。
+`harness` / `model` / `turns` 会成为卡片徽章并参与画廊筛选(也可按 harness、模型或 series 分组),请用规范写法(见 `src/data/taxonomy.ts` 或站内关于页);
+`series` 相同的作品进入 `/shots/series/<name>` 并排对照;prompt 不同会各自保留原文;
 `turns`、日期、产物形式出现在详情页「生成信息」面板;`npm run audit` 的 Lighthouse 分数有则自动展示;
 markdown 正文可选,显示在详情页「备注」区。
 
 ## 目录速览
 
-| 路径                       | 作用                                         |
-| -------------------------- | -------------------------------------------- |
-| `src/data/shot/`           | 作品条目(markdown)                           |
-| `public/artifacts/`        | 产物 HTML(单文件或子目录,`/artifacts/` 路径) |
-| `src/assets/images/shots/` | 作品截图(由脚本生成)                         |
-| `src/components/shots/`    | ShotCard / PromptBox 组件                    |
-| `src/pages/shots/`         | 画廊列表页 + 详情页                          |
-| `src/config.yaml`          | 站点名 / SEO / 主题                          |
+| 路径                       | 作用                                            |
+| -------------------------- | ----------------------------------------------- |
+| `src/data/shot/`           | 作品条目(markdown)                              |
+| `public/artifacts/`        | 产物 HTML(单文件或子目录,`/artifacts/` 路径)    |
+| `src/assets/images/shots/` | 作品截图(由脚本生成)                            |
+| `src/components/shots/`    | ShotCard / PromptBox / PreviewFrame / MetaChips |
+| `src/pages/shots/`         | 画廊列表页 + 详情页                             |
+| `src/config.yaml`          | 站点名 / SEO / 主题                             |
 
 ## 部署
 
@@ -73,4 +74,4 @@ markdown 正文可选,显示在详情页「备注」区。
 - **GitHub Pages**:设置上面两项后,把 `dist/` 发布到 gh-pages 分支,或加一个 `actions/upload-pages-artifact` + `actions/deploy-pages` 的 workflow(可参考 `.github/workflows/actions.yaml` 的构建步骤改)。访问 `/shots` 这类无斜杠路径时 GH Pages 会 301 到 `/shots/`,属正常行为。
 - **Vercel / Cloudflare Pages / Netlify**:连上仓库零配置即可,`site.base` 保持 `/`,只改 `site.site`。
 
-**建议顺手改**:页脚 GitHub 链接(`src/navigation.ts`,目前指向通用 github.com)、favicon 与 Logo(`src/assets/favicons/`、`src/components/Logo.astro`,目前是模板默认火箭图)、`metadata.description`(改成你自己的定位文案)。
+**站点身份已经定好**:名称、简介、页脚、favicon 与 Logo 都是 One-Shot Library,不再使用模板火箭图。部署时仍必须改上面的 `site.site` 与 `site.base`;`base` 不要加尾斜杠,否则首页会被 Astro 的尾斜杠重定向页盖住。

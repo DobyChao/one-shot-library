@@ -1,0 +1,156 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  src: string;
+  title: string;
+  /** Local artifact (width toggle + optional download). External embeds stay full width. */
+  isLocal?: boolean;
+  /** Set for single-file artifacts. Multi-file folders must not offer a partial download. */
+  downloadName?: string;
+  heightClass?: string;
+}
+
+const { src, title, isLocal = false, downloadName, heightClass = 'h-[70vh] min-h-[480px]' } = Astro.props;
+
+const toolClass =
+  'inline-flex items-center gap-1.5 rounded-md border border-black/10 px-3 py-1.5 text-sm font-medium text-default transition hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-white/15 dark:hover:bg-white/10';
+---
+
+<div data-preview class="w-full">
+  <div class="mb-3 flex flex-wrap items-center justify-end gap-2">
+    {
+      isLocal && (
+        <div
+          class="inline-flex overflow-hidden rounded-md border border-black/10 text-sm dark:border-white/15"
+          role="group"
+          aria-label="切换预览宽度"
+        >
+          <button
+            type="button"
+            data-width-toggle="100%"
+            class="bg-button px-3 py-1.5 font-medium text-white"
+            aria-pressed="true"
+          >
+            桌面
+          </button>
+          <button
+            type="button"
+            data-width-toggle="390px"
+            class="px-3 py-1.5 font-medium text-default hover:bg-black/5 dark:hover:bg-white/10"
+            aria-pressed="false"
+          >
+            手机
+          </button>
+        </div>
+      )
+    }
+    <a href={src} target="_blank" rel="noopener" class={toolClass}>
+      <Icon name="tabler:external-link" class="h-4 w-4" aria-hidden="true" />
+      新窗口打开
+    </a>
+    {
+      downloadName && (
+        <a href={src} download={downloadName} class={toolClass}>
+          <Icon name="tabler:download" class="h-4 w-4" aria-hidden="true" />
+          下载 HTML
+        </a>
+      )
+    }
+  </div>
+
+  <div class="flex justify-center">
+    <div
+      data-preview-frame
+      class="w-full max-w-full overflow-hidden rounded-md border border-black/10 shadow-sm transition-all duration-300 dark:border-white/10"
+      style="width: 100%;"
+    >
+      <div
+        class="flex items-center gap-2 border-b border-black/10 bg-black/[0.04] px-3 py-2 dark:border-white/10 dark:bg-white/[0.04]"
+      >
+        <span class="h-2.5 w-2.5 rounded-full bg-[#e07a5f]" aria-hidden="true"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-[#e0b15f]" aria-hidden="true"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-[#7dae8b]" aria-hidden="true"></span>
+        <span class="ml-2 flex-1 truncate rounded bg-page px-2 py-1 font-mono text-[11px] text-muted">{src}</span>
+      </div>
+      <div class="relative bg-white">
+        <div
+          data-preview-overlay
+          class="absolute inset-0 z-10 flex items-center justify-center bg-page px-6 text-center"
+        >
+          <div class="max-w-sm">
+            <p data-preview-message class="text-sm text-default">正在载入预览…</p>
+            <a href={src} target="_blank" rel="noopener" class:list={[toolClass, 'mt-3']}>新窗口打开</a>
+          </div>
+        </div>
+        <iframe
+          src={src}
+          title={`${title} 实时预览`}
+          loading="lazy"
+          sandbox="allow-scripts allow-same-origin allow-pointer-lock"
+          referrerpolicy="no-referrer"
+          class:list={['relative z-0 block w-full bg-white', heightClass]}></iframe>
+      </div>
+    </div>
+  </div>
+  {!isLocal && <p class="mt-2 text-center text-xs text-muted">部分站点禁止被 iframe 嵌入。若预览空白,请新窗口打开。</p>}
+</div>
+
+<script>
+  const activeClasses = ['bg-button', 'text-white'];
+  const inactiveClasses = ['text-default', 'hover:bg-black/5', 'dark:hover:bg-white/10'];
+
+  function bindPreviews() {
+    document.querySelectorAll<HTMLElement>('[data-preview]').forEach((root) => {
+      if (root.dataset.bound === '1') return;
+      root.dataset.bound = '1';
+      const iframe = root.querySelector<HTMLIFrameElement>('iframe');
+      const overlay = root.querySelector<HTMLElement>('[data-preview-overlay]');
+      const message = root.querySelector('[data-preview-message]');
+      if (!iframe || !overlay) return;
+
+      const done = () => overlay.classList.add('hidden');
+      let alreadyLoaded: boolean;
+      try {
+        alreadyLoaded =
+          iframe.contentDocument?.readyState === 'complete' && iframe.contentDocument.URL !== 'about:blank';
+      } catch {
+        alreadyLoaded = false;
+      }
+      if (alreadyLoaded) done();
+      else iframe.addEventListener('load', done);
+      window.setTimeout(() => {
+        if (!overlay.classList.contains('hidden') && message) {
+          message.textContent = '还在加载。若画面一直空白,用「新窗口打开」。';
+        }
+      }, 8000);
+    });
+  }
+
+  function onPreviewClick(event: MouseEvent) {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const btn = target.closest<HTMLElement>('[data-width-toggle]');
+    if (!btn) return;
+    const root = btn.closest('[data-preview]');
+    const frame = root?.querySelector<HTMLElement>('[data-preview-frame]');
+    if (!root || !frame) return;
+    const width = btn.dataset.widthToggle || '100%';
+    frame.style.width = width;
+    frame.style.maxWidth = width;
+    root.querySelectorAll<HTMLElement>('[data-width-toggle]').forEach((item) => {
+      const on = item === btn;
+      item.setAttribute('aria-pressed', String(on));
+      item.classList.remove(...activeClasses, ...inactiveClasses);
+      item.classList.add(...(on ? activeClasses : inactiveClasses));
+    });
+  }
+
+  if (!document.documentElement.dataset.oslPreview) {
+    document.documentElement.dataset.oslPreview = '1';
+    document.addEventListener('click', onPreviewClick);
+  }
+
+  document.addEventListener('astro:page-load', bindPreviews);
+  bindPreviews();
+</script>

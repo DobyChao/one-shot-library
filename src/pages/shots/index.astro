@@ -7,166 +7,416 @@ export const prerender = true;
 
 const shots = await fetchShots();
 
-// Distinct values per filter dimension, ordered by frequency.
 const countBy = (values: Array<string | undefined>) => {
-  const m = new Map<string, number>();
-  for (const v of values) {
-    if (!v) continue;
-    m.set(v, (m.get(v) ?? 0) + 1);
+  const counts = new Map<string, number>();
+  for (const value of values) {
+    if (!value) continue;
+    counts.set(value, (counts.get(value) ?? 0) + 1);
   }
-  return [...m.entries()].sort((a, b) => b[1] - a[1]).map(([value, count]) => ({ value, count }));
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh'))
+    .map(([value, count]) => ({
+      value,
+      count,
+    }));
 };
 
-const contentTags = countBy(shots.flatMap((shot) => (shot.tags ?? []).map((t) => t.title)));
-const models = countBy(shots.map((s) => s.model));
-const harnesses = countBy(shots.map((s) => s.harness));
+const contentTags = countBy(shots.flatMap((shot) => (shot.tags ?? []).map((tag) => tag.title)));
+const models = countBy(shots.map((shot) => shot.model));
+const harnesses = countBy(shots.map((shot) => shot.harness));
+const turns = countBy(shots.map((shot) => String(shot.turns ?? 1))).map((item) => ({
+  ...item,
+  label: item.value === '1' ? '1 轮 · one-shot' : `${item.value} 轮`,
+}));
+
+const oneShotCount = shots.filter((shot) => (shot.turns ?? 1) === 1).length;
+
+const filterGroups = [
+  { label: '类型', en: 'Type', key: 'type', values: contentTags.map((item) => ({ ...item, label: item.value })) },
+  { label: '模型', en: 'Model', key: 'model', values: models.map((item) => ({ ...item, label: item.value })) },
+  {
+    label: 'Harness',
+    en: 'Agent',
+    key: 'harness',
+    values: harnesses.map((item) => ({ ...item, label: item.value })),
+  },
+  { label: '轮数', en: 'Turns', key: 'turns', values: turns },
+].filter((group) => group.values.length > 0);
 
 const metadata = {
   title: '画廊',
-  description: '全部 one-shot 前端作品:一条 prompt,一次生成。可按类型、模型与 Agent Harness 筛选。',
+  description: '全部 one-shot 前端作品。可搜索 prompt,并按类型、模型、Harness 与轮数筛选,或按系列分组。',
 };
 
-const chipActive = 'bg-primary text-white';
-const chipInactive =
-  'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700';
+const chipBase =
+  'rounded-md px-3 py-1.5 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+const chipActive = `${chipBase} bg-button text-white hover:bg-button-hover`;
+const chipInactive = `${chipBase} bg-black/5 text-default hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15`;
+
+const searchText = (shot: (typeof shots)[number]) =>
+  [
+    shot.title,
+    shot.excerpt,
+    shot.prompt,
+    shot.model,
+    shot.harness,
+    shot.series,
+    ...(shot.tags ?? []).map((tag) => tag.title),
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 ---
 
 <Layout metadata={metadata}>
-  <section class="px-4 py-16 sm:px-6 mx-auto max-w-6xl lg:px-8">
-    <header class="mb-10 text-center">
-      <p class="mb-2 text-sm font-semibold uppercase tracking-wider text-primary">One-Shot Gallery</p>
-      <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl dark:text-white md:text-5xl">作品画廊</h1>
-      <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-600 dark:text-slate-400">
-        每件作品都由一条 prompt 一次生成,点开可以查看原始 prompt、生成信息和在线预览。
+  <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+    <header class="mb-10 max-w-3xl">
+      <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-primary">Gallery</p>
+      <h1 class="mt-2 text-4xl font-semibold tracking-tight text-heading sm:text-5xl">作品画廊</h1>
+      <p class="mt-4 text-lg text-muted">
+        {shots.length} 件馆藏,其中 {oneShotCount} 件是一轮生成。点开卡片看完整 prompt 和在线预览;带「同题对照」的作品可以并排比较。
       </p>
     </header>
 
     {
-      (contentTags.length > 0 || models.length > 0 || harnesses.length > 0) && (
-        <div class="mb-10 space-y-3" role="group" aria-label="筛选作品">
-          {[
-            { label: '类型', key: 'type', values: contentTags, prefix: '' },
-            { label: '模型', key: 'model', values: models, prefix: '' },
-            { label: 'Agent', key: 'harness', values: harnesses, prefix: '' },
-          ]
-            .filter((group) => group.values.length > 0)
-            .map((group) => (
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="mr-1 w-12 shrink-0 text-right text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
-                  {group.label}
-                </span>
-                <button
-                  type="button"
-                  data-filter-group={group.key}
-                  data-filter-value="*"
-                  class={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${chipActive}`}
-                  aria-pressed="true"
+      shots.length === 0 ? (
+        <p class="border border-dashed border-black/15 px-6 py-16 text-center text-muted dark:border-white/15">
+          还没有作品。往 <code class="font-mono text-sm">src/data/shot/</code> 里加一个 markdown 文件试试。
+        </p>
+      ) : (
+        <div id="shots-browser">
+          <div class="mb-8 space-y-5 rounded-md border border-black/10 p-4 sm:p-5 dark:border-white/10">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+              <div class="min-w-0 flex-1">
+                <label
+                  for="shots-query"
+                  class="mb-2 block font-mono text-[11px] uppercase tracking-[0.16em] text-muted"
                 >
-                  全部
-                </button>
-                {group.values.map(({ value, count }) => (
+                  搜索 · Search
+                </label>
+                <input
+                  id="shots-query"
+                  type="search"
+                  placeholder="标题、prompt、模型、harness"
+                  autocomplete="off"
+                  class="w-full rounded-md border border-black/10 bg-page px-3 py-2 text-sm text-default placeholder:text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-white/15"
+                />
+              </div>
+              <div>
+                <p id="group-label" class="mb-2 font-mono text-[11px] uppercase tracking-[0.16em] text-muted">
+                  分组 · Group
+                </p>
+                <div role="radiogroup" aria-labelledby="group-label" class="flex flex-wrap gap-2">
+                  {[
+                    ['flat', '平铺'],
+                    ['harness', '按 Harness'],
+                    ['model', '按模型'],
+                    ['series', '按系列'],
+                  ].map(([mode, label], index) => (
+                    <button
+                      type="button"
+                      role="radio"
+                      data-group-mode={mode}
+                      aria-checked={index === 0 ? 'true' : 'false'}
+                      tabindex={index === 0 ? 0 : -1}
+                      class={index === 0 ? chipActive : chipInactive}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {filterGroups.map((group) => (
+              <fieldset class="min-w-0 border-0 p-0">
+                <legend class="mb-2 font-mono text-[11px] uppercase tracking-[0.16em] text-muted">
+                  {group.label} · {group.en}
+                </legend>
+                <div role="radiogroup" aria-label={`按${group.label}筛选`} class="flex flex-wrap gap-2">
                   <button
                     type="button"
+                    role="radio"
                     data-filter-group={group.key}
-                    data-filter-value={value}
-                    class={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${chipInactive}`}
-                    aria-pressed="false"
+                    data-filter-value="*"
+                    aria-checked="true"
+                    tabindex="0"
+                    class={chipActive}
                   >
-                    {value} ({count})
+                    全部
                   </button>
-                ))}
+                  {group.values.map(({ value, count, label }) => (
+                    <button
+                      type="button"
+                      role="radio"
+                      data-filter-group={group.key}
+                      data-filter-value={value}
+                      aria-checked="false"
+                      tabindex="-1"
+                      class={chipInactive}
+                    >
+                      {label}
+                      <span class="ml-1 font-mono text-[11px] opacity-80">{count}</span>
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            ))}
+
+            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-black/10 pt-3 dark:border-white/10">
+              <p id="shots-status" aria-live="polite" aria-atomic="true" class="text-sm text-muted">
+                显示全部 {shots.length} 件
+              </p>
+              <button type="button" data-filter-reset class="hidden text-sm font-medium text-primary hover:underline">
+                重置筛选
+              </button>
+            </div>
+          </div>
+
+          <div id="shots-grid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {shots.map((shot, index) => (
+              <div
+                data-shot-item
+                data-shot-index={index}
+                data-shot-tags={(shot.tags ?? []).map((tag) => tag.title).join('|')}
+                data-shot-model={shot.model ?? ''}
+                data-shot-harness={shot.harness ?? ''}
+                data-shot-turns={String(shot.turns ?? 1)}
+                data-shot-series={shot.series ?? ''}
+                data-shot-search={searchText(shot)}
+                class="flex"
+              >
+                <ShotCard shot={shot} index={index} />
               </div>
             ))}
-        </div>
-      )
-    }
-
-    <div id="shots-grid" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      {
-        shots.map((shot) => (
-          <div
-            data-shot-tags={(shot.tags ?? []).map((t) => t.title).join('|')}
-            data-shot-model={shot.model ?? ''}
-            data-shot-harness={shot.harness ?? ''}
-            data-shot-item
-            class="flex"
-          >
-            <ShotCard shot={shot} />
           </div>
-        ))
-      }
-    </div>
 
-    <p id="shots-empty" class="hidden py-16 text-center text-gray-500 dark:text-slate-400">
-      没有符合筛选条件的作品,换个组合试试。
-    </p>
-
-    {
-      shots.length === 0 && (
-        <p class="text-center text-gray-500 dark:text-slate-400">
-          还没有作品。往 <code>src/data/shot/</code> 里加一个 markdown 文件试试。
-        </p>
+          <p
+            id="shots-empty"
+            class="hidden border border-dashed border-black/15 px-6 py-16 text-center text-muted dark:border-white/15"
+          >
+            没有符合条件的作品。重置筛选,或换个关键词。
+          </p>
+        </div>
       )
     }
   </section>
 </Layout>
 
 <script>
-  // Three filter dimensions (type / model / harness), AND-combined across
-  // groups, single-select within a group ("*" = 全部).
+  // Filters are AND-combined across groups and single-select inside a group.
+  // Grouping only rearranges the same cards. No-JS visitors still get the full grid.
   //
-  // Binding must happen on `astro:page-load`: the ClientRouter swaps the DOM
-  // on in-site navigation and skips identical inline scripts on revisits, so
-  // parse-time binding leaves the buttons dead after coming back to this page.
-  // `astro:page-load` fires on first load and after every client-side swap,
-  // and the document-level listener survives the swap.
-  function initShotsFilter() {
-    const state: Record<string, string> = { type: '*', model: '*', harness: '*' };
-    const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter-group]');
-    const items = document.querySelectorAll<HTMLElement>('[data-shot-item]');
-    const empty = document.querySelector<HTMLElement>('#shots-empty');
-    if (!buttons.length) return;
+  // Listeners live on `document` and re-query the DOM on `astro:page-load`, because
+  // the ClientRouter swaps the page and skips identical inline scripts on revisits.
+  const state: Record<string, string> = { type: '*', model: '*', harness: '*', turns: '*', group: 'flat', query: '' };
+  const groupModes = ['flat', 'harness', 'model', 'series'];
+  const activeClasses = ['bg-button', 'text-white', 'hover:bg-button-hover'];
+  const inactiveClasses = [
+    'bg-black/5',
+    'text-default',
+    'hover:bg-black/10',
+    'dark:bg-white/10',
+    'dark:hover:bg-white/15',
+  ];
 
-    const activeClasses = ['bg-primary', 'text-white'];
-    const inactiveClasses = [
-      'bg-gray-100',
-      'text-gray-700',
-      'hover:bg-gray-200',
-      'dark:bg-slate-800',
-      'dark:text-slate-300',
-      'dark:hover:bg-slate-700',
-    ];
+  const currentRoot = () => document.querySelector<HTMLElement>('#shots-browser');
 
-    const apply = () => {
-      buttons.forEach((btn) => {
-        const isActive = state[btn.dataset.filterGroup ?? ''] === btn.dataset.filterValue;
-        btn.setAttribute('aria-pressed', String(isActive));
-        btn.classList.remove(...activeClasses, ...inactiveClasses);
-        btn.classList.add(...(isActive ? activeClasses : inactiveClasses));
-      });
-
-      let visibleCount = 0;
-      items.forEach((item) => {
-        const tags = (item.dataset.shotTags ?? '').split('|').filter(Boolean);
-        const ok =
-          (state.type === '*' || tags.includes(state.type)) &&
-          (state.model === '*' || item.dataset.shotModel === state.model) &&
-          (state.harness === '*' || item.dataset.shotHarness === state.harness);
-        item.classList.toggle('hidden', !ok);
-        if (ok) visibleCount += 1;
-      });
-      empty?.classList.toggle('hidden', visibleCount > 0);
+  const readParams = () => {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      type: params.get('type') || '*',
+      model: params.get('model') || '*',
+      harness: params.get('harness') || '*',
+      turns: params.get('turns') || '*',
+      group: params.get('group') || 'flat',
+      query: params.get('q') || '',
     };
+  };
 
-    buttons.forEach((btn) =>
-      btn.addEventListener('click', () => {
-        state[btn.dataset.filterGroup ?? ''] = btn.dataset.filterValue ?? '*';
-        apply();
-      })
-    );
+  const writeParams = () => {
+    const url = new URL(window.location.href);
+    const entries = [
+      ['type', state.type],
+      ['model', state.model],
+      ['harness', state.harness],
+      ['turns', state.turns],
+      ['group', state.group === 'flat' ? '' : state.group],
+      ['q', state.query],
+    ];
+    for (const [key, value] of entries) {
+      if (!value || value === '*') url.searchParams.delete(key);
+      else url.searchParams.set(key, value);
+    }
+    window.history.replaceState(null, '', url);
+  };
 
+  const apply = () => {
+    const root = currentRoot();
+    if (!root) return;
+    const grid = root.querySelector('#shots-grid');
+    const empty = root.querySelector('#shots-empty');
+    const status = root.querySelector('#shots-status');
+    const reset = root.querySelector('[data-filter-reset]');
+    const items = [...root.querySelectorAll<HTMLElement>('[data-shot-item]')];
+    if (!grid) return;
+
+    root.querySelectorAll<HTMLElement>('[role="radio"]').forEach((btn) => {
+      const filterGroup = btn.dataset.filterGroup;
+      const mode = btn.dataset.groupMode;
+      const isActive = filterGroup ? state[filterGroup] === btn.dataset.filterValue : state.group === mode;
+      btn.setAttribute('aria-checked', String(isActive));
+      btn.tabIndex = isActive ? 0 : -1;
+      btn.classList.remove(...activeClasses, ...inactiveClasses);
+      btn.classList.add(...(isActive ? activeClasses : inactiveClasses));
+    });
+
+    const query = state.query.toLowerCase();
+    const visible = [];
+    items.forEach((item) => {
+      const tags = (item.dataset.shotTags || '').split('|').filter(Boolean);
+      const haystack = (item.dataset.shotSearch || '').toLowerCase();
+      const ok =
+        (state.type === '*' || tags.includes(state.type)) &&
+        (state.model === '*' || item.dataset.shotModel === state.model) &&
+        (state.harness === '*' || item.dataset.shotHarness === state.harness) &&
+        (state.turns === '*' || item.dataset.shotTurns === state.turns) &&
+        (!query || haystack.includes(query));
+      item.classList.toggle('hidden', !ok);
+      if (ok) visible.push(item);
+    });
+
+    grid.querySelectorAll('[data-group-heading]').forEach((heading) => heading.remove());
+    const ordered = [...items].sort((a, b) => Number(a.dataset.shotIndex) - Number(b.dataset.shotIndex));
+
+    if (state.group === 'flat') {
+      ordered.forEach((item) => grid.appendChild(item));
+    } else {
+      const key = state.group === 'harness' ? 'shotHarness' : state.group === 'model' ? 'shotModel' : 'shotSeries';
+      const groups = new Map<string, HTMLElement[]>();
+      for (const item of ordered) {
+        const label = item.dataset[key] || (state.group === 'series' ? '未入系列' : '未标注');
+        const list = groups.get(label) || [];
+        list.push(item);
+        groups.set(label, list);
+      }
+      const entries = [...groups.entries()].sort((a, b) => {
+        const shown = (list: HTMLElement[]) => list.filter((item) => !item.classList.contains('hidden')).length;
+        const delta = shown(b[1]) - shown(a[1]);
+        if (delta !== 0) return delta;
+        if (a[0] === '未入系列' || a[0] === '未标注') return 1;
+        if (b[0] === '未入系列' || b[0] === '未标注') return -1;
+        return a[0].localeCompare(b[0], 'zh');
+      });
+      for (const [label, groupItems] of entries) {
+        const shown = groupItems.filter((item) => !item.classList.contains('hidden'));
+        if (shown.length === 0) {
+          groupItems.forEach((item) => grid.appendChild(item));
+          continue;
+        }
+        const heading = document.createElement('h2');
+        heading.dataset.groupHeading = 'true';
+        heading.className =
+          'col-span-full mt-2 flex items-baseline gap-3 border-b border-black/10 pb-2 dark:border-white/10';
+        const name = document.createElement('span');
+        name.className = 'text-lg font-semibold text-heading';
+        name.textContent = label;
+        const count = document.createElement('span');
+        count.className = 'font-mono text-xs text-muted';
+        count.textContent = `${shown.length} 件`;
+        heading.append(name, count);
+        grid.appendChild(heading);
+        groupItems.forEach((item) => grid.appendChild(item));
+      }
+    }
+
+    empty?.classList.toggle('hidden', visible.length > 0);
+    if (status) {
+      status.textContent =
+        visible.length === items.length ? `显示全部 ${items.length} 件` : `显示 ${visible.length} / ${items.length} 件`;
+    }
+    const filtering =
+      state.type !== '*' || state.model !== '*' || state.harness !== '*' || state.turns !== '*' || state.query !== '';
+    reset?.classList.toggle('hidden', !filtering);
+  };
+
+  const hydrate = () => {
+    if (!currentRoot()) return;
+    const next = readParams();
+    state.type = next.type;
+    state.model = next.model;
+    state.harness = next.harness;
+    state.turns = next.turns;
+    state.group = groupModes.includes(next.group) ? next.group : 'flat';
+    state.query = next.query;
+    const input = currentRoot()?.querySelector<HTMLInputElement>('#shots-query');
+    if (input && document.activeElement !== input) input.value = state.query;
     apply();
+  };
+
+  const onClick = (event: MouseEvent) => {
+    const root = currentRoot();
+    const target = event.target;
+    if (!root || !(target instanceof Element) || !root.contains(target)) return;
+    const filterBtn = target.closest<HTMLElement>('[data-filter-group]');
+    const groupBtn = target.closest<HTMLElement>('[data-group-mode]');
+    const reset = target.closest('[data-filter-reset]');
+    if (filterBtn) state[filterBtn.dataset.filterGroup || 'type'] = filterBtn.dataset.filterValue || '*';
+    else if (groupBtn) state.group = groupBtn.dataset.groupMode || 'flat';
+    else if (reset) {
+      state.type = '*';
+      state.model = '*';
+      state.harness = '*';
+      state.turns = '*';
+      state.query = '';
+      const input = root.querySelector<HTMLInputElement>('#shots-query');
+      if (input) input.value = '';
+    } else return;
+    apply();
+    writeParams();
+  };
+
+  const onInput = (event: Event) => {
+    const root = currentRoot();
+    const target = event.target;
+    if (!root || !(target instanceof HTMLInputElement) || target.id !== 'shots-query' || !root.contains(target)) return;
+    state.query = target.value.trim();
+    apply();
+    writeParams();
+  };
+
+  const onKeyDown = (event: KeyboardEvent) => {
+    const root = currentRoot();
+    const target = event.target;
+    if (!root || !(target instanceof Element) || !root.contains(target)) return;
+    if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+    const radio = target.closest<HTMLElement>('[role="radio"]');
+    const group = radio?.closest('[role="radiogroup"]');
+    if (!radio || !group) return;
+    const radios = [...group.querySelectorAll<HTMLElement>('[role="radio"]')];
+    const index = radios.indexOf(radio);
+    if (index < 0) return;
+    const next =
+      event.key === 'ArrowRight' || event.key === 'ArrowDown'
+        ? (index + 1) % radios.length
+        : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+          ? (index - 1 + radios.length) % radios.length
+          : event.key === 'Home'
+            ? 0
+            : radios.length - 1;
+    event.preventDefault();
+    radios[next].focus();
+    radios[next].click();
+  };
+
+  if (!document.documentElement.dataset.oslGallery) {
+    document.documentElement.dataset.oslGallery = '1';
+    document.addEventListener('click', onClick);
+    document.addEventListener('input', onInput);
+    document.addEventListener('keydown', onKeyDown);
   }
 
-  document.addEventListener('astro:page-load', initShotsFilter);
+  document.addEventListener('astro:page-load', hydrate);
+  hydrate();
 </script>

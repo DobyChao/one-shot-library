@@ -39,8 +39,6 @@ const { language, textDirection } = I18N;
     <SiteVerification />
     <Analytics />
 
-    <link rel="preconnect" href="https://images.unsplash.com" />
-
     <!-- Comment the line below to disable View Transitions -->
     <ClientRouter fallback="swap" />
 
@@ -49,6 +47,12 @@ const { language, textDirection } = I18N;
   </head>
 
   <body class="antialiased text-default bg-page tracking-tight min-h-screen flex flex-col">
+    <a
+      href="#content"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-button focus:px-3 focus:py-2 focus:text-white"
+    >
+      跳到内容
+    </a>
     <slot />
 
     <Intersect />

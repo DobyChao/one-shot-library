@@ -2,17 +2,23 @@
 import type { ImageMetadata } from 'astro';
 import type { Shot } from '~/types';
 import Image from '~/components/common/Image.astro';
+import MetaChips from '~/components/shots/MetaChips.astro';
 import { Icon } from 'astro-icon/components';
 import { findImage } from '~/utils/images';
-import { getPermalink } from '~/utils/permalinks';
+import { cleanSlug, getPermalink } from '~/utils/permalinks';
+import { promptPreview } from '~/utils/utils';
 
 export interface Props {
   shot: Shot;
+  /** Zero-based position in the current list, printed as a catalog number. */
+  index?: number;
 }
 
-const { shot } = Astro.props;
+const { shot, index } = Astro.props;
 const image = await findImage(shot.image);
 const link = getPermalink(shot.permalink);
+const seriesHref = shot.series ? getPermalink(`/shots/series/${cleanSlug(shot.series)}`) : undefined;
+const preview = promptPreview(shot.prompt, 120);
 
 // Looping video covers recorded by `npm run screenshots -- <slug>` for entries
 // with `video: true` in frontmatter. Non-image assets (webm) import as
@@ -30,16 +36,14 @@ const initials = shot.title
   .map((w) => w[0])
   .join('')
   .toUpperCase();
+
+const catalogNo = typeof index === 'number' ? String(index + 1).padStart(2, '0') : undefined;
 ---
 
 <article
-  class="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-700 dark:bg-slate-800"
+  class="group relative flex h-full w-full flex-col overflow-hidden rounded-md border border-black/10 bg-page transition duration-200 hover:border-primary/50 dark:border-white/10 dark:bg-white/[0.03]"
 >
-  <a
-    href={link}
-    class="relative block aspect-[3/2] overflow-hidden bg-gray-100 dark:bg-slate-700"
-    aria-label={shot.title}
-  >
+  <a href={link} class="relative block aspect-[3/2] overflow-hidden bg-black/5 dark:bg-white/5" aria-label={shot.title}>
     {
       coverSrc ? (
         <video
@@ -65,69 +69,59 @@ const initials = shot.title
           decoding="async"
         />
       ) : (
-        <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600">
-          <span class="text-5xl font-bold text-white/90">{initials}</span>
+        <div class="flex h-full w-full items-center justify-center bg-button">
+          <span class="font-mono text-5xl font-bold text-white/90">{initials}</span>
         </div>
       )
     }
     {
+      catalogNo && (
+        <span class="absolute left-2 top-2 bg-page/90 px-1.5 py-0.5 font-mono text-[11px] text-heading dark:bg-black/70 dark:text-white">
+          {catalogNo}
+        </span>
+      )
+    }
+    {
       coverSrc && (
-        <span class="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-medium text-white">
-          <Icon name="tabler:movie" class="h-3 w-3" />
+        <span class="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-medium text-white">
+          <Icon name="tabler:movie" class="h-3 w-3" aria-hidden="true" />
           动态预览
         </span>
       )
     }
   </a>
 
-  <div class="flex flex-1 flex-col gap-3 p-5">
-    <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-slate-400">
+  <div class="flex flex-1 flex-col gap-3 p-4">
+    <MetaChips shot={shot} compact />
+
+    <h3 class="text-lg font-semibold leading-tight tracking-tight text-heading">
+      <a href={link} class="transition hover:text-primary">{shot.title}</a>
+    </h3>
+
+    {shot.excerpt && <p class="line-clamp-2 text-sm text-muted">{shot.excerpt}</p>}
+
+    <p class="border-l-2 border-button/70 pl-3 font-mono text-[12px] leading-relaxed text-default">
+      <span class="mb-0.5 block text-[10px] uppercase tracking-[0.14em] text-muted">Prompt</span>
+      <span class="line-clamp-3">{preview}</span>
+    </p>
+
+    <div class="mt-auto flex flex-wrap items-center gap-2 pt-1">
       {
-        shot.harness && (
-          <span class="inline-flex items-center rounded-full bg-violet-500/10 px-2.5 py-0.5 font-medium text-violet-600 dark:bg-violet-500/20 dark:text-violet-300">
-            <Icon name="tabler:robot" class="mr-1 h-3.5 w-3.5" />
-            {shot.harness}
-          </span>
-        )
+        shot.tags?.map((tag) => (
+          <span class="rounded bg-black/5 px-2 py-0.5 text-xs text-muted dark:bg-white/10">{tag.title}</span>
+        ))
       }
       {
-        shot.model && (
-          <span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary dark:bg-primary/20 dark:text-blue-300">
-            <Icon name="tabler:cpu" class="mr-1 h-3.5 w-3.5" />
-            {shot.model}
-          </span>
-        )
-      }
-      {
-        (shot.turns ?? 1) === 1 ? (
-          <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 font-medium text-emerald-600 dark:text-emerald-400">
-            <Icon name="tabler:bolt" class="h-3.5 w-3.5" />
-            one-shot
-          </span>
-        ) : (
-          <span class="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 font-medium text-amber-600 dark:text-amber-400">
-            {shot.turns} 轮对话
-          </span>
+        seriesHref && (
+          <a
+            href={seriesHref}
+            class="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary hover:underline"
+          >
+            <Icon name="tabler:arrows-split" class="h-3.5 w-3.5" aria-hidden="true" />
+            同题对照
+          </a>
         )
       }
     </div>
-
-    <h3 class="text-lg font-bold leading-tight text-gray-900 dark:text-slate-100">
-      <a href={link} class="transition hover:text-primary dark:hover:text-blue-400">{shot.title}</a>
-    </h3>
-
-    {shot.excerpt && <p class="line-clamp-2 text-sm text-gray-600 dark:text-slate-400">{shot.excerpt}</p>}
-
-    {
-      shot.tags && shot.tags.length > 0 && (
-        <div class="mt-auto flex flex-wrap gap-2 pt-2">
-          {shot.tags.map((tag) => (
-            <span class="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-slate-700 dark:text-slate-300">
-              {tag.title}
-            </span>
-          ))}
-        </div>
-      )
-    }
   </div>
 </article>

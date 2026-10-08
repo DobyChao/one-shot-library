@@ -17,12 +17,14 @@ const metadata = {
 
     <div class="prose prose-lg dark:prose-invert mx-auto">
       <p>
-        <strong>One-Shot Library</strong> 收藏 AI 在一条 prompt 内直接生成的前端产物:落地页、仪表盘、小工具。 我们相信「一次成型的质量」本身就是一种值得展示的东西——所以每件作品都同时展示三个东西:
-        <strong>原始 prompt、使用的模型、生成结果</strong>。
+        <strong>One-Shot Library</strong> 是一个静态展厅,收藏 AI 在一条 prompt 内直接生成的前端产物:落地页、仪表盘、小工具。每件作品同时摊开四样东西:<strong
+          >原始 prompt、harness、模型与轮数、可交互的预览</strong
+        >。
       </p>
       <p>
-        站点基于 <a href="https://github.com/onwidget/astrowind">AstroWind</a>(Astro + Tailwind CSS)构建, 产物以静态
-        HTML 形式随站点分发(单文件或子目录),详情页内嵌 iframe 实时预览。
+        这里不是评测台:不打分、不投票、不连接模型 API。你看到的页面就是收录时的那份静态 HTML。站点基于
+        <a href="https://github.com/onwidget/astrowind">AstroWind</a>(Astro + Tailwind CSS)构建,产物以静态 HTML
+        随站点分发(单文件或子目录),详情页用沙箱 iframe 预览。
       </p>
 
       <h2 id="submit">如何提交作品</h2>
@@ -68,6 +70,7 @@ turns: 1                 # 实际对话轮数,1 = 真 one-shot
 html: my-landing.html    # public/artifacts/ 下的文件名
 image: '~/assets/images/shots/my-landing.png'
 tags: [landing-page, saas]
+series: my-series        # 可选。同名 series 会进入「同题对照」并排页
 featured: false          # 首页精选
 ---</code></pre>
 
@@ -77,22 +80,19 @@ featured: false          # 首页精选
       <p class="flex flex-wrap items-center gap-2">
         {
           HARNESSES.map((h) => (
-            <span class="rounded-full bg-violet-500/10 px-3 py-1 text-sm font-medium text-violet-600 dark:bg-violet-500/20 dark:text-violet-300">
-              {h}
-            </span>
+            <span class="rounded-full bg-accent/10 px-3 py-1 text-sm font-medium text-accent">{h}</span>
           ))
         }
         {
           MODELS.map((m) => (
-            <span class="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary dark:bg-primary/20 dark:text-blue-300">
-              {m}
-            </span>
+            <span class="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">{m}</span>
           ))
         }
       </p>
       <p>
-        <code>turns</code>、生成日期、产物形式会出现在详情页的「生成信息」面板里;frontmatter 加 <code>video: true</code> 时,收录流程会用
-        Playwright 录制一段循环动画作为卡片封面(可用 <code>videoKey</code>
+        <code>turns</code>、生成日期、产物形式会出现在详情页的「生成信息」面板里;<code>series</code> 相同的作品可以在「同题对照」页并排看
+        prompt 和预览。frontmatter 加 <code>video: true</code> 时,收录流程会用 Playwright 录制一段循环动画作为卡片封面(可用
+        <code>videoKey</code>
         指定开始交互的按键)。 markdown 正文可选,显示在详情页「备注」区(生成细节、人工改动说明等)。
       </p>
     </div>
