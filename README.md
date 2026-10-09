@@ -1,6 +1,6 @@
 # One-Shot Library
 
-这个网站用来看 AI 生成的前端小页面,比如落地页、仪表盘和小工具。有的只对话了一轮,有的来回改过几轮。每件作品都记下当时的对话、用的工具和模型,并附上能打开的 HTML。仓库名仍是 One-Shot Library。
+一间 vibecoding 产物画廊。有些页面只经过一轮对话就写成了,有些则改过许多轮才定下来。落地页、仪表盘和小工具都在。翻开一件,prompt 还是当初那一串字,工具和轮数写在旁边,HTML 打开就是当时生成的那一页。仓库名仍是 One-Shot Library。
 
 基于 [AstroWind](https://github.com/onwidget/astrowind)(Astro 7 + Tailwind CSS v4)构建。页面以静态 HTML 发布,详情页用 iframe 看最终结果,对话按时间线排列。
 

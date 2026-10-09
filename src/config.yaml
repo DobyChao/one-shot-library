@@ -11,7 +11,7 @@ metadata:
   title:
     default: One-Shot Library
     template: '%s — One-Shot Library'
-  description: '这个网站用来看 AI 生成的前端小页面。每件作品记下当时的 prompt、对话、工具和模型,并附上能打开的 HTML。只对话一轮的和来回改过几轮的都会收录。'
+  description: '一间 vibecoding 产物画廊。一轮写成的和改过许多轮的页面都在,旁边留着当时的 prompt、工具和轮数,HTML 也可以打开。'
   robots:
     index: true
     follow: true
