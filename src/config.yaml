@@ -11,7 +11,7 @@ metadata:
   title:
     default: One-Shot Library
     template: '%s — One-Shot Library'
-  description: '收录 AI 做的前端小页面。每件留着当时的 prompt、对话、工具、模型和能打开的 HTML。只改一轮的和改过几轮的都有。'
+  description: '这个网站用来看 AI 生成的前端小页面。每件作品记下当时的 prompt、对话、工具和模型,并附上能打开的 HTML。只对话一轮的和来回改过几轮的都会收录。'
   robots:
     index: true
     follow: true

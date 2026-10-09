@@ -1,8 +1,8 @@
 # One-Shot Library
 
-收录 AI 做的前端小页面(落地页、仪表盘、小工具)。只改一轮的和改过几轮的都收,每件留着当时的对话、工具、模型和能打开的 HTML。仓库名仍是 One-Shot Library。
+这个网站用来看 AI 生成的前端小页面,比如落地页、仪表盘和小工具。有的只对话了一轮,有的来回改过几轮。每件作品都记下当时的对话、用的工具和模型,并附上能打开的 HTML。仓库名仍是 One-Shot Library。
 
-基于 [AstroWind](https://github.com/onwidget/astrowind)(Astro 7 + Tailwind CSS v4)构建。页面以静态 HTML 放出来,详情页用 iframe 看最终结果,对话按时间线排。
+基于 [AstroWind](https://github.com/onwidget/astrowind)(Astro 7 + Tailwind CSS v4)构建。页面以静态 HTML 发布,详情页用 iframe 看最终结果,对话按时间线排列。
 
 ## 常用命令
 

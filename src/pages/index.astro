@@ -9,7 +9,7 @@ import { fetchSeriesGroups, fetchShots, findLatestShots } from '~/utils/shots';
 import { getHomePermalink, getPermalink } from '~/utils/permalinks';
 
 const metadata = {
-  title: 'One-Shot Library — AI 做的前端小页面',
+  title: 'One-Shot Library',
   ignoreTitleTemplate: true,
 };
 
@@ -44,8 +44,8 @@ const structuredData = {
 
 const stats = [
   { value: String(allShots.length), label: '件作品', en: 'Shots' },
-  { value: String(oneShotCount), label: '只改一轮', en: 'One-shot' },
-  { value: String(vibeCount), label: '改过几轮', en: 'Vibe' },
+  { value: String(oneShotCount), label: '一轮对话', en: 'One-shot' },
+  { value: String(vibeCount), label: '多轮对话', en: 'Vibe' },
   { value: String(harnessCount), label: '种工具', en: 'Harness' },
   { value: String(seriesGroups.length), label: '组对照', en: 'Series' },
 ];
@@ -57,12 +57,12 @@ const stats = [
   <section class="osl-grid border-b border-black/10 dark:border-white/10">
     <div class="mx-auto max-w-7xl px-4 pb-12 pt-14 sm:px-6 lg:px-8 lg:pb-16 lg:pt-20">
       <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">One-Shot Library · 静态站点</p>
-      <h1 class="mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-heading sm:text-5xl">
-        AI 做的页面,放在这里看
+      <h1 class="mt-4 max-w-3xl text-3xl font-semibold leading-snug tracking-tight text-heading sm:text-4xl">
+        这个网站用来看 AI 生成的前端小页面。
       </h1>
       <p class="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
-        落地页、仪表盘、小工具。每件旁边放着当时的 prompt、用过的工具和模型、改了几轮,以及能打开的
-        HTML。只改过一轮的和来回改过的都收在这里。文件是静态的,不打分,也不投票。
+        落地页、仪表盘和小工具都有。有的只对话了一轮就做完,有的来回改过几轮。每件作品都会记下当时的
+        prompt、用的工具和模型、一共几轮,并附上能在浏览器里打开的 HTML。这些文件是静态的,没有打分,也没有投票。
       </p>
       <div class="mt-8 flex flex-col gap-3 sm:flex-row">
         <a href={getPermalink('/shots')} class="btn-primary w-full sm:w-auto">
@@ -127,7 +127,7 @@ const stats = [
     <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
         <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-primary">Latest shots</p>
-        <h2 id="latest-heading" class="mt-2 text-3xl font-semibold tracking-tight text-heading">最近放上来的</h2>
+        <h2 id="latest-heading" class="mt-2 text-3xl font-semibold tracking-tight text-heading">最近添加的</h2>
       </div>
       <a
         href={getPermalink('/shots')}
@@ -156,8 +156,8 @@ const stats = [
     <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
       <h2 id="read-heading" class="text-3xl font-semibold tracking-tight text-heading">详情页里有什么</h2>
       <p class="mt-4 max-w-3xl leading-relaxed text-muted">
-        改过几轮的作品,标题下面有一句当时想要的效果,卡片上也先显示这句。接着是按时间排的对话,每一轮都能复制。只改一轮的,对话里就那条
-        prompt。再往下是收录时填的工具、模型和轮数,最后是沙箱里的页面,可以改成手机宽度,也可以新窗口打开。中间如果留了稿,挂在对应那一轮下面。
+        来回改过的作品,标题下面会写一句当时想做成什么样,卡片上也会先显示这句。后面是按时间排列的对话,每一轮都可以复制。只对话一轮的作品,时间线里只有那条
+        prompt。再下面是收录时填写的工具、模型和轮数。最后是沙箱里的页面,可以切换到手机宽度,也可以在新窗口打开。如果某一轮留了中间页面,会挂在那一轮下面。
       </p>
     </div>
   </section>
@@ -167,9 +167,10 @@ const stats = [
       class="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-14 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8"
     >
       <div class="max-w-xl">
-        <h2 class="text-3xl font-semibold tracking-tight text-heading">要加一件</h2>
+        <h2 class="text-3xl font-semibold tracking-tight text-heading">提交作品</h2>
         <p class="mt-3 text-muted">
-          现在有 {allShots.length} 件。{oneShotCount} 件只改了一轮,{vibeCount} 件改过几轮。把 prompt、对话和 HTML 交过来就行。
+          现在有 {allShots.length} 件,其中 {oneShotCount} 件只对话了一轮,{vibeCount} 件来回改过。提交时带上 prompt、对话记录和
+          HTML 即可。
         </p>
       </div>
       <a href={`${getPermalink('/about')}#submit`} class="btn-primary w-full shrink-0 sm:w-auto">
