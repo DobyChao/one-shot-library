@@ -8,6 +8,8 @@ mode: vibe
 vibe: 不要表格,改成能划掉的纸条。
 outcome: 三张黄纸条,按钮每按一次划掉一条。
 turns: 2
+harness: Cursor
+model: Grok 4.7 High
 html: counter-slip/index.html
 image: '~/assets/images/shots/counter-slip/index.png'
 imageAlt: 柜台纸条的最终页面,三张黄色便条
@@ -33,4 +35,4 @@ session:
       改好了。三张纸条稍微歪着。底下的按钮按一下,划掉下一条。
 ---
 
-这是我们写的样例,用来演示多轮对话在时间线上怎么显示。没有模型那边的原始记录,所以工具和模型空着。页面是单独加的两个 HTML。
+这是我们写的样例,用来演示多轮对话在时间线上怎么显示。工具是 Cursor,模型是 Grok 4.7 High。页面是单独加的两个 HTML。
