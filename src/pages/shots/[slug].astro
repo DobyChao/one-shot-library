@@ -186,8 +186,13 @@ const jumpClass =
         class="grid grid-cols-1 gap-px overflow-hidden rounded-md border border-black/10 bg-black/10 sm:grid-cols-2 dark:border-white/10 dark:bg-white/10"
       >
         {
-          infoCells.map((cell) => (
-            <div class="bg-page p-4">
+          infoCells.map((cell, index) => (
+            <div
+              class:list={[
+                'bg-page p-4',
+                infoCells.length % 2 === 1 && index === infoCells.length - 1 && 'sm:col-span-2',
+              ]}
+            >
               <dt class="flex items-center gap-2 text-xs uppercase tracking-wider text-muted">
                 <Icon name={cell.icon} class="h-4 w-4 text-primary" aria-hidden="true" />
                 {cell.label}
