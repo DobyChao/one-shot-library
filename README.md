@@ -53,10 +53,9 @@ featured: false
 
 可选字段:`externalUrl`(外部链接代替本地 HTML)、`imageAlt`、`updateDate`、`draft: true`(隐藏)、
 `video: true` + `videoKey`(录循环视频封面,录制时按该键或点击画面启动产物)、
-`series`(同题对照系列的组名;prompt 相同或只是相近都可以,详情页与对照页互链)、
+`series`(可选,同题作品可以先记同一个组名;对照页暂时不开放)、
 `session`(有序回合:`role` 为 `user` 或 `agent`,`text` 必填,`note` / `html` / `image` 可选)。
-`mode` / `harness` / `model` / `turns` 会成为卡片徽章并参与画廊筛选(也可按方式、工具、模型或 series 分组)。工具和模型请用规范写法(见 `src/data/taxonomy.ts` 或站内关于页),不知道就留空;
-`series` 相同的作品进入 `/shots/series/<name>` 并排对照;prompt 不同会各自保留原文;
+`mode` / `harness` / `model` / `turns` 会成为卡片徽章并参与画廊筛选(也可按方式、工具或模型分组)。工具和模型请用规范写法(见 `src/data/taxonomy.ts` 或站内关于页),不知道就留空;
 `prompt` 是用户的第一条消息。不填 `session` 时,站点用它合成一条用户回合,已有的一轮条目不用改文件;
 某一回合的 `html` 若与最终 `html` 相同,时间线只链到下面的预览,不再嵌一次;
 方式、轮数、日期、产物形式出现在详情页「生成信息」面板;`npm run audit` 的 Lighthouse 分数有则自动展示;

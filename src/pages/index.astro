@@ -5,7 +5,7 @@ import ShotCard from '~/components/shots/ShotCard.astro';
 import { Icon } from 'astro-icon/components';
 import { I18N, METADATA, SITE } from 'astrowind:config';
 
-import { fetchSeriesGroups, fetchShots, findLatestShots } from '~/utils/shots';
+import { fetchShots, findLatestShots } from '~/utils/shots';
 import { getHomePermalink, getPermalink } from '~/utils/permalinks';
 
 const metadata = {
@@ -13,19 +13,11 @@ const metadata = {
   ignoreTitleTemplate: true,
 };
 
-const [latestShots, allShots, seriesGroups] = await Promise.all([
-  findLatestShots({ count: 6 }),
-  fetchShots(),
-  fetchSeriesGroups(),
-]);
+const [latestShots, allShots] = await Promise.all([findLatestShots({ count: 6 }), fetchShots()]);
 
 const oneShotCount = allShots.filter((shot) => shot.mode === 'one-shot').length;
 const vibeCount = allShots.filter((shot) => shot.mode === 'vibe').length;
 const harnessCount = new Set(allShots.map((shot) => shot.harness).filter(Boolean)).size;
-const featured = seriesGroups[0];
-const featuredPromptsMatch = featured
-  ? featured.shots.every((shot) => shot.prompt.trim() === featured.shots[0].prompt.trim())
-  : false;
 
 const homeUrl = SITE.site ? new URL(getHomePermalink(), SITE.site).href : getHomePermalink();
 const structuredData = {
@@ -47,7 +39,6 @@ const stats = [
   { value: String(oneShotCount), label: '一轮对话', en: 'One-shot' },
   { value: String(vibeCount), label: '多轮对话', en: 'Vibe' },
   { value: String(harnessCount), label: '种工具', en: 'Harness' },
-  { value: String(seriesGroups.length), label: '组对照', en: 'Series' },
 ];
 ---
 
@@ -72,7 +63,7 @@ const stats = [
     </div>
 
     <dl
-      class="mx-auto grid max-w-7xl grid-cols-2 gap-px overflow-hidden border-t border-black/10 bg-black/10 sm:grid-cols-3 lg:grid-cols-5 dark:border-white/10 dark:bg-white/10"
+      class="mx-auto grid max-w-7xl grid-cols-2 gap-px overflow-hidden border-t border-black/10 bg-black/10 lg:grid-cols-4 dark:border-white/10 dark:bg-white/10"
     >
       {
         stats.map((stat) => (
@@ -85,41 +76,6 @@ const stats = [
       }
     </dl>
   </section>
-
-  {
-    featured && (
-      <section class="border-b border-black/10 dark:border-white/10" aria-labelledby="series-heading">
-        <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-          <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
-            <div class="max-w-2xl">
-              <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-primary">Side by side</p>
-              <h2 id="series-heading" class="mt-2 text-3xl font-semibold tracking-tight text-heading">
-                同题对照
-              </h2>
-              <p class="mt-3 text-muted">
-                系列「{featured.series}」把题目接近的作品放在一起。
-                {featuredPromptsMatch
-                  ? '这组共用同一条 prompt,并排就能看出一次生成的差别。'
-                  : 'prompt 并不完全相同,对照页会把各自的原文和预览摆在一起。'}
-              </p>
-            </div>
-            <a
-              href={getPermalink(`/shots/series/${featured.slug}`)}
-              class="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
-            >
-              并排预览
-              <Icon name="tabler:arrows-split" class="h-4 w-4" aria-hidden="true" />
-            </a>
-          </div>
-          <div class="grid gap-6 lg:grid-cols-2">
-            {featured.shots.map((shot, index) => (
-              <ShotCard shot={shot} index={index} />
-            ))}
-          </div>
-        </div>
-      </section>
-    )
-  }
 
   <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-16" aria-labelledby="latest-heading">
     <div class="mb-8 flex flex-wrap items-end justify-between gap-4">

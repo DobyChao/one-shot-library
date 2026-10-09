@@ -83,7 +83,7 @@ const searchText = (shot: (typeof shots)[number]) =>
       <h1 class="mt-2 text-4xl font-semibold tracking-tight text-heading sm:text-5xl">作品画廊</h1>
       <p class="mt-4 text-lg text-muted">
         一共 {shots.length} 件作品。其中 {oneShotCount} 件只对话了一轮,{vibeCount} 件来回改过。点进去可以看当时的对话和最后的
-        HTML。series 相同的作品可以并排比较。
+        HTML。
       </p>
     </header>
 
@@ -121,7 +121,6 @@ const searchText = (shot: (typeof shots)[number]) =>
                     ['mode', '按方式'],
                     ['harness', '按工具'],
                     ['model', '按模型'],
-                    ['series', '按系列'],
                   ].map(([mode, label], index) => (
                     <button
                       type="button"
@@ -241,7 +240,7 @@ const searchText = (shot: (typeof shots)[number]) =>
     group: 'flat',
     query: '',
   };
-  const groupModes = ['flat', 'mode', 'harness', 'model', 'series'];
+  const groupModes = ['flat', 'mode', 'harness', 'model'];
   const activeClasses = ['bg-button', 'text-white', 'hover:bg-button-hover'];
   const inactiveClasses = [
     'bg-black/5',
@@ -326,14 +325,7 @@ const searchText = (shot: (typeof shots)[number]) =>
     if (state.group === 'flat') {
       ordered.forEach((item) => grid.appendChild(item));
     } else {
-      const key =
-        state.group === 'harness'
-          ? 'shotHarness'
-          : state.group === 'model'
-            ? 'shotModel'
-            : state.group === 'mode'
-              ? 'shotMode'
-              : 'shotSeries';
+      const key = state.group === 'harness' ? 'shotHarness' : state.group === 'model' ? 'shotModel' : 'shotMode';
       const groups = new Map<string, HTMLElement[]>();
       for (const item of ordered) {
         const raw = item.dataset[key] || '';
@@ -342,7 +334,7 @@ const searchText = (shot: (typeof shots)[number]) =>
             ? '多轮 · vibe'
             : state.group === 'mode' && raw === 'one-shot'
               ? '一轮 · one-shot'
-              : raw || (state.group === 'series' ? '未入系列' : '未标注');
+              : raw || '未标注';
         const list = groups.get(label) || [];
         list.push(item);
         groups.set(label, list);
@@ -351,8 +343,8 @@ const searchText = (shot: (typeof shots)[number]) =>
         const shown = (list: HTMLElement[]) => list.filter((item) => !item.classList.contains('hidden')).length;
         const delta = shown(b[1]) - shown(a[1]);
         if (delta !== 0) return delta;
-        if (a[0] === '未入系列' || a[0] === '未标注') return 1;
-        if (b[0] === '未入系列' || b[0] === '未标注') return -1;
+        if (a[0] === '未标注') return 1;
+        if (b[0] === '未标注') return -1;
         return a[0].localeCompare(b[0], 'zh');
       });
       for (const [label, groupItems] of entries) {

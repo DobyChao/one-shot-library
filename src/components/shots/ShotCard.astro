@@ -5,7 +5,7 @@ import Image from '~/components/common/Image.astro';
 import MetaChips from '~/components/shots/MetaChips.astro';
 import { Icon } from 'astro-icon/components';
 import { findImage } from '~/utils/images';
-import { cleanSlug, getPermalink } from '~/utils/permalinks';
+import { getPermalink } from '~/utils/permalinks';
 import { promptPreview } from '~/utils/utils';
 
 export interface Props {
@@ -17,7 +17,6 @@ export interface Props {
 const { shot, index } = Astro.props;
 const image = await findImage(shot.image);
 const link = getPermalink(shot.permalink);
-const seriesHref = shot.series ? getPermalink(`/shots/series/${cleanSlug(shot.series)}`) : undefined;
 const preview = shot.vibe?.trim() ? shot.vibe.trim() : promptPreview(shot.prompt, 120);
 const previewLabel = shot.vibe?.trim() ? '想要的效果' : 'Prompt';
 
@@ -126,17 +125,6 @@ const catalogNo = typeof index === 'number' ? String(index + 1).padStart(2, '0')
         shot.tags?.map((tag) => (
           <span class="rounded bg-black/5 px-2 py-0.5 text-xs text-muted dark:bg-white/10">{tag.title}</span>
         ))
-      }
-      {
-        seriesHref && (
-          <a
-            href={seriesHref}
-            class="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary hover:underline"
-          >
-            <Icon name="tabler:arrows-split" class="h-3.5 w-3.5" aria-hidden="true" />
-            同题对照
-          </a>
-        )
       }
     </div>
   </div>

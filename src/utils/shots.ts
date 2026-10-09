@@ -135,39 +135,3 @@ export const getStaticPathsShots = async () => {
     props: { shot },
   }));
 };
-
-export interface SeriesGroup {
-  /** Series name as written in frontmatter. */
-  series: string;
-  /** URL slug under /shots/series/. */
-  slug: string;
-  shots: Array<Shot>;
-}
-
-/** Shots that share a `series` id, newest group first. */
-export const fetchSeriesGroups = async (): Promise<Array<SeriesGroup>> => {
-  const shots = await fetchShots();
-  const map = new Map<string, Array<Shot>>();
-  for (const shot of shots) {
-    if (!shot.series) continue;
-    const list = map.get(shot.series) ?? [];
-    list.push(shot);
-    map.set(shot.series, list);
-  }
-
-  return [...map.entries()]
-    .map(([series, items]) => ({
-      series,
-      slug: cleanSlug(series),
-      shots: items,
-    }))
-    .sort((a, b) => b.shots[0].publishDate.valueOf() - a.shots[0].publishDate.valueOf());
-};
-
-/** Static paths for same-theme comparison pages. */
-export const getStaticPathsSeries = async () => {
-  return (await fetchSeriesGroups()).map((group) => ({
-    params: { series: group.slug },
-    props: { group },
-  }));
-};

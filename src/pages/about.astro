@@ -73,7 +73,7 @@ model: GLM-5.3-Flash     # 可选。使用的模型
 html: my-landing.html    # public/artifacts/ 下的最终文件
 image: '~/assets/images/shots/my-landing.png'
 tags: [landing-page, saas]
-series: my-series        # 可选。同名 series 会进入「同题对照」并排页
+series: my-series        # 可选。先记着,对照页暂时不开放
 featured: false
 session:                 # 可选。不填时用 prompt 合成一条用户消息
   - role: user
@@ -88,7 +88,7 @@ session:                 # 可选。不填时用 prompt 合成一条用户消息
 ---</code></pre>
 
       <p>
-        <code>prompt</code> 是用户的第一条消息,同题对照仍用它比较。<code>session</code> 按时间顺序写用户和助手的回合;某一回合的
+        <code>prompt</code> 是用户的第一条消息。<code>session</code> 按时间顺序写用户和助手的回合;某一回合的
         <code>html</code> 若与最终 <code>html</code> 相同,详情页不再嵌一次,只链到下面的预览。<code>harness</code> 与
         <code>model</code> 会作为标签展示,并参与画廊筛选——写了就用规范写法,不知道可以留空:
       </p>
@@ -105,8 +105,8 @@ session:                 # 可选。不填时用 prompt 合成一条用户消息
         }
       </p>
       <p>
-        <code>turns</code> 算的是用户发了几次,和方式、日期、文件形式一起出现在「生成信息」里。<code>series</code> 相同的作品可以在「同题对照」页并排看
-        prompt 和预览。frontmatter 加 <code>video: true</code> 时,收录时会用 Playwright 录一段循环动画当卡片封面(可用
+        <code>turns</code> 算的是用户发了几次,和方式、日期、文件形式一起出现在「生成信息」里。<code>series</code>
+        可以先记下同题作品的组名,对照页暂时不开放。frontmatter 加 <code>video: true</code> 时,收录时会用 Playwright 录一段循环动画当卡片封面(可用
         <code>videoKey</code>
         指定开始交互的按键)。markdown 正文可选,显示在详情页「备注」里。如果对话是为了把时间线演示出来而写的,在备注里写明。
       </p>

@@ -7,10 +7,6 @@ export const headerData = {
       href: getPermalink('/shots'),
     },
     {
-      text: '同题对照',
-      href: getPermalink('/shots/series'),
-    },
-    {
       text: '关于',
       href: getPermalink('/about'),
     },
@@ -25,7 +21,6 @@ export const footerData = {
       links: [
         { text: '首页', href: getPermalink('/') },
         { text: '画廊', href: getPermalink('/shots') },
-        { text: '同题对照', href: getPermalink('/shots/series') },
         { text: '关于 / 提交作品', href: getPermalink('/about') },
         { text: 'RSS 订阅', href: getAsset('/rss.xml') },
       ],

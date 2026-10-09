@@ -10,7 +10,7 @@ import type { ImageMetadata } from 'astro';
 
 import { fetchShots, getStaticPathsShots, shotModeLabel } from '~/utils/shots';
 import { findImage } from '~/utils/images';
-import { cleanSlug, getAsset, getPermalink } from '~/utils/permalinks';
+import { getAsset, getPermalink } from '~/utils/permalinks';
 import { truncateAtWord } from '~/utils/utils';
 
 export const prerender = true;
@@ -82,12 +82,6 @@ const allShots = await fetchShots();
 const currentIndex = allShots.findIndex((item) => item.slug === shot.slug);
 const newerShot = currentIndex > 0 ? allShots[currentIndex - 1] : undefined;
 const olderShot = currentIndex >= 0 && currentIndex < allShots.length - 1 ? allShots[currentIndex + 1] : undefined;
-const seriesSiblings = shot.series
-  ? allShots.filter((item) => item.series === shot.series && item.slug !== shot.slug)
-  : [];
-const seriesHref = shot.series ? getPermalink(`/shots/series/${cleanSlug(shot.series)}`) : undefined;
-const samePrompt =
-  seriesSiblings.length > 0 && seriesSiblings.every((item) => item.prompt.trim() === shot.prompt.trim());
 
 const metricsGlob = import.meta.glob<{
   performance: number;
@@ -139,14 +133,6 @@ const jumpClass =
           <Icon name="tabler:app-window" class="h-4 w-4" aria-hidden="true" />
           看页面
         </a>
-        {
-          seriesHref && (
-            <a href={seriesHref} class={jumpClass}>
-              <Icon name="tabler:arrows-split" class="h-4 w-4" aria-hidden="true" />
-              同题对照{shot.series ? ` · ${shot.series}` : ''}
-            </a>
-          )
-        }
       </div>
     </header>
 
@@ -278,46 +264,6 @@ const jumpClass =
           </h2>
           <div class="prose prose-lg max-w-none dark:prose-invert prose-a:text-primary">
             <shot.Content />
-          </div>
-        </section>
-      )
-    }
-
-    {
-      seriesSiblings.length > 0 && seriesHref && (
-        <section class="mb-12" aria-labelledby="series-heading">
-          <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h2 id="series-heading" class="flex items-center gap-2 text-xl font-semibold text-heading">
-                <Icon name="tabler:arrows-split" class="h-5 w-5 text-primary" aria-hidden="true" />
-                同题对照
-              </h2>
-              <p class="mt-2 text-sm text-muted">
-                系列「{shot.series}」。
-                {samePrompt ? '这组共用同一条 prompt。' : '每件保留自己的 prompt,对照页会并排摆开。'}
-              </p>
-            </div>
-            <a href={seriesHref} class="btn-primary px-4 py-2 text-sm">
-              并排预览
-            </a>
-          </div>
-          <div class="grid gap-4 sm:grid-cols-2">
-            {seriesSiblings.map((sibling) => (
-              <a
-                href={getPermalink(sibling.permalink)}
-                class="flex items-center justify-between gap-4 rounded-md border border-black/10 bg-page p-4 transition hover:border-primary/50 dark:border-white/10"
-              >
-                <div class="min-w-0">
-                  <p class="truncate font-semibold text-heading">{sibling.title}</p>
-                  <p class="mt-1 text-xs text-muted">
-                    {sibling.harness ? `${sibling.harness} · ` : ''}
-                    {sibling.model ? `${sibling.model} · ` : ''}
-                    {shotModeLabel(sibling.mode)} · {formatDate(sibling.publishDate)}
-                  </p>
-                </div>
-                <Icon name="tabler:chevron-right" class="h-5 w-5 shrink-0 text-muted" aria-hidden="true" />
-              </a>
-            ))}
           </div>
         </section>
       )
