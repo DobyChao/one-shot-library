@@ -9,7 +9,8 @@ vibe: 夜里看的一页,不要海报。
 outcome: 第二稿把字靠左,右边留了一行小字。
 turns: 2
 harness: Cursor
-model: Grok 4.7 High
+model: Grok 4.7
+thinking: high
 html: night-margin/index.html
 image: '~/assets/images/shots/night-margin/index.png'
 imageAlt: 夜读页边的最终页面,字靠左,右边有一行小字
@@ -35,4 +36,4 @@ session:
       改好了。标题和正文靠左,右边有一行小字。
 ---
 
-这是我们写的样例,用来演示多轮对话在时间线上怎么显示。工具是 Cursor,模型是 Grok 4.7 High。页面是单独加的两个 HTML。
+这是我们写的样例,用来演示多轮对话在时间线上怎么显示。工具是 Cursor,模型是 Grok 4.7,思考强度 high。页面是单独加的两个 HTML。

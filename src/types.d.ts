@@ -86,6 +86,8 @@ export interface Shot {
   harness?: string;
   /** Model/agent that produced the artifact. */
   model?: string;
+  /** Thinking effort for this call, e.g. "high". Detail page only. */
+  thinking?: string;
   /** User openings. 1 means a true one-shot. */
   turns: number;
 

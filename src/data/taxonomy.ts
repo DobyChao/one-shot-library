@@ -6,4 +6,4 @@
  */
 export const HARNESSES = ['ZCode', 'Claude Code', 'Cursor', 'v0', 'Bolt', 'Copilot'] as const;
 
-export const MODELS = ['GLM-5.3-Flash', 'Claude Sonnet 4.5', 'GPT-5.2', 'Gemini 3 Pro', 'Grok 4.7 High'] as const;
+export const MODELS = ['GLM-5.3-Flash', 'Claude Sonnet 4.5', 'GPT-5.2', 'Gemini 3 Pro', 'Grok 4.7'] as const;

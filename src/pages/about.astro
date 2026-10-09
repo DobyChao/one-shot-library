@@ -70,6 +70,7 @@ outcome: 最后改成了什么  # 可选
 turns: 1                 # 用户发了几次。不填时按 session 里的 user 条数
 harness: ZCode           # 可选。驱动生成的工具
 model: GLM-5.3-Flash     # 可选。使用的模型
+thinking: high           # 可选。思考强度,只出现在详情页,不进筛选
 html: my-landing.html    # public/artifacts/ 下的最终文件
 image: '~/assets/images/shots/my-landing.png'
 tags: [landing-page, saas]
@@ -105,7 +106,8 @@ session:                 # 可选。不填时用 prompt 合成一条用户消息
         }
       </p>
       <p>
-        <code>turns</code> 算的是用户发了几次,和方式、日期、文件形式一起出现在「生成信息」里。<code>series</code>
+        <code>turns</code> 算的是用户发了几次,和方式、日期、文件形式一起出现在「生成信息」里。填了
+        <code>thinking</code> 时,思考强度也写在这里,不进卡片和筛选。<code>series</code>
         可以先记下同题作品的组名,对照页暂时不开放。frontmatter 加 <code>video: true</code> 时,收录时会用 Playwright 录一段循环动画当卡片封面(可用
         <code>videoKey</code>
         指定开始交互的按键)。markdown 正文可选,显示在详情页「备注」里。如果对话是为了把时间线演示出来而写的,在备注里写明。

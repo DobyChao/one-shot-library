@@ -23,6 +23,7 @@ const getNormalizedShot = async (shot: CollectionEntry<'shot'>): Promise<Shot> =
     session: rawSession,
     harness,
     model,
+    thinking,
     turns: rawTurns,
     html,
     externalUrl,
@@ -82,6 +83,7 @@ const getNormalizedShot = async (shot: CollectionEntry<'shot'>): Promise<Shot> =
     session,
     harness,
     model,
+    thinking,
     turns,
 
     html,

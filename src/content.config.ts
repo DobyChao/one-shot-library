@@ -107,6 +107,8 @@ const shotCollection = defineCollection({
     harness: z.string().optional(),
     /** Model/agent that produced the artifact, e.g. "GLM-5.3-Flash". */
     model: z.string().optional(),
+    /** Thinking effort for this call, e.g. "high". Shown on the detail page only. */
+    thinking: z.string().optional(),
     /** User openings actually used (1 = true one-shot). Defaults to the user beats in `session`. */
     turns: z.number().int().optional(),
 
