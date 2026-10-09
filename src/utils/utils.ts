@@ -20,6 +20,13 @@ export const truncateAtWord = (text = '', limit = 155): string => {
   return `${(lastSpace > limit / 2 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.]+$/, '')}…`;
 };
 
+/** One line of a prompt for cards and search snippets. */
+export const promptPreview = (prompt = '', limit = 140): string => {
+  const flat = prompt.replace(/\s+/g, ' ').trim();
+  if (flat.length <= limit) return flat;
+  return `${flat.slice(0, limit).trimEnd()}…`;
+};
+
 export const trim = (str = '', ch?: string) => {
   let start = 0,
     end = str.length || 0;

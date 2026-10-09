@@ -1,0 +1,99 @@
+---
+import type { SessionTurn } from '~/types';
+import PromptBox from '~/components/shots/PromptBox.astro';
+import PreviewFrame from '~/components/shots/PreviewFrame.astro';
+import { Icon } from 'astro-icon/components';
+import { findImage } from '~/utils/images';
+import { getAsset } from '~/utils/permalinks';
+
+interface Props {
+  session: SessionTurn[];
+  /** Final artifact path. The same file is not embedded again inside the timeline. */
+  finalHtml?: string;
+  title: string;
+}
+
+const { session, finalHtml, title } = Astro.props;
+
+let userCount = 0;
+const annotated = session.map((turn, index) => {
+  const userIndex = turn.role === 'user' ? ++userCount : undefined;
+  return { turn, index, userIndex };
+});
+
+const rows = await Promise.all(
+  annotated.map(async (row) => {
+    let imageSrc: string | undefined;
+    if (row.turn.image) {
+      const found = await findImage(row.turn.image);
+      if (found && typeof found !== 'string') imageSrc = found.src;
+      else if (typeof found === 'string') imageSrc = found.startsWith('/') ? getAsset(found) : found;
+    }
+    const isFinal = Boolean(finalHtml && row.turn.html && row.turn.html === finalHtml);
+    const previewSrc = row.turn.html && !isFinal ? getAsset(`/artifacts/${row.turn.html}`) : undefined;
+    return { ...row, imageSrc, isFinal, previewSrc };
+  })
+);
+---
+
+<ol class="m-0 list-none p-0">
+  {
+    rows.map(({ turn, index, userIndex, imageSrc, isFinal, previewSrc }) => (
+      <li class="relative border-l border-black/15 pb-8 pl-6 last:border-transparent last:pb-0 dark:border-white/15">
+        <span
+          class:list={[
+            'absolute -left-[7px] top-1 h-3.5 w-3.5 rounded-full border-2 border-page',
+            turn.role === 'user' ? 'bg-button' : 'bg-accent',
+          ]}
+          aria-hidden="true"
+        />
+        <p class="mb-2 font-mono text-[11px] uppercase tracking-[0.16em] text-muted">
+          {String(index + 1).padStart(2, '0')}
+          {' · '}
+          {turn.role === 'user' ? `用户 · User · 第 ${userIndex} 次` : '助手 · Agent'}
+        </p>
+        {turn.role === 'user' ? (
+          <PromptBox
+            prompt={turn.text}
+            label={userIndex === 1 ? '第一条' : `第 ${userIndex} 次`}
+            copyLabel="复制这一轮"
+            id={userIndex === 1 ? 'prompt' : undefined}
+          />
+        ) : (
+          <div class="rounded-md border border-black/10 bg-page px-4 py-4 dark:border-white/10">
+            <p class="whitespace-pre-wrap text-sm leading-relaxed text-default">{turn.text}</p>
+          </div>
+        )}
+        {turn.note && <p class="mt-2 text-sm text-muted">{turn.note}</p>}
+        {imageSrc && (
+          <figure class="mt-3 overflow-hidden rounded-md border border-black/10 dark:border-white/10">
+            <img src={imageSrc} alt="" class="w-full" loading="lazy" decoding="async" />
+            <figcaption class="px-3 py-2 text-xs text-muted">这一步的画面</figcaption>
+          </figure>
+        )}
+        {isFinal && (
+          <a
+            href="#live-preview"
+            class="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+          >
+            <Icon name="tabler:app-window" class="h-4 w-4" aria-hidden="true" />
+            和下面的预览是同一个文件
+          </a>
+        )}
+        {previewSrc && (
+          <details class="mt-3 rounded-md border border-black/10 dark:border-white/10">
+            <summary class="cursor-pointer px-4 py-3 text-sm font-medium text-heading">展开这一步的预览</summary>
+            <div class="border-t border-black/10 p-3 dark:border-white/10">
+              <PreviewFrame
+                src={previewSrc}
+                title={`${title} · 第 ${index + 1} 步`}
+                isLocal
+                heightClass="h-[420px] min-h-[280px]"
+              />
+            </div>
+          </details>
+        )}
+      </li>
+    ))
+  }
+</ol>

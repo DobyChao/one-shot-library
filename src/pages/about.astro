@@ -4,25 +4,26 @@ import { HARNESSES, MODELS } from '~/data/taxonomy';
 
 const metadata = {
   title: '关于 / 提交作品',
-  description: 'One-Shot Library 是什么,以及如何把自己的 one-shot 作品提交进画廊。',
+  description: '一间 vibecoding 产物画廊,以及怎样提交作品。',
 };
 ---
 
 <Layout metadata={metadata}>
   <section class="px-4 py-16 sm:px-6 mx-auto max-w-3xl lg:px-8">
-    <header class="mb-10 text-center">
+    <header class="mb-10">
       <p class="mb-2 text-sm font-semibold uppercase tracking-wider text-primary">About</p>
       <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl dark:text-white md:text-5xl">关于本站</h1>
     </header>
 
     <div class="prose prose-lg dark:prose-invert mx-auto">
       <p>
-        <strong>One-Shot Library</strong> 收藏 AI 在一条 prompt 内直接生成的前端产物:落地页、仪表盘、小工具。 我们相信「一次成型的质量」本身就是一种值得展示的东西——所以每件作品都同时展示三个东西:
-        <strong>原始 prompt、使用的模型、生成结果</strong>。
+        <strong>One-Shot Library</strong> 是一间 vibecoding 产物画廊。有些页面只经过一轮对话就写成了,有些则改过许多轮才定下来。落地页、仪表盘和小工具都在。翻开一件,能看到当时的
+        prompt、用过的工具和轮数,HTML 打开就是当时生成的那一页。
       </p>
       <p>
-        站点基于 <a href="https://github.com/onwidget/astrowind">AstroWind</a>(Astro + Tailwind CSS)构建, 产物以静态
-        HTML 形式随站点分发(单文件或子目录),详情页内嵌 iframe 实时预览。
+        你看到的就是收录时的那份 HTML。不打分,不投票,也不连模型。站点基于
+        <a href="https://github.com/onwidget/astrowind">AstroWind</a>(Astro + Tailwind CSS)构建,产物以静态 HTML
+        随站点分发(单文件或子目录),详情页用沙箱 iframe 预览。
       </p>
 
       <h2 id="submit">如何提交作品</h2>
@@ -53,7 +54,8 @@ const metadata = {
       <p>
         不想折腾仓库?直接
         <a href="https://github.com/DobyChao/one-shot-library/issues/new?template=submit.yml">用表单开一个 Issue</a>,
-        附上原始 prompt、使用的 harness / 模型、产物链接(或文件),由维护者代为收录。
+        附上第一条
+        prompt、方式(只对话一轮,或来回改过)、改过几轮时的会话、用的工具和模型,以及页面链接或文件。维护者会帮你加进画廊。
       </p>
 
       <h3>frontmatter 字段</h3>
@@ -61,39 +63,52 @@ const metadata = {
 title: 作品标题
 excerpt: 一句话介绍
 prompt: |
-  生成它的那条完整 prompt(原样粘贴)
-harness: ZCode           # 驱动生成的 agent harness
-model: GLM-5.3-Flash     # 使用的模型
-turns: 1                 # 实际对话轮数,1 = 真 one-shot
-html: my-landing.html    # public/artifacts/ 下的文件名
+  用户第一条消息,原样粘贴。只改一轮的可以只填这项。
+mode: one-shot           # one-shot 或 vibe。不填时,用户消息超过 1 次会当成 vibe
+vibe: 当时想要的效果      # 可选。卡片优先显示它
+outcome: 最后改成了什么  # 可选
+turns: 1                 # 用户发了几次。不填时按 session 里的 user 条数
+harness: ZCode           # 可选。驱动生成的工具
+model: GLM-5.3-Flash     # 可选。使用的模型
+html: my-landing.html    # public/artifacts/ 下的最终文件
 image: '~/assets/images/shots/my-landing.png'
 tags: [landing-page, saas]
-featured: false          # 首页精选
+series: my-series        # 可选。先记着,对照页暂时不开放
+featured: false
+session:                 # 可选。不填时用 prompt 合成一条用户消息
+  - role: user
+    text: |
+      和 prompt 相同的第一条消息
+  - role: agent
+    text: |
+      这一步做出了什么,短记即可
+    note: 中间稿说明
+    html: my-landing/step-1.html   # 可选,public/artifacts/ 下的中间稿
+    image: '~/assets/images/shots/my-landing/step-1.png'
 ---</code></pre>
 
       <p>
-        <code>harness</code> 与 <code>model</code> 会作为标签展示,并参与画廊的分组筛选——请使用规范写法:
+        <code>prompt</code> 是用户的第一条消息。<code>session</code> 按时间顺序写用户和助手的回合;某一回合的
+        <code>html</code> 若与最终 <code>html</code> 相同,详情页不再嵌一次,只链到下面的预览。<code>harness</code> 与
+        <code>model</code> 会作为标签展示,并参与画廊筛选——写了就用规范写法,不知道可以留空:
       </p>
       <p class="flex flex-wrap items-center gap-2">
         {
           HARNESSES.map((h) => (
-            <span class="rounded-full bg-violet-500/10 px-3 py-1 text-sm font-medium text-violet-600 dark:bg-violet-500/20 dark:text-violet-300">
-              {h}
-            </span>
+            <span class="rounded-full bg-accent/10 px-3 py-1 text-sm font-medium text-accent">{h}</span>
           ))
         }
         {
           MODELS.map((m) => (
-            <span class="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary dark:bg-primary/20 dark:text-blue-300">
-              {m}
-            </span>
+            <span class="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">{m}</span>
           ))
         }
       </p>
       <p>
-        <code>turns</code>、生成日期、产物形式会出现在详情页的「生成信息」面板里;frontmatter 加 <code>video: true</code> 时,收录流程会用
-        Playwright 录制一段循环动画作为卡片封面(可用 <code>videoKey</code>
-        指定开始交互的按键)。 markdown 正文可选,显示在详情页「备注」区(生成细节、人工改动说明等)。
+        <code>turns</code> 算的是用户发了几次,和方式、日期、文件形式一起出现在「生成信息」里。<code>series</code>
+        可以先记下同题作品的组名,对照页暂时不开放。frontmatter 加 <code>video: true</code> 时,收录时会用 Playwright 录一段循环动画当卡片封面(可用
+        <code>videoKey</code>
+        指定开始交互的按键)。markdown 正文可选,显示在详情页「备注」里。如果对话是为了把时间线演示出来而写的,在备注里写明。
       </p>
     </div>
   </section>

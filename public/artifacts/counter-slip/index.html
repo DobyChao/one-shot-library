@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>柜台纸条</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+      body {
+        background: #efe4cf;
+        color: #3a2a16;
+        font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Songti SC', 'Noto Serif SC', serif;
+      }
+      main {
+        width: min(560px, calc(100% - 2.5rem));
+        margin: 0 auto;
+        padding: 8vh 0 10vh;
+      }
+      h1 {
+        margin: 0 0 0.4rem;
+        font-size: 2rem;
+        font-weight: 560;
+      }
+      .lead {
+        margin: 0 0 1.6rem;
+        color: #6b5434;
+      }
+      ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      li {
+        margin: 0 0 0.9rem;
+        padding: 1rem 1.1rem 0.95rem;
+        background: #f4e2b0;
+        box-shadow: 3px 4px 0 rgb(90 60 20 / 12%);
+        font-size: 1.15rem;
+        line-height: 1.55;
+        transform: rotate(var(--tilt));
+      }
+      li:nth-child(1) {
+        --tilt: -0.6deg;
+      }
+      li:nth-child(2) {
+        --tilt: 0.8deg;
+      }
+      li:nth-child(3) {
+        --tilt: -0.2deg;
+      }
+      li.done {
+        color: #8a7352;
+        text-decoration: line-through;
+        background: #ead7a4;
+      }
+      button {
+        margin-top: 0.6rem;
+        padding: 0.55rem 0.95rem;
+        border: 1px solid #3a2a16;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>柜台纸条</h1>
+      <p class="lead">成稿 · 不再提交,划掉就好</p>
+      <ul id="slips">
+        <li>找零盒里少了一枚一元。</li>
+        <li>下午的便签别再贴在屏幕上。</li>
+        <li>关灯前把这三张纸收进抽屉。</li>
+      </ul>
+      <button type="button" id="strike">划掉下一条</button>
+    </main>
+    <script>
+      const items = [...document.querySelectorAll('#slips li')];
+      document.querySelector('#strike').addEventListener('click', () => {
+        const next = items.find((item) => !item.classList.contains('done'));
+        if (next) next.classList.add('done');
+      });
+    </script>
+  </body>
+</html>

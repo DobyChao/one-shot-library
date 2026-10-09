@@ -17,6 +17,8 @@
   --color-default: var(--aw-color-text-default);
   --color-muted: var(--aw-color-text-muted);
   --color-link: var(--aw-color-link, var(--aw-color-primary));
+  --color-button: var(--aw-color-button);
+  --color-button-hover: var(--aw-color-button-hover);
 
   --font-sans:
     var(--aw-font-sans, ui-sans-serif), ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
@@ -55,11 +57,11 @@
 }
 
 @utility btn {
-  @apply inline-flex items-center justify-center rounded-full border-gray-400 border bg-transparent font-medium text-center text-base text-page leading-snug transition py-3.5 px-6 md:px-8 ease-in duration-200 focus:ring-blue-500 focus:ring-offset-blue-200 focus:ring-2 focus:ring-offset-2 hover:bg-gray-100 hover:border-gray-600 dark:text-slate-300 dark:border-slate-500 dark:hover:bg-slate-800 dark:hover:border-slate-800 cursor-pointer;
+  @apply inline-flex cursor-pointer items-center justify-center rounded-md border border-black/15 bg-transparent px-6 py-3.5 text-center text-base font-medium leading-snug text-page transition duration-200 ease-in hover:border-black/30 hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--aw-color-bg-page)] md:px-8 dark:border-white/20 dark:text-slate-200 dark:hover:border-white/35 dark:hover:bg-white/10;
 }
 
 @utility btn-primary {
-  @apply btn font-semibold bg-primary text-white border-primary hover:bg-secondary hover:border-secondary hover:text-white dark:text-white dark:bg-primary dark:border-primary dark:hover:border-secondary dark:hover:bg-secondary;
+  @apply btn border-button bg-button font-semibold text-white hover:border-button-hover hover:bg-button-hover hover:text-white dark:border-button dark:bg-button dark:text-white dark:hover:border-button-hover dark:hover:bg-button-hover;
 }
 
 @utility btn-secondary {
@@ -68,6 +70,19 @@
 
 @utility btn-tertiary {
   @apply btn border-none shadow-none text-muted hover:text-gray-900 dark:text-gray-400 dark:hover:text-white;
+}
+
+/* Catalog masthead: vermilion rule so every page reads as One-Shot Library. */
+#header {
+  border-top: 2px solid var(--aw-color-button);
+}
+
+/* Graph-paper ground for the homepage exhibition band. */
+@utility osl-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--aw-color-text-default) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--aw-color-text-default) 7%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
 /* Sticky header: solid page background on phones, translucent page background with blur on desktop. */
@@ -92,7 +107,15 @@
   left: 0;
   right: 0;
   bottom: 70px !important;
-  padding: 0 5px;
+  z-index: 30;
+  padding: 1.5rem 1.25rem;
+  background-color: var(--aw-color-bg-page);
+}
+
+#header.expanded > div > div:last-child {
+  z-index: 30;
+  background-color: var(--aw-color-bg-page);
+  border-top: 1px solid color-mix(in srgb, var(--aw-color-text-default) 12%, transparent);
 }
 
 .dropdown:focus .dropdown-menu,
@@ -132,6 +155,10 @@
 
 /* Blog prose: inline code without the typography plugin's backticks, and
    code blocks that follow the light/dark theme (Shiki dual themes). */
+.prose :where(a) {
+  color: var(--aw-color-primary);
+}
+
 .prose :where(code):not(:where(pre *)) {
   background-color: color-mix(in oklab, var(--aw-color-text-default) 8%, transparent);
   border-radius: 0.25rem;

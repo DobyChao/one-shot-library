@@ -26,7 +26,7 @@ export const footerData = {
       ],
     },
     {
-      title: '灵感来源',
+      title: '参照馆',
       links: [
         { text: 'v0 Community', href: 'https://v0.app', target: '_blank' },
         { text: 'WebDev Arena', href: 'https://web.lmarena.ai', target: '_blank' },
@@ -39,6 +39,6 @@ export const footerData = {
     { ariaLabel: 'Github', icon: 'tabler:brand-github', href: 'https://github.com/DobyChao/one-shot-library' },
   ],
   footNote: `
-    One-Shot Library · 每条 prompt 都值得一个展厅
+    One-Shot Library · 静态站点
   `,
 };

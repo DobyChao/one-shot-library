@@ -1,7 +1,9 @@
 import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
-import type { Shot, Taxonomy } from '~/types';
+import type { SessionTurn, Shot, ShotMode, Taxonomy } from '~/types';
 import { cleanSlug, trimSlash } from './permalinks';
+
+export const shotModeLabel = (mode: ShotMode) => (mode === 'vibe' ? '多轮 · vibe' : '一轮 · one-shot');
 
 const getNormalizedShot = async (shot: CollectionEntry<'shot'>): Promise<Shot> => {
   const { id, data } = shot;
@@ -15,9 +17,13 @@ const getNormalizedShot = async (shot: CollectionEntry<'shot'>): Promise<Shot> =
     image,
     imageAlt,
     prompt,
+    mode: rawMode,
+    vibe,
+    outcome,
+    session: rawSession,
     harness,
     model,
-    turns,
+    turns: rawTurns,
     html,
     externalUrl,
     tags: rawTags = [],
@@ -38,6 +44,21 @@ const getNormalizedShot = async (shot: CollectionEntry<'shot'>): Promise<Shot> =
     title: tag,
   }));
 
+  const session: SessionTurn[] =
+    rawSession && rawSession.length > 0
+      ? rawSession.map((turn) => ({
+          role: turn.role,
+          text: turn.text,
+          note: turn.note,
+          html: turn.html,
+          image: turn.image,
+        }))
+      : [{ role: 'user', text: prompt }];
+
+  const userTurns = session.filter((turn) => turn.role === 'user').length;
+  const turns = typeof rawTurns === 'number' ? rawTurns : Math.max(userTurns, 1);
+  const mode: ShotMode = rawMode ?? (userTurns > 1 || turns > 1 ? 'vibe' : 'one-shot');
+
   return {
     id,
     slug,
@@ -55,6 +76,10 @@ const getNormalizedShot = async (shot: CollectionEntry<'shot'>): Promise<Shot> =
     imageAlt,
 
     prompt,
+    mode,
+    vibe,
+    outcome,
+    session,
     harness,
     model,
     turns,

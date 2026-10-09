@@ -1,8 +1,8 @@
 # One-Shot Library
 
-一个 Prompt,一个页面。收藏 AI one-shot 生成的前端产物(落地页 / 仪表盘 / 小工具),每件作品都附**原始 prompt、模型与在线预览**。
+一间 vibecoding 产物画廊。有些页面只经过一轮对话就写成了,有些则改过许多轮才定下来。落地页、仪表盘和小工具都在。翻开一件,prompt 还是当初那一串字,工具和轮数写在旁边,HTML 打开就是当时生成的那一页。仓库名仍是 One-Shot Library。
 
-基于 [AstroWind](https://github.com/onwidget/astrowind)(Astro 7 + Tailwind CSS v4)构建,产物以单文件 HTML 静态分发,详情页内嵌 iframe 实时预览。
+基于 [AstroWind](https://github.com/onwidget/astrowind)(Astro 7 + Tailwind CSS v4)构建。页面以静态 HTML 发布,详情页用 iframe 看最终结果,对话按时间线排列。
 
 ## 常用命令
 
@@ -30,34 +30,47 @@ npm run new          # 脚手架:新建条目骨架并格式化
 title: 作品标题
 excerpt: 一句话介绍
 prompt: |
-  生成它的那条完整 prompt(原样粘贴)
-harness: ZCode # 驱动生成的 agent harness(ZCode / Claude Code / Cursor / v0 …)
-model: GLM-5.3-Flash # 使用的模型
-turns: 1 # 实际对话轮数,1 = 真 one-shot
-html: my-landing.html # public/artifacts/ 下的文件名
+  用户第一条消息(原样粘贴)。只改一轮的只填这项,也会合成一条会话。
+mode: one-shot # one-shot 或 vibe。不填时,用户消息超过 1 次会当成 vibe
+vibe: 当时想要的效果 # 可选。卡片优先显示它
+outcome: 最后改成了什么 # 可选
+turns: 1 # 用户发了几次。不填时按 session 里的 user 条数
+harness: ZCode # 可选。驱动生成的工具(ZCode / Claude Code / Cursor / v0 …)
+model: GLM-5.3-Flash # 可选。使用的模型
+html: my-landing.html # public/artifacts/ 下的最终文件
 image: '~/assets/images/shots/my-landing.png'
 tags: [landing-page, saas]
-featured: false # 首页精选
+featured: false
+# session: # 可选。多轮时按顺序写。html / image 挂在某一回合上
+#   - role: user
+#     text: 和 prompt 相同的第一条消息
+#     html: my-landing/step-1.html
+#   - role: agent
+#     text: 这一步交出来的东西
+#     note: 中间稿说明
 ---
 ```
 
 可选字段:`externalUrl`(外部链接代替本地 HTML)、`imageAlt`、`updateDate`、`draft: true`(隐藏)、
 `video: true` + `videoKey`(录循环视频封面,录制时按该键或点击画面启动产物)、
-`series`(同 prompt 对照系列的组名,详情页互链)。
-`harness` / `model` 会成为卡片徽章并参与画廊分组筛选,请用规范写法(见 `src/data/taxonomy.ts` 或站内关于页);
-`turns`、日期、产物形式出现在详情页「生成信息」面板;`npm run audit` 的 Lighthouse 分数有则自动展示;
-markdown 正文可选,显示在详情页「备注」区。
+`series`(可选,同题作品可以先记同一个组名;对照页暂时不开放)、
+`session`(有序回合:`role` 为 `user` 或 `agent`,`text` 必填,`note` / `html` / `image` 可选)。
+`mode` / `harness` / `model` / `turns` 会成为卡片徽章并参与画廊筛选(也可按方式、工具或模型分组)。工具和模型请用规范写法(见 `src/data/taxonomy.ts` 或站内关于页),不知道就留空;
+`prompt` 是用户的第一条消息。不填 `session` 时,站点用它合成一条用户回合,已有的一轮条目不用改文件;
+某一回合的 `html` 若与最终 `html` 相同,时间线只链到下面的预览,不再嵌一次;
+方式、轮数、日期、产物形式出现在详情页「生成信息」面板;`npm run audit` 的 Lighthouse 分数有则自动展示;
+markdown 正文可选,显示在详情页「备注」里。为了演示时间线而写的样例,请在备注里标明。
 
 ## 目录速览
 
-| 路径                       | 作用                                         |
-| -------------------------- | -------------------------------------------- |
-| `src/data/shot/`           | 作品条目(markdown)                           |
-| `public/artifacts/`        | 产物 HTML(单文件或子目录,`/artifacts/` 路径) |
-| `src/assets/images/shots/` | 作品截图(由脚本生成)                         |
-| `src/components/shots/`    | ShotCard / PromptBox 组件                    |
-| `src/pages/shots/`         | 画廊列表页 + 详情页                          |
-| `src/config.yaml`          | 站点名 / SEO / 主题                          |
+| 路径                       | 作用                                                              |
+| -------------------------- | ----------------------------------------------------------------- |
+| `src/data/shot/`           | 作品条目(markdown)                                                |
+| `public/artifacts/`        | 产物 HTML(单文件或子目录,`/artifacts/` 路径)                      |
+| `src/assets/images/shots/` | 作品截图(由脚本生成)                                              |
+| `src/components/shots/`    | ShotCard / SessionTimeline / PromptBox / PreviewFrame / MetaChips |
+| `src/pages/shots/`         | 画廊列表页 + 详情页                                               |
+| `src/config.yaml`          | 站点名 / SEO / 主题                                               |
 
 ## 部署
 
@@ -73,4 +86,4 @@ markdown 正文可选,显示在详情页「备注」区。
 - **GitHub Pages**:设置上面两项后,把 `dist/` 发布到 gh-pages 分支,或加一个 `actions/upload-pages-artifact` + `actions/deploy-pages` 的 workflow(可参考 `.github/workflows/actions.yaml` 的构建步骤改)。访问 `/shots` 这类无斜杠路径时 GH Pages 会 301 到 `/shots/`,属正常行为。
 - **Vercel / Cloudflare Pages / Netlify**:连上仓库零配置即可,`site.base` 保持 `/`,只改 `site.site`。
 
-**建议顺手改**:页脚 GitHub 链接(`src/navigation.ts`,目前指向通用 github.com)、favicon 与 Logo(`src/assets/favicons/`、`src/components/Logo.astro`,目前是模板默认火箭图)、`metadata.description`(改成你自己的定位文案)。
+**站点身份已经定好**:名称、简介、页脚、favicon 与 Logo 都是 One-Shot Library,不再使用模板火箭图。部署时仍必须改上面的 `site.site` 与 `site.base`;`base` 不要加尾斜杠,否则首页会被 Astro 的尾斜杠重定向页盖住。

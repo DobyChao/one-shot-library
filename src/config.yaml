@@ -11,7 +11,7 @@ metadata:
   title:
     default: One-Shot Library
     template: '%s — One-Shot Library'
-  description: '一个 Prompt,一个页面。AI one-shot 前端产物画廊:每件作品都由一条 prompt 一次生成,附原始 prompt、模型与在线预览。'
+  description: '一间 vibecoding 产物画廊。一轮写成的和改过许多轮的页面都在,旁边留着当时的 prompt、工具和轮数,HTML 也可以打开。'
   robots:
     index: true
     follow: true
