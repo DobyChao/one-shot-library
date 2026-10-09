@@ -9,7 +9,7 @@ import { fetchSeriesGroups, fetchShots, findLatestShots } from '~/utils/shots';
 import { getHomePermalink, getPermalink } from '~/utils/permalinks';
 
 const metadata = {
-  title: 'One-Shot Library — 一个 Prompt,一个页面',
+  title: 'One-Shot Library — 感觉,对话,页面',
   ignoreTitleTemplate: true,
 };
 
@@ -19,9 +19,9 @@ const [latestShots, allShots, seriesGroups] = await Promise.all([
   fetchSeriesGroups(),
 ]);
 
-const oneShotCount = allShots.filter((shot) => (shot.turns ?? 1) === 1).length;
+const oneShotCount = allShots.filter((shot) => shot.mode === 'one-shot').length;
+const vibeCount = allShots.filter((shot) => shot.mode === 'vibe').length;
 const harnessCount = new Set(allShots.map((shot) => shot.harness).filter(Boolean)).size;
-const modelCount = new Set(allShots.map((shot) => shot.model).filter(Boolean)).size;
 const featured = seriesGroups[0];
 const featuredPromptsMatch = featured
   ? featured.shots.every((shot) => shot.prompt.trim() === featured.shots[0].prompt.trim())
@@ -44,9 +44,9 @@ const structuredData = {
 
 const stats = [
   { value: String(allShots.length), label: '件作品', en: 'Shots' },
-  { value: String(oneShotCount), label: '真 one-shot', en: 'Single turn' },
-  { value: String(harnessCount), label: '种 Harness', en: 'Agents' },
-  { value: String(modelCount), label: '个模型', en: 'Models' },
+  { value: String(oneShotCount), label: '一轮成页', en: 'One-shot' },
+  { value: String(vibeCount), label: '多轮会话', en: 'Vibe' },
+  { value: String(harnessCount), label: '种工具', en: 'Harness' },
   { value: String(seriesGroups.length), label: '组对照', en: 'Series' },
 ];
 ---
@@ -58,12 +58,12 @@ const stats = [
     <div class="mx-auto max-w-7xl px-4 pb-12 pt-14 sm:px-6 lg:px-8 lg:pb-16 lg:pt-20">
       <p class="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">One-Shot Library · 静态展厅</p>
       <h1 class="mt-4 max-w-4xl text-5xl font-semibold tracking-tight text-heading sm:text-6xl lg:text-7xl">
-        一个 Prompt,<br />
-        <span class="text-primary">一个页面。</span>
+        感觉,对话,<br />
+        <span class="text-primary">然后成页。</span>
       </h1>
       <p class="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
-        收藏 AI 在一条 prompt 里直接生成的落地页、仪表盘和小工具。每件作品都摊开原始
-        prompt、harness、模型、对话轮数,以及可以点开的预览。这是展厅,不是评测台:没有投票,没有排行榜,也没有后端。
+        展出 vibe-coding 里长出来的落地页、仪表盘和小工具。一轮 one-shot
+        照样是一等公民;多轮会话会把感觉、来回改过的对话和成稿留在同一页。这是展厅,不是评测台:没有投票,没有排行榜,也没有后端。
       </p>
       <div class="mt-8 flex flex-col gap-3 sm:flex-row">
         <a href={getPermalink('/shots')} class="btn-primary w-full sm:w-auto">
@@ -161,24 +161,25 @@ const stats = [
         class="mt-8 grid gap-px overflow-hidden rounded-md border border-black/10 bg-black/10 sm:grid-cols-3 dark:border-white/10 dark:bg-white/10"
       >
         <li class="bg-page p-6">
-          <p class="font-mono text-xs text-primary">01 · Prompt</p>
-          <h3 class="mt-3 text-xl font-semibold text-heading">原文置顶</h3>
+          <p class="font-mono text-xs text-primary">01 · Vibe</p>
+          <h3 class="mt-3 text-xl font-semibold text-heading">先看感觉</h3>
           <p class="mt-2 text-sm leading-relaxed text-muted">
-            生成它的那条 prompt 放在详情页最前面,一键复制。卡片上也能先看到开头几句。
+            多轮作品会在标题下面写下一句 vibe。一轮作品没有这句,直接从那条 prompt
+            进入会话。卡片上优先露出这句,而不是整段原文。
           </p>
         </li>
         <li class="bg-page p-6">
-          <p class="font-mono text-xs text-primary">02 · Harness / Model / Turns</p>
-          <h3 class="mt-3 text-xl font-semibold text-heading">谁生成的,几轮</h3>
+          <p class="font-mono text-xs text-primary">02 · Session</p>
+          <h3 class="mt-3 text-xl font-semibold text-heading">再读对话</h3>
           <p class="mt-2 text-sm leading-relaxed text-muted">
-            Harness、模型和对话轮数写在收录时的 frontmatter 里。1 轮就是真 one-shot,多轮会标出来。
+            详情页按时间线展开用户和助手的回合,可以复制每一轮。一轮作品的时间线就是开场那一条。中间稿如果留了,挂在对应的那一步。
           </p>
         </li>
         <li class="bg-page p-6">
-          <p class="font-mono text-xs text-primary">03 · Live preview</p>
-          <h3 class="mt-3 text-xl font-semibold text-heading">沙箱里打开</h3>
+          <p class="font-mono text-xs text-primary">03 · Page</p>
+          <h3 class="mt-3 text-xl font-semibold text-heading">最后看成稿</h3>
           <p class="mt-2 text-sm leading-relaxed text-muted">
-            产物以静态 HTML 挂在本站,详情页用沙箱 iframe 预览,可切到手机宽度,也可以新窗口打开。
+            会话和生成信息之后,才是沙箱里的最终页面。可切到手机宽度,也可以新窗口打开。工具、模型和轮数写在中间的档案里。
           </p>
         </li>
       </ol>
@@ -190,9 +191,9 @@ const stats = [
       class="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-14 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8"
     >
       <div class="max-w-xl">
-        <h2 class="text-3xl font-semibold tracking-tight text-heading">下一件,从你的 prompt 开始</h2>
+        <h2 class="text-3xl font-semibold tracking-tight text-heading">下一件,从一轮或一段对话开始</h2>
         <p class="mt-3 text-muted">
-          已收录 {allShots.length} 件,其中 {oneShotCount} 件是一轮生成。把原始 prompt 和产物交出来,它们会以同样的方式被展出。
+          已收录 {allShots.length} 件,其中 {oneShotCount} 件一轮成页,{vibeCount} 件是多轮 vibe。把开场 prompt、会话和成稿交出来,它们会以同样的方式被展出。
         </p>
       </div>
       <a href={`${getPermalink('/about')}#submit`} class="btn-primary w-full shrink-0 sm:w-auto">

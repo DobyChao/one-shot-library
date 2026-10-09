@@ -9,7 +9,7 @@ export const GET = async () => {
 
   return rss({
     title: `${SITE?.name} — 新收录`,
-    description: METADATA?.description ?? 'AI one-shot 前端产物画廊',
+    description: METADATA?.description ?? '一轮 one-shot 与多轮 vibe 的静态展厅',
     site: SITE?.site ?? '',
     items: shots.map((shot) => ({
       title: shot.title,

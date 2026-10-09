@@ -40,6 +40,21 @@ export interface Taxonomy {
   title: string;
 }
 
+/** One-shot is a single user opening. Vibe is an iterative session. */
+export type ShotMode = 'one-shot' | 'vibe';
+
+/** One beat in a recorded session, in order. */
+export interface SessionTurn {
+  role: 'user' | 'agent';
+  text: string;
+  /** Short aside about this beat (what changed, or that it is a display sample). */
+  note?: string;
+  /** Intermediate artifact under public/artifacts/, relative path. */
+  html?: string;
+  /** Screenshot for this beat. Asset path (`~/...`) or a site path (`/...`). */
+  image?: string;
+}
+
 export interface Shot {
   /** Unique ID identifying the shot. */
   id: string;
@@ -57,14 +72,22 @@ export interface Shot {
   image?: ImageMetadata | string;
   imageAlt?: string;
 
-  /** The exact one-shot prompt that generated the artifact. */
+  /** Opening user message. One-shot entries can omit `session`; it is copied from here. */
   prompt: string;
+  /** Resolved archive mode. Omitted frontmatter defaults to one-shot when there is a single user turn. */
+  mode: ShotMode;
+  /** One-line feel for a vibe session. Shown on the card and above the timeline. */
+  vibe?: string;
+  /** What the session arrived at, in one sentence. */
+  outcome?: string;
+  /** Ordered session. At least the opening user turn. */
+  session: SessionTurn[];
   /** Agent harness that drove the generation, e.g. "ZCode", "Claude Code". */
   harness?: string;
   /** Model/agent that produced the artifact. */
   model?: string;
-  /** Number of conversation turns actually used (1 = true one-shot). */
-  turns?: number;
+  /** User openings. 1 means a true one-shot. */
+  turns: number;
 
   /** Artifact HTML file name served from /shots/<file>. */
   html?: string;

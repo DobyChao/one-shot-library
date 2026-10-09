@@ -1,12 +1,12 @@
 name: 作品提交
-description: 提交一个 one-shot 作品,由维护者代为收录进画廊
+description: 提交一轮 one-shot 或多轮 vibe 作品,由维护者代为收录进画廊
 title: '[作品提交] '
 labels: ['submission']
 body:
   - type: markdown
     attributes:
       value: |
-        感谢投稿!收录后会展示在你的作品页并署上 harness / 模型信息。
+        感谢投稿!收录后会展示会话、方式,以及你填写的工具 / 模型。
         想自己动手也可以走 PR 流程,见 [README](https://github.com/DobyChao/one-shot-library#如何添加一件作品)。
 
   - type: input
@@ -20,36 +20,58 @@ body:
   - type: textarea
     id: prompt
     attributes:
-      label: 原始 Prompt
-      description: 生成它的一条 prompt,一字不改地粘贴
+      label: 开场 Prompt
+      description: 用户第一次开口的原文,一字不改地粘贴。一轮作品填这项即可。
       placeholder: |
         一句话生成一个……
     validations:
       required: true
 
   - type: dropdown
+    id: mode
+    attributes:
+      label: 方式
+      description: 一轮成页选 one-shot;来回改过选 vibe,并在下面写下会话
+      options:
+        - one-shot
+        - vibe
+    validations:
+      required: true
+
+  - type: textarea
+    id: session
+    attributes:
+      label: 会话
+      description: vibe 作品按顺序写下用户和助手的回合。某一回合如果有中间稿,附上文件或链接。一轮作品可留空。
+      placeholder: |
+        用户: ……
+        助手: ……
+        用户: 改成……
+
+  - type: dropdown
     id: harness
     attributes:
-      label: Agent Harness
-      description: 驱动生成的工具(规范写法)
+      label: 工具 · Harness
+      description: 驱动生成的工具(规范写法)。不知道选「未填写」
       options:
+        - 未填写
         - ZCode
         - Claude Code
         - Cursor
         - v0
         - Bolt
         - Copilot
-        - 其他(在模型/备注里说明)
+        - 其他(在备注里说明)
     validations:
-      required: true
+      required: false
 
   - type: input
     id: model
     attributes:
       label: 模型
-      description: 如 GLM-5.3-Flash / Claude Sonnet 4.5
+      description: 如 GLM-5.3-Flash / Claude Sonnet 4.5。不知道可留空
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: artifact
@@ -63,4 +85,4 @@ body:
     id: notes
     attributes:
       label: 其他备注
-      description: 实际对话轮数、人工改动、运行注意事项等(可选)
+      description: 用户开口次数、人工改动、若会话是展陈样例请写明(可选)

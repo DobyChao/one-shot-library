@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>夜读页边</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+      body {
+        background: #f3eee4;
+        color: #1b2433;
+        font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Songti SC', 'Noto Serif SC', serif;
+      }
+      .sheet {
+        display: grid;
+        grid-template-columns: minmax(0, 38rem) 12rem;
+        gap: 2.75rem;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 9vh 6vw 12vh;
+      }
+      .kicker {
+        margin: 0 0 1.2rem;
+        color: #8a5a32;
+        font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+        font-size: 12px;
+        letter-spacing: 0.18em;
+      }
+      h1 {
+        margin: 0 0 1.6rem;
+        font-size: clamp(32px, 4vw, 48px);
+        font-weight: 560;
+        line-height: 1.25;
+      }
+      p {
+        margin: 0 0 1.15rem;
+        font-size: 1.12rem;
+        line-height: 1.95;
+      }
+      .note {
+        margin-top: 4.6rem;
+        color: #8a5a32;
+        font-size: 0.92rem;
+        line-height: 1.7;
+      }
+      @media (max-width: 720px) {
+        .sheet {
+          grid-template-columns: 1fr;
+          gap: 0.5rem;
+        }
+        .note {
+          margin-top: 0.5rem;
+          padding-top: 1rem;
+          border-top: 1px solid #e0d3bf;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <article class="sheet">
+      <div>
+        <p class="kicker">夜读 · 成稿</p>
+        <h1>灯还亮着的时候,只读一页。</h1>
+        <p>把灯拧到刚好能认字。书脊朝外,这一页靠左,右边空着,留给不想写进正文的那一句。</p>
+        <p>第一稿把句子举在页面中央,像一张海报。海报适合被看见,不适合被读完。于是标题落下,栏变窄,字用墨蓝,停在还能一口气读完的长度。</p>
+        <p>读完这一页就合上。灯可以再亮一会儿,但不再翻。</p>
+      </div>
+      <aside class="note">页边:海报改成了可以顺着读的一页。句子还是那句,位置换了。</aside>
+    </article>
+  </body>
+</html>

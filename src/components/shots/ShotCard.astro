@@ -18,7 +18,8 @@ const { shot, index } = Astro.props;
 const image = await findImage(shot.image);
 const link = getPermalink(shot.permalink);
 const seriesHref = shot.series ? getPermalink(`/shots/series/${cleanSlug(shot.series)}`) : undefined;
-const preview = promptPreview(shot.prompt, 120);
+const preview = shot.vibe?.trim() ? shot.vibe.trim() : promptPreview(shot.prompt, 120);
+const previewLabel = shot.vibe?.trim() ? 'Vibe' : 'Prompt';
 
 // Looping video covers recorded by `npm run screenshots -- <slug>` for entries
 // with `video: true` in frontmatter. Non-image assets (webm) import as
@@ -46,15 +47,30 @@ const catalogNo = typeof index === 'number' ? String(index + 1).padStart(2, '0')
   <a href={link} class="relative block aspect-[3/2] overflow-hidden bg-black/5 dark:bg-white/5" aria-label={shot.title}>
     {
       coverSrc ? (
-        <video
-          src={coverSrc}
-          poster={poster}
-          autoplay
-          muted
-          loop
-          playsinline
-          class="h-full w-full object-cover object-top"
-        />
+        <>
+          {poster && (
+            <img
+              src={poster}
+              alt=""
+              data-cover-poster
+              class="absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-300"
+            />
+          )}
+          <video
+            src={coverSrc}
+            poster={poster}
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            data-cover-video
+            class:list={[
+              'relative h-full w-full object-cover object-top transition-opacity duration-300',
+              poster && 'opacity-0',
+            ]}
+          />
+        </>
       ) : image ? (
         <Image
           src={image}
@@ -101,7 +117,7 @@ const catalogNo = typeof index === 'number' ? String(index + 1).padStart(2, '0')
     {shot.excerpt && <p class="line-clamp-2 text-sm text-muted">{shot.excerpt}</p>}
 
     <p class="border-l-2 border-button/70 pl-3 font-mono text-[12px] leading-relaxed text-default">
-      <span class="mb-0.5 block text-[10px] uppercase tracking-[0.14em] text-muted">Prompt</span>
+      <span class="mb-0.5 block text-[10px] uppercase tracking-[0.14em] text-muted">{previewLabel}</span>
       <span class="line-clamp-3">{preview}</span>
     </p>
 
@@ -125,3 +141,29 @@ const catalogNo = typeof index === 'number' ? String(index + 1).padStart(2, '0')
     </div>
   </div>
 </article>
+
+<script>
+  const revealCover = (video: HTMLVideoElement) => {
+    video.classList.remove('opacity-0');
+    video.parentElement?.querySelector('[data-cover-poster]')?.classList.add('opacity-0');
+  };
+
+  const bindCovers = () => {
+    document.querySelectorAll<HTMLVideoElement>('[data-cover-video]').forEach((video) => {
+      if (video.dataset.bound === '1') return;
+      video.dataset.bound = '1';
+      const show = () => revealCover(video);
+      if (video.readyState >= 2) show();
+      else {
+        video.addEventListener('loadeddata', show, { once: true });
+        video.addEventListener('playing', show, { once: true });
+      }
+    });
+  };
+
+  if (!document.documentElement.dataset.oslCovers) {
+    document.documentElement.dataset.oslCovers = '1';
+    document.addEventListener('astro:page-load', bindCovers);
+  }
+  bindCovers();
+</script>

@@ -11,7 +11,7 @@ metadata:
   title:
     default: One-Shot Library
     template: '%s — One-Shot Library'
-  description: '一个 Prompt,一个页面。静态画廊,收藏 AI 一条 prompt 一次生成的前端作品,并展出原始 prompt、harness、模型、轮数与在线预览。'
+  description: '静态展厅,收藏 vibe-coding 里长出来的前端页面。一轮 one-shot 与多轮会话并列,展出感觉、对话、工具、模型和成稿预览。'
   robots:
     index: true
     follow: true

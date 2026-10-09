@@ -80,13 +80,34 @@ const shotCollection = defineCollection({
     image: z.string().optional(),
     imageAlt: z.string().optional(),
 
-    /** The exact one-shot prompt that generated the artifact. */
+    /** Opening user message. One-shot entries can omit `session`; it is copied from here. */
     prompt: z.string(),
+    /** one-shot = a single user opening. vibe = an iterative session. */
+    mode: z.enum(['one-shot', 'vibe']).optional(),
+    /** One-line feel. Cards prefer this over a prompt excerpt when it is set. */
+    vibe: z.string().optional(),
+    /** What the session arrived at, in one sentence. */
+    outcome: z.string().optional(),
+    /**
+     * Ordered session. Each beat is a user or agent turn.
+     * `html` is a path under public/artifacts/. `image` is a screenshot ref.
+     */
+    session: z
+      .array(
+        z.object({
+          role: z.enum(['user', 'agent']),
+          text: z.string(),
+          note: z.string().optional(),
+          html: z.string().optional(),
+          image: z.string().optional(),
+        })
+      )
+      .optional(),
     /** Agent harness that drove the generation, e.g. "ZCode", "Claude Code", "v0". */
     harness: z.string().optional(),
     /** Model/agent that produced the artifact, e.g. "GLM-5.3-Flash". */
     model: z.string().optional(),
-    /** Number of conversation turns actually used (1 = true one-shot). */
+    /** User openings actually used (1 = true one-shot). Defaults to the user beats in `session`. */
     turns: z.number().int().optional(),
 
     /** Artifact HTML file served from /artifacts/<file> (public/artifacts). */

@@ -5,11 +5,13 @@ export interface Props {
   prompt: string;
   /** Optional label above the box. */
   label?: string;
+  /** Idle text on the copy button. Restored after the "已复制" flash. */
+  copyLabel?: string;
   /** Anchor id, used by the detail page jump link. */
   id?: string;
 }
 
-const { prompt, label = '原始 Prompt', id } = Astro.props;
+const { prompt, label = '原始 Prompt', copyLabel = '复制 Prompt', id } = Astro.props;
 const chars = prompt.trim().length;
 ---
 
@@ -32,7 +34,7 @@ const chars = prompt.trim().length;
       class="inline-flex items-center gap-1.5 rounded-md bg-button px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-button-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
       <Icon name="tabler:copy" class="h-3.5 w-3.5" aria-hidden="true" />
-      <span data-copy-text aria-live="polite">复制 Prompt</span>
+      <span data-copy-text data-copy-idle={copyLabel} aria-live="polite">{copyLabel}</span>
     </button>
   </div>
   <pre
@@ -69,11 +71,12 @@ const chars = prompt.trim().length;
         const code = btn.closest('[data-prompt-box]')?.querySelector('[data-prompt-text]');
         if (!code) return;
         const ok = await copyText(code.textContent ?? '');
-        const label = btn.querySelector('[data-copy-text]');
+        const label = btn.querySelector<HTMLElement>('[data-copy-text]');
         if (label) {
+          const idle = label.dataset.copyIdle || '复制 Prompt';
           label.textContent = ok ? '已复制' : '复制失败';
           window.setTimeout(() => {
-            label.textContent = '复制 Prompt';
+            label.textContent = idle;
           }, 2000);
         }
       });
