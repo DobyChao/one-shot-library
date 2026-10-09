@@ -55,7 +55,7 @@ const rows = await Promise.all(
         {turn.role === 'user' ? (
           <PromptBox
             prompt={turn.text}
-            label={userIndex === 1 ? '开场 · Prompt' : `第 ${userIndex} 次开口`}
+            label={userIndex === 1 ? '第一条' : `第 ${userIndex} 次`}
             copyLabel="复制这一轮"
             id={userIndex === 1 ? 'prompt' : undefined}
           />
@@ -77,7 +77,7 @@ const rows = await Promise.all(
             class="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
           >
             <Icon name="tabler:app-window" class="h-4 w-4" aria-hidden="true" />
-            这一步的页面就是页底成稿
+            和下面的预览是同一个文件
           </a>
         )}
         {previewSrc && (

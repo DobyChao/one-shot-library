@@ -19,7 +19,7 @@ const image = await findImage(shot.image);
 const link = getPermalink(shot.permalink);
 const seriesHref = shot.series ? getPermalink(`/shots/series/${cleanSlug(shot.series)}`) : undefined;
 const preview = shot.vibe?.trim() ? shot.vibe.trim() : promptPreview(shot.prompt, 120);
-const previewLabel = shot.vibe?.trim() ? 'Vibe' : 'Prompt';
+const previewLabel = shot.vibe?.trim() ? '想要的效果' : 'Prompt';
 
 // Looping video covers recorded by `npm run screenshots -- <slug>` for entries
 // with `video: true` in frontmatter. Non-image assets (webm) import as

@@ -32,7 +32,7 @@ publishDate: ${today}T12:00:00Z
 title: ${title}
 excerpt: 一句话介绍
 prompt: |
-  TODO: 粘贴开场那条用户原文(原样,一字不改)
+  TODO: 粘贴用户的第一条消息(原样,一字不改)
 mode: one-shot
 harness: ZCode
 model: GLM-5.3-Flash
@@ -46,7 +46,7 @@ featured: false
 TODO: 备注(生成细节、人工改动说明等,可留空)。
 
 多轮 vibe 时把 mode 改成 vibe,补上 vibe / outcome,并按顺序写 session(role: user | agent)。
-turns 记用户开口次数。harness 和 model 不知道就删掉这两行。
+turns 填用户发了几次。harness 和 model 不知道就删掉这两行。
 `;
 
 fs.writeFileSync(outFile, content);

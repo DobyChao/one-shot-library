@@ -49,7 +49,7 @@ const singletonGroups = filterGroups.filter((group) => group.values.length === 1
 
 const metadata = {
   title: '画廊',
-  description: '一轮 one-shot 与多轮 vibe 会话。可搜索对话,并按方式、类型、模型、工具与轮数筛选。',
+  description: '按方式、类型、模型、工具和轮数筛选。可以搜标题和对话。',
 };
 
 const chipBase =
@@ -82,7 +82,8 @@ const searchText = (shot: (typeof shots)[number]) =>
       <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-primary">Gallery</p>
       <h1 class="mt-2 text-4xl font-semibold tracking-tight text-heading sm:text-5xl">作品画廊</h1>
       <p class="mt-4 text-lg text-muted">
-        {shots.length} 件馆藏。{oneShotCount} 件一轮成页,{vibeCount} 件是多轮 vibe。点开卡片先看会话,再看成稿;带「同题对照」的作品可以并排比较。
+        一共 {shots.length} 件。{oneShotCount} 件只改了一轮,{vibeCount} 件改过几轮。点进去能看到当时的对话和最后的页面。写了同一个
+        series 的可以并排看。
       </p>
     </header>
 
@@ -105,7 +106,7 @@ const searchText = (shot: (typeof shots)[number]) =>
                 <input
                   id="shots-query"
                   type="search"
-                  placeholder="标题、感觉、对话、模型"
+                  placeholder="标题、摘要、对话、模型"
                   autocomplete="off"
                   class="w-full rounded-md border border-black/10 bg-page px-3 py-2 text-sm text-default placeholder:text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-white/15"
                 />

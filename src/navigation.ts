@@ -44,6 +44,6 @@ export const footerData = {
     { ariaLabel: 'Github', icon: 'tabler:brand-github', href: 'https://github.com/DobyChao/one-shot-library' },
   ],
   footNote: `
-    One-Shot Library · 静态展厅 · 一轮与多轮都原样展出
+    One-Shot Library · 静态站点
   `,
 };

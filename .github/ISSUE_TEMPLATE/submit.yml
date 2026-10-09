@@ -20,8 +20,8 @@ body:
   - type: textarea
     id: prompt
     attributes:
-      label: 开场 Prompt
-      description: 用户第一次开口的原文,一字不改地粘贴。一轮作品填这项即可。
+      label: 第一条 Prompt
+      description: 用户第一次发的原文,一字不改地粘贴。只改一轮的填这项即可。
       placeholder: |
         一句话生成一个……
     validations:
@@ -31,7 +31,7 @@ body:
     id: mode
     attributes:
       label: 方式
-      description: 一轮成页选 one-shot;来回改过选 vibe,并在下面写下会话
+      description: 只改一轮选 one-shot;来回改过选 vibe,并在下面写下对话
       options:
         - one-shot
         - vibe
@@ -85,4 +85,4 @@ body:
     id: notes
     attributes:
       label: 其他备注
-      description: 用户开口次数、人工改动、若会话是展陈样例请写明(可选)
+      description: 用户发了几次、人工改动。如果对话是样例,请写明(可选)

@@ -1,8 +1,8 @@
 # One-Shot Library
 
-感觉,对话,然后成页。收藏 vibe-coding 里长出来的前端产物(落地页 / 仪表盘 / 小工具)。一轮 **one-shot** 与多轮 **vibe** 会话并列,每件作品都留下**对话、工具、模型和成稿预览**。仓库名仍是 One-Shot Library。
+收录 AI 做的前端小页面(落地页、仪表盘、小工具)。只改一轮的和改过几轮的都收,每件留着当时的对话、工具、模型和能打开的 HTML。仓库名仍是 One-Shot Library。
 
-基于 [AstroWind](https://github.com/onwidget/astrowind)(Astro 7 + Tailwind CSS v4)构建,产物以静态 HTML 分发,详情页内嵌 iframe 预览最终页面,并按时间线展开会话。
+基于 [AstroWind](https://github.com/onwidget/astrowind)(Astro 7 + Tailwind CSS v4)构建。页面以静态 HTML 放出来,详情页用 iframe 看最终结果,对话按时间线排。
 
 ## 常用命令
 
@@ -30,11 +30,11 @@ npm run new          # 脚手架:新建条目骨架并格式化
 title: 作品标题
 excerpt: 一句话介绍
 prompt: |
-  开场那条用户原文(原样粘贴)。一轮作品只填这项也会合成一条会话。
-mode: one-shot # one-shot 或 vibe。省略时,用户开口超过 1 次会当成 vibe
-vibe: 一句感觉 # 可选。卡片优先显示它
-outcome: 这次改到了哪里 # 可选
-turns: 1 # 用户开口次数。省略时按 session 里的 user 条数
+  用户第一条消息(原样粘贴)。只改一轮的只填这项,也会合成一条会话。
+mode: one-shot # one-shot 或 vibe。不填时,用户消息超过 1 次会当成 vibe
+vibe: 当时想要的效果 # 可选。卡片优先显示它
+outcome: 最后改成了什么 # 可选
+turns: 1 # 用户发了几次。不填时按 session 里的 user 条数
 harness: ZCode # 可选。驱动生成的工具(ZCode / Claude Code / Cursor / v0 …)
 model: GLM-5.3-Flash # 可选。使用的模型
 html: my-landing.html # public/artifacts/ 下的最终文件
@@ -43,7 +43,7 @@ tags: [landing-page, saas]
 featured: false
 # session: # 可选。多轮时按顺序写。html / image 挂在某一回合上
 #   - role: user
-#     text: 与 prompt 相同的开场原文
+#     text: 和 prompt 相同的第一条消息
 #     html: my-landing/step-1.html
 #   - role: agent
 #     text: 这一步交出来的东西
@@ -57,10 +57,10 @@ featured: false
 `session`(有序回合:`role` 为 `user` 或 `agent`,`text` 必填,`note` / `html` / `image` 可选)。
 `mode` / `harness` / `model` / `turns` 会成为卡片徽章并参与画廊筛选(也可按方式、工具、模型或 series 分组)。工具和模型请用规范写法(见 `src/data/taxonomy.ts` 或站内关于页),不知道就留空;
 `series` 相同的作品进入 `/shots/series/<name>` 并排对照;prompt 不同会各自保留原文;
-`prompt` 是开场用户原文。省略 `session` 时,站点用它合成一条用户回合,已有的一轮条目不用改文件;
-某一回合的 `html` 若与最终 `html` 相同,时间线只链到页底成稿,不再嵌一次;
+`prompt` 是用户的第一条消息。不填 `session` 时,站点用它合成一条用户回合,已有的一轮条目不用改文件;
+某一回合的 `html` 若与最终 `html` 相同,时间线只链到下面的预览,不再嵌一次;
 方式、轮数、日期、产物形式出现在详情页「生成信息」面板;`npm run audit` 的 Lighthouse 分数有则自动展示;
-markdown 正文可选,显示在详情页「备注」区。为演示时间线而写的样例请在备注里标明。
+markdown 正文可选,显示在详情页「备注」里。为了演示时间线而写的样例,请在备注里标明。
 
 ## 目录速览
 

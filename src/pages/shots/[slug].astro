@@ -51,7 +51,7 @@ const infoCells: Array<{ label: string; value: string; hint?: string; icon: stri
   {
     label: '方式 · Mode',
     value: shotModeLabel(shot.mode),
-    hint: shot.mode === 'vibe' ? '多轮把感觉改到成稿' : '开场一条 prompt 即成页',
+    hint: shot.mode === 'vibe' ? '中间改过' : '只发过一次',
     icon: shot.mode === 'vibe' ? 'tabler:messages' : 'tabler:bolt',
   },
 ];
@@ -64,7 +64,7 @@ if (shot.model) {
 infoCells.push({
   label: '轮数 · Turns',
   value: `${shot.turns} 轮`,
-  hint: '记用户开口的次数',
+  hint: '算用户发了几次',
   icon: 'tabler:messages',
 });
 infoCells.push({ label: '日期 · Date', value: formatDate(shot.publishDate), icon: 'tabler:calendar' });
@@ -137,7 +137,7 @@ const jumpClass =
         </a>
         <a href="#live-preview" class={jumpClass}>
           <Icon name="tabler:app-window" class="h-4 w-4" aria-hidden="true" />
-          看成稿
+          看页面
         </a>
         {
           seriesHref && (
@@ -155,13 +155,13 @@ const jumpClass =
         <aside class="mb-10 max-w-3xl border-l-2 border-button pl-5">
           {shot.vibe && (
             <>
-              <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-primary">感觉 · Vibe</p>
-              <p class="mt-2 text-2xl font-semibold leading-snug text-heading">{shot.vibe}</p>
+              <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-primary">想要的效果</p>
+              <p class="mt-2 text-lg leading-snug text-heading">{shot.vibe}</p>
             </>
           )}
           {shot.outcome && (
             <p class="mt-3 text-muted">
-              <span class="font-medium text-heading">结果 · </span>
+              <span class="font-medium text-heading">改完之后 · </span>
               {shot.outcome}
             </p>
           )}
@@ -175,8 +175,8 @@ const jumpClass =
         <p class="mt-1 text-sm text-muted">
           {
             shot.mode === 'one-shot'
-              ? '这件是一轮成页。时间线里就是开场那条 prompt,成稿在下面。'
-              : '按收录顺序排列。用户每次开口记为一轮;某一回合如果留了中间稿,可以展开看。'
+              ? '只发过一次。下面是当时那条 prompt,页面在更下面。'
+              : '按当时的顺序排。用户发一次算一轮。某一步如果存了中间页面,点开就能看。'
           }
         </p>
       </div>
@@ -186,7 +186,7 @@ const jumpClass =
     <section class="mb-12" aria-labelledby="info-heading">
       <div class="mb-4 flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="info-heading" class="text-xl font-semibold text-heading">生成信息</h2>
-        <p class="text-xs text-muted">收录时写入的档案,不是在线评测。</p>
+        <p class="text-xs text-muted">收录时填的,不会自动更新。</p>
       </div>
       <dl
         class="grid grid-cols-1 gap-px overflow-hidden rounded-md border border-black/10 bg-black/10 sm:grid-cols-2 dark:border-white/10 dark:bg-white/10"
@@ -209,7 +209,7 @@ const jumpClass =
     <section class="mb-12 scroll-mt-24" id="live-preview" aria-labelledby="preview-heading">
       <h2 id="preview-heading" class="mb-4 flex items-center gap-2 text-xl font-semibold text-heading">
         <Icon name="tabler:app-window" class="h-5 w-5 text-primary" aria-hidden="true" />
-        成稿预览
+        页面预览
       </h2>
       {
         liveUrl ? (

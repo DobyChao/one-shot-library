@@ -11,7 +11,7 @@ metadata:
   title:
     default: One-Shot Library
     template: '%s — One-Shot Library'
-  description: '静态展厅,收藏 vibe-coding 里长出来的前端页面。一轮 one-shot 与多轮会话并列,展出感觉、对话、工具、模型和成稿预览。'
+  description: '收录 AI 做的前端小页面。每件留着当时的 prompt、对话、工具、模型和能打开的 HTML。只改一轮的和改过几轮的都有。'
   robots:
     index: true
     follow: true

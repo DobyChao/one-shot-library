@@ -4,24 +4,23 @@ import { HARNESSES, MODELS } from '~/data/taxonomy';
 
 const metadata = {
   title: '关于 / 提交作品',
-  description: 'One-Shot Library 是什么,以及如何把一轮 one-shot 或多轮 vibe 作品提交进画廊。',
+  description: '这个站点收什么,以及怎么把作品交上来。',
 };
 ---
 
 <Layout metadata={metadata}>
   <section class="px-4 py-16 sm:px-6 mx-auto max-w-3xl lg:px-8">
-    <header class="mb-10 text-center">
+    <header class="mb-10">
       <p class="mb-2 text-sm font-semibold uppercase tracking-wider text-primary">About</p>
       <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl dark:text-white md:text-5xl">关于本站</h1>
     </header>
 
     <div class="prose prose-lg dark:prose-invert mx-auto">
       <p>
-        <strong>One-Shot Library</strong> 是一个静态展厅,收藏 vibe-coding 里长出来的前端页面:落地页、仪表盘、小工具。一轮
-        one-shot 与多轮会话并列。每件作品摊开<strong>感觉、按时间排列的对话、工具与模型、以及成稿预览</strong>。
+        <strong>One-Shot Library</strong> 收 AI 做的前端页面,落地页、仪表盘、小工具都有。只改一轮的和来回改过的放在一起。每件看得到当时的对话、用的工具和模型,以及最后的页面。
       </p>
       <p>
-        这里不是评测台:不打分、不投票、不连接模型 API。你看到的页面就是收录时的那份静态 HTML。站点基于
+        你看到的就是收录时的那份 HTML。不打分,不投票,也不连模型。站点基于
         <a href="https://github.com/onwidget/astrowind">AstroWind</a>(Astro + Tailwind CSS)构建,产物以静态 HTML
         随站点分发(单文件或子目录),详情页用沙箱 iframe 预览。
       </p>
@@ -54,7 +53,8 @@ const metadata = {
       <p>
         不想折腾仓库?直接
         <a href="https://github.com/DobyChao/one-shot-library/issues/new?template=submit.yml">用表单开一个 Issue</a>,
-        附上开场 prompt、方式(一轮或 vibe)、会话(多轮时)、使用的工具 / 模型、产物链接(或文件),由维护者代为收录。
+        附上第一条
+        prompt、方式(只改一轮或改过几轮)、会话(改过几轮时)、用的工具和模型、页面链接或文件。维护者会代为放上来。
       </p>
 
       <h3>frontmatter 字段</h3>
@@ -62,11 +62,11 @@ const metadata = {
 title: 作品标题
 excerpt: 一句话介绍
 prompt: |
-  开场那条用户原文。一轮作品可以只填这一项。
-mode: one-shot           # one-shot 或 vibe。省略时:用户开口超过 1 次会当成 vibe
-vibe: 一句感觉           # 可选。卡片优先显示它
-outcome: 这次改到了哪里  # 可选
-turns: 1                 # 用户开口次数。省略时按 session 里的 user 条数
+  用户第一条消息,原样粘贴。只改一轮的可以只填这项。
+mode: one-shot           # one-shot 或 vibe。不填时,用户消息超过 1 次会当成 vibe
+vibe: 当时想要的效果      # 可选。卡片优先显示它
+outcome: 最后改成了什么  # 可选
+turns: 1                 # 用户发了几次。不填时按 session 里的 user 条数
 harness: ZCode           # 可选。驱动生成的工具
 model: GLM-5.3-Flash     # 可选。使用的模型
 html: my-landing.html    # public/artifacts/ 下的最终文件
@@ -74,21 +74,21 @@ image: '~/assets/images/shots/my-landing.png'
 tags: [landing-page, saas]
 series: my-series        # 可选。同名 series 会进入「同题对照」并排页
 featured: false
-session:                 # 可选。省略时用 prompt 合成一条用户回合
+session:                 # 可选。不填时用 prompt 合成一条用户消息
   - role: user
     text: |
-      与 prompt 相同的开场原文
+      和 prompt 相同的第一条消息
   - role: agent
     text: |
-      这一步交出来的东西,短记即可
+      这一步做出了什么,短记即可
     note: 中间稿说明
     html: my-landing/step-1.html   # 可选,public/artifacts/ 下的中间稿
     image: '~/assets/images/shots/my-landing/step-1.png'
 ---</code></pre>
 
       <p>
-        <code>prompt</code> 始终是开场那条用户原文,同题对照仍用它比较。<code>session</code> 按时间顺序写用户和助手的回合;某一回合的
-        <code>html</code> 若与最终 <code>html</code> 相同,详情页不会再嵌一次,只链到页底成稿。<code>harness</code> 与
+        <code>prompt</code> 是用户的第一条消息,同题对照仍用它比较。<code>session</code> 按时间顺序写用户和助手的回合;某一回合的
+        <code>html</code> 若与最终 <code>html</code> 相同,详情页不再嵌一次,只链到下面的预览。<code>harness</code> 与
         <code>model</code> 会作为标签展示,并参与画廊筛选——写了就用规范写法,不知道可以留空:
       </p>
       <p class="flex flex-wrap items-center gap-2">
@@ -104,10 +104,10 @@ session:                 # 可选。省略时用 prompt 合成一条用户回合
         }
       </p>
       <p>
-        <code>turns</code> 记的是用户开口次数,和方式、日期、产物形式一起出现在「生成信息」里。<code>series</code> 相同的作品可以在「同题对照」页并排看
-        prompt 和预览。frontmatter 加 <code>video: true</code> 时,收录流程会用 Playwright 录制一段循环动画作为卡片封面(可用
+        <code>turns</code> 算的是用户发了几次,和方式、日期、文件形式一起出现在「生成信息」里。<code>series</code> 相同的作品可以在「同题对照」页并排看
+        prompt 和预览。frontmatter 加 <code>video: true</code> 时,收录时会用 Playwright 录一段循环动画当卡片封面(可用
         <code>videoKey</code>
-        指定开始交互的按键)。markdown 正文可选,显示在详情页「备注」区。若会话是为了演示时间线而写的样例,请在备注里写明,不要伪装成某次模型转录。
+        指定开始交互的按键)。markdown 正文可选,显示在详情页「备注」里。如果对话是为了把时间线演示出来而写的,在备注里写明。
       </p>
     </div>
   </section>
