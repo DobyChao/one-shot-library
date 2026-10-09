@@ -37,6 +37,7 @@ outcome: 最后改成了什么 # 可选
 turns: 1 # 用户发了几次。不填时按 session 里的 user 条数
 harness: ZCode # 可选。驱动生成的工具(ZCode / Claude Code / Cursor / v0 …)
 model: GLM-5.3-Flash # 可选。使用的模型
+thinking: high # 可选。思考强度,只出现在详情页,不进筛选
 html: my-landing.html # public/artifacts/ 下的最终文件
 image: '~/assets/images/shots/my-landing.png'
 tags: [landing-page, saas]
@@ -58,7 +59,7 @@ featured: false
 `mode` / `harness` / `model` / `turns` 会成为卡片徽章并参与画廊筛选(也可按方式、工具或模型分组)。工具和模型请用规范写法(见 `src/data/taxonomy.ts` 或站内关于页),不知道就留空;
 `prompt` 是用户的第一条消息。不填 `session` 时,站点用它合成一条用户回合,已有的一轮条目不用改文件;
 某一回合的 `html` 若与最终 `html` 相同,时间线只链到下面的预览,不再嵌一次;
-方式、轮数、日期、产物形式出现在详情页「生成信息」面板;`npm run audit` 的 Lighthouse 分数有则自动展示;
+方式、轮数、日期、产物形式出现在详情页「生成信息」面板,填了 `thinking` 时思考强度也在这里;`npm run audit` 的 Lighthouse 分数有则自动展示;
 markdown 正文可选,显示在详情页「备注」里。为了演示时间线而写的样例,请在备注里标明。
 
 ## 目录速览

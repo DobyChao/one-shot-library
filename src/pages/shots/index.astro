@@ -7,14 +7,21 @@ export const prerender = true;
 
 const shots = await fetchShots();
 
-const countBy = (values: Array<string | undefined>) => {
+const UNCATEGORIZED = '未分类';
+
+const countBy = (values: Array<string | undefined>, blankLabel?: string) => {
   const counts = new Map<string, number>();
   for (const value of values) {
-    if (!value) continue;
-    counts.set(value, (counts.get(value) ?? 0) + 1);
+    const key = value || blankLabel;
+    if (!key) continue;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   return [...counts.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh'))
+    .sort((a, b) => {
+      if (blankLabel && a[0] === blankLabel) return 1;
+      if (blankLabel && b[0] === blankLabel) return -1;
+      return b[1] - a[1] || a[0].localeCompare(b[0], 'zh');
+    })
     .map(([value, count]) => ({
       value,
       count,
@@ -22,8 +29,14 @@ const countBy = (values: Array<string | undefined>) => {
 };
 
 const contentTags = countBy(shots.flatMap((shot) => (shot.tags ?? []).map((tag) => tag.title)));
-const models = countBy(shots.map((shot) => shot.model));
-const harnesses = countBy(shots.map((shot) => shot.harness));
+const models = countBy(
+  shots.map((shot) => shot.model),
+  UNCATEGORIZED
+);
+const harnesses = countBy(
+  shots.map((shot) => shot.harness),
+  UNCATEGORIZED
+);
 const turns = countBy(shots.map((shot) => String(shot.turns ?? 1))).map((item) => ({
   ...item,
   label: `${item.value} 轮`,
@@ -201,8 +214,8 @@ const searchText = (shot: (typeof shots)[number]) =>
                 data-shot-index={index}
                 data-shot-tags={(shot.tags ?? []).map((tag) => tag.title).join('|')}
                 data-shot-mode={shot.mode}
-                data-shot-model={shot.model ?? ''}
-                data-shot-harness={shot.harness ?? ''}
+                data-shot-model={shot.model || UNCATEGORIZED}
+                data-shot-harness={shot.harness || UNCATEGORIZED}
                 data-shot-turns={String(shot.turns ?? 1)}
                 data-shot-series={shot.series ?? ''}
                 data-shot-search={searchText(shot)}
@@ -334,7 +347,7 @@ const searchText = (shot: (typeof shots)[number]) =>
             ? '多轮 · vibe'
             : state.group === 'mode' && raw === 'one-shot'
               ? '一轮 · one-shot'
-              : raw || '未标注';
+              : raw || '未分类';
         const list = groups.get(label) || [];
         list.push(item);
         groups.set(label, list);
@@ -343,8 +356,8 @@ const searchText = (shot: (typeof shots)[number]) =>
         const shown = (list: HTMLElement[]) => list.filter((item) => !item.classList.contains('hidden')).length;
         const delta = shown(b[1]) - shown(a[1]);
         if (delta !== 0) return delta;
-        if (a[0] === '未标注') return 1;
-        if (b[0] === '未标注') return -1;
+        if (a[0] === '未分类') return 1;
+        if (b[0] === '未分类') return -1;
         return a[0].localeCompare(b[0], 'zh');
       });
       for (const [label, groupItems] of entries) {
