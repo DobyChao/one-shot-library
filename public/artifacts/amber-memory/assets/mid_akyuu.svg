@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="80" height="96">
+  <!-- amber specimen glow -->
+  <ellipse cx="40" cy="50" rx="32" ry="40" fill="#C9952A" opacity=".12"/>
+  <ellipse cx="40" cy="91" rx="18" ry="3.5" fill="#141414" opacity=".3"/>
+  <path d="M28 40 Q40 26 52 40 L50 78 Q40 88 30 78 Z" fill="#E8DCC8" stroke="#B83A2C" stroke-width="1.4"/>
+  <rect x="32" y="48" width="16" height="18" rx="1" fill="#3A3A48" opacity=".55"/>
+  <path d="M34 52 H46 M34 56 H44 M34 60 H45" stroke="#E8DCC8" stroke-width=".8" opacity=".6"/>
+  <circle cx="40" cy="26" r="12" fill="#F5D78E" stroke="#141414" stroke-width="1.2"/>
+  <path d="M29 22 Q40 10 51 22" fill="#3A3A48"/>
+  <ellipse cx="36" cy="27" rx="1.8" ry="2.4" fill="#141414"/>
+  <ellipse cx="44" cy="27" rx="1.8" ry="2.4" fill="#141414"/>
+  <!-- frame corners suggesting projection -->
+  <path d="M18 18 H28 V22 H22 V28 H18 Z" fill="none" stroke="#C9952A" stroke-width="1.5" opacity=".7"/>
+  <path d="M62 18 H52 V22 H58 V28 H62 Z" fill="none" stroke="#C9952A" stroke-width="1.5" opacity=".7"/>
+</svg>

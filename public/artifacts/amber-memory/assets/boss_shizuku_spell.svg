@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="80" height="96">
+  <defs>
+    <linearGradient id="dress" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2E5A6B"/>
+      <stop offset="100%" stop-color="#1A3A4A"/>
+    </linearGradient>
+    <linearGradient id="amberG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFD966" stop-opacity=".95"/>
+      <stop offset="50%" stop-color="#E8A317" stop-opacity=".85"/>
+      <stop offset="100%" stop-color="#B86E00" stop-opacity=".9"/>
+    </linearGradient>
+    <radialGradient id="faceG" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#F5D78E"/>
+      <stop offset="100%" stop-color="#E8A317"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="40" cy="91" rx="20" ry="4" fill="#1A3A4A" opacity=".35"/>
+  <!-- sand mist -->
+  <g fill="#E8A317" opacity=".35">
+    <circle cx="22" cy="62" r="2"/><circle cx="28" cy="70" r="1.5"/>
+    <circle cx="18" cy="74" r="1.2"/><circle cx="34" cy="78" r="1.8"/>
+    <circle cx="48" cy="66" r="1.4"/><circle cx="56" cy="72" r="2"/>
+    <circle cx="52" cy="80" r="1.3"/><circle cx="42" cy="84" r="1.6"/>
+  </g>
+  <!-- dress -->
+  <path d="M26 38 Q40 26 54 38 L58 70 Q40 88 22 70 Z" fill="url(#dress)" stroke="#E8A317" stroke-width="1.5"/>
+  <path d="M28 48 Q40 40 52 48" fill="none" stroke="#FFD966" stroke-width="1.3" opacity=".85"/>
+  <path d="M30 58 Q40 50 50 58" fill="none" stroke="#F5D78E" stroke-width="1" opacity=".6"/>
+  <!-- hourglass glow on chest -->
+  <ellipse cx="40" cy="54" rx="6" ry="9" fill="url(#amberG)" opacity=".55"/>
+  <path d="M36 46 L40 54 L44 46 M36 62 L40 54 L44 62" fill="none" stroke="#FFD966" stroke-width="1.4"/>
+  <!-- arms raised / pouring -->
+  <path d="M24 40 Q12 36 16 52" fill="none" stroke="#2E5A6B" stroke-width="5" stroke-linecap="round"/>
+  <path d="M56 40 Q68 34 64 50" fill="none" stroke="#2E5A6B" stroke-width="5" stroke-linecap="round"/>
+  <!-- tipped gourd pouring amber -->
+  <g transform="rotate(-35 20 58)">
+    <ellipse cx="18" cy="60" rx="10" ry="8" fill="url(#amberG)" stroke="#B86E00" stroke-width="1.3"/>
+    <path d="M10 56 Q18 50 26 56" fill="none" stroke="#B86E00" stroke-width="1.1"/>
+    <path d="M14 68 Q18 74 22 68" fill="none" stroke="#1A3A4A" stroke-width="1.4" opacity=".7"/>
+  </g>
+  <path d="M28 68 Q32 78 30 88" fill="none" stroke="#E8A317" stroke-width="2" opacity=".6" stroke-linecap="round"/>
+  <circle cx="30" cy="90" r="2.2" fill="#FFD966" opacity=".7"/>
+  <!-- head -->
+  <circle cx="40" cy="24" r="13" fill="url(#faceG)" stroke="#B86E00" stroke-width="1.5"/>
+  <path d="M28 20 Q22 6 34 10 Q40 2 46 10 Q58 6 52 20" fill="#1A3A4A" opacity=".9"/>
+  <path d="M27 26 Q18 34 22 48" fill="none" stroke="#E8A317" stroke-width="2.2" stroke-linecap="round" opacity=".8"/>
+  <path d="M53 26 Q62 34 58 48" fill="none" stroke="#E8A317" stroke-width="2.2" stroke-linecap="round" opacity=".8"/>
+  <path d="M30 20 Q40 14 50 20 Q44 18 40 19 Q36 18 30 20" fill="#2E5A6B"/>
+  <ellipse cx="35" cy="25" rx="2.2" ry="2.8" fill="#1A3A4A"/>
+  <ellipse cx="45" cy="25" rx="2.2" ry="2.8" fill="#1A3A4A"/>
+  <circle cx="35.5" cy="24" r=".7" fill="#F7F2E8"/>
+  <circle cx="45.5" cy="24" r=".7" fill="#F7F2E8"/>
+  <path d="M37 30 Q40 33 43 30" fill="none" stroke="#B86E00" stroke-width="1.1" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 56" width="360" height="56">
+  <defs>
+    <linearGradient id="ban" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3D2914" stop-opacity="0"/>
+      <stop offset="15%" stop-color="#3D2914" stop-opacity=".85"/>
+      <stop offset="85%" stop-color="#3D2914" stop-opacity=".85"/>
+      <stop offset="100%" stop-color="#3D2914" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="8" width="360" height="40" fill="url(#ban)"/>
+  <rect x="24" y="10" width="312" height="36" rx="3" fill="#3D2914" fill-opacity=".85" stroke="#E8A317" stroke-width="1.8"/>
+  <path d="M28 14 L40 14 L34 28 Z" fill="#E8A317" opacity=".8"/>
+  <path d="M332 14 L320 14 L326 28 Z" fill="#E8A317" opacity=".8"/>
+  <text x="180" y="34" text-anchor="middle" font-family="serif" font-size="15" fill="#F5D78E">水符「逆流的二十四刻」</text>
+</svg>

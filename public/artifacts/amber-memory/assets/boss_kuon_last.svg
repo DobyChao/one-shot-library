@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="80" height="96">
+  <defs>
+    <radialGradient id="last" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#FFE6A0" stop-opacity=".5"/>
+      <stop offset="50%" stop-color="#F2C14E" stop-opacity=".25"/>
+      <stop offset="100%" stop-color="#E8B84A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="robe3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F2C14E"/>
+      <stop offset="40%" stop-color="#6B4C7A"/>
+      <stop offset="100%" stop-color="#1A1430"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="40" cy="50" rx="36" ry="42" fill="url(#last)"/>
+  <ellipse cx="40" cy="91" rx="20" ry="4" fill="#000" opacity=".35"/>
+  <!-- freeze shell hint -->
+  <circle cx="40" cy="48" r="38" fill="none" stroke="#E8B84A" stroke-width="2" opacity=".45"/>
+  <path d="M20 36 Q40 10 60 36 L58 78 Q40 94 22 78 Z" fill="url(#robe3)" stroke="#FFE6A0" stroke-width="1.6"/>
+  <circle cx="40" cy="22" r="13" fill="#FFE6A0" stroke="#F2C14E" stroke-width="1.5"/>
+  <path d="M27 18 Q24 4 36 10 Q40 0 44 10 Q56 4 53 18" fill="#1A1430"/>
+  <ellipse cx="35" cy="23" rx="2.2" ry="2.8" fill="#1A1430"/>
+  <ellipse cx="45" cy="23" rx="2.2" ry="2.8" fill="#1A1430"/>
+  <!-- shattered shards around -->
+  <g fill="#FFE6A0" opacity=".7">
+    <path d="M10 40 L14 36 L16 42 Z"/><path d="M66 38 L72 42 L68 48 Z"/>
+    <path d="M14 70 L18 66 L20 74 Z"/><path d="M62 68 L68 72 L64 78 Z"/>
+  </g>
+  <circle cx="40" cy="22" r="20" fill="none" stroke="#FFE6A0" stroke-width="1.5" opacity=".7"/>
+</svg>

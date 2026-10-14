@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 448" width="384" height="448" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a1e38"/>
+      <stop offset="45%" stop-color="#4A3560"/>
+      <stop offset="100%" stop-color="#1e2830"/>
+    </linearGradient>
+    <radialGradient id="tree" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#F0C14A" stop-opacity=".45"/>
+      <stop offset="55%" stop-color="#D4890A" stop-opacity=".25"/>
+      <stop offset="100%" stop-color="#D4890A" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="384" height="448" fill="url(#sky)"/>
+  <ellipse cx="192" cy="160" rx="120" ry="140" fill="url(#tree)"/>
+  <!-- sacred tree silhouette -->
+  <path d="M192 40 L210 160 L192 280 L174 160 Z" fill="#D4890A" opacity=".55"/>
+  <path d="M160 100 Q192 60 224 100 Q210 140 192 130 Q174 140 160 100" fill="#F0C14A" opacity=".35"/>
+  <rect x="186" y="200" width="12" height="120" fill="#6B3A2A" opacity=".6"/>
+  <!-- floating garden platforms -->
+  <ellipse cx="80" cy="320" rx="60" ry="16" fill="#6F9B6A" opacity=".45"/>
+  <ellipse cx="300" cy="300" rx="55" ry="14" fill="#6F9B6A" opacity=".4"/>
+  <ellipse cx="192" cy="380" rx="140" ry="28" fill="#2a1e38" opacity=".5"/>
+  <!-- gold petals -->
+  <g fill="#F0C14A" opacity=".5">
+    <ellipse cx="50" cy="120" rx="6" ry="3" transform="rotate(-20 50 120)"/>
+    <ellipse cx="120" cy="80" rx="5" ry="2.5" transform="rotate(15 120 80)"/>
+    <ellipse cx="260" cy="100" rx="6" ry="3" transform="rotate(-35 260 100)"/>
+    <ellipse cx="320" cy="160" rx="5" ry="2.5" transform="rotate(25 320 160)"/>
+    <ellipse cx="90" cy="200" rx="4" ry="2"/>
+    <ellipse cx="280" cy="220" rx="5" ry="2.5"/>
+    <ellipse cx="150" cy="260" rx="4" ry="2"/>
+    <ellipse cx="230" cy="280" rx="5" ry="2.5"/>
+  </g>
+  <!-- silver trim hints -->
+  <path d="M40 360 Q192 330 344 360" fill="none" stroke="#C0C8D4" stroke-width="1" opacity=".25"/>
+</svg>

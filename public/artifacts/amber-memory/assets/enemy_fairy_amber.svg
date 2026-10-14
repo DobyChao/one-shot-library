@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <radialGradient id="body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#FFD966"/>
+      <stop offset="100%" stop-color="#E8A317"/>
+    </radialGradient>
+  </defs>
+  <!-- wings -->
+  <ellipse cx="6" cy="14" rx="5" ry="8" fill="#F5D78E" opacity=".55" stroke="#E8A317" stroke-width=".8"/>
+  <ellipse cx="26" cy="14" rx="5" ry="8" fill="#F5D78E" opacity=".55" stroke="#E8A317" stroke-width=".8"/>
+  <!-- body -->
+  <ellipse cx="16" cy="18" rx="7" ry="9" fill="url(#body)" stroke="#B86E00" stroke-width="1"/>
+  <!-- head -->
+  <circle cx="16" cy="9" r="5.5" fill="#F5D78E" stroke="#B86E00" stroke-width="1"/>
+  <circle cx="14" cy="9" r="1" fill="#2A2218"/>
+  <circle cx="18" cy="9" r="1" fill="#2A2218"/>
+  <!-- crystal shard hat -->
+  <path d="M16 2 L19 8 L13 8 Z" fill="#E8A317" stroke="#B86E00" stroke-width=".7"/>
+  <circle cx="16" cy="5" r="1" fill="#FFD966"/>
+  <!-- sparkle -->
+  <circle cx="22" cy="20" r="1.2" fill="#FFD966" opacity=".9"/>
+</svg>
