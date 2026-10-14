@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="80" height="96">
+  <!-- translucent silhouette for mirror afterimage; overall ~0.45 via shapes -->
+  <ellipse cx="40" cy="91" rx="18" ry="3.5" fill="#1A3A4A" opacity=".15"/>
+  <path d="M26 38 Q40 28 54 38 L56 72 Q40 86 24 72 Z" fill="#2E5A6B" opacity=".4" stroke="#E8A317" stroke-width="1" stroke-opacity=".45"/>
+  <circle cx="40" cy="26" r="12" fill="#F5D78E" opacity=".4" stroke="#B86E00" stroke-width="1" stroke-opacity=".4"/>
+  <path d="M28 22 Q22 10 34 14 Q40 6 46 14 Q58 10 52 22" fill="#1A3A4A" opacity=".35"/>
+  <path d="M30 22 Q40 16 50 22" fill="#2E5A6B" opacity=".35"/>
+  <!-- hollow hourglass hint -->
+  <path d="M36 46 L40 54 L44 46 L40 50 Z" fill="none" stroke="#FFD966" stroke-width="1.2" opacity=".4"/>
+  <ellipse cx="40" cy="56" rx="5" ry="7" fill="none" stroke="#E8A317" stroke-width="1" opacity=".35"/>
+  <!-- soft double outline for ghost feel -->
+  <path d="M24 40 Q40 30 56 40" fill="none" stroke="#F5D78E" stroke-width=".8" opacity=".3"/>
+  <ellipse cx="18" cy="70" rx="8" ry="6" fill="#E8A317" opacity=".2"/>
+</svg>

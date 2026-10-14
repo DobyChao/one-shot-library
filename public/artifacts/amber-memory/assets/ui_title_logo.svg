@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 100" width="360" height="100">
+  <defs>
+    <linearGradient id="titleG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFD966"/>
+      <stop offset="50%" stop-color="#E8A317"/>
+      <stop offset="100%" stop-color="#B86E00"/>
+    </linearGradient>
+  </defs>
+  <!-- amber crystal ornaments -->
+  <path d="M40 50 L52 30 L64 50 L52 70 Z" fill="#E8A317" opacity=".55" stroke="#B86E00" stroke-width="1"/>
+  <path d="M296 50 L308 30 L320 50 L308 70 Z" fill="#E8A317" opacity=".55" stroke="#B86E00" stroke-width="1"/>
+  <text x="180" y="44" text-anchor="middle" font-family="serif" font-size="30" font-weight="700" fill="url(#titleG)" stroke="#B86E00" stroke-width="0.6">东方琥珀录</text>
+  <text x="180" y="70" text-anchor="middle" font-family="serif" font-size="13" fill="#F5D78E" letter-spacing="1.5">Ephemeral Amber Memory</text>
+  <line x1="90" y1="80" x2="270" y2="80" stroke="#E8A317" stroke-width="1" opacity=".5"/>
+  <circle cx="180" cy="80" r="3" fill="#FFD966"/>
+</svg>

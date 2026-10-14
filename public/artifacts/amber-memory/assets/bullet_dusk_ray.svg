@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 8" width="24" height="8">
+  <defs>
+    <linearGradient id="r" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6B4C7A" stop-opacity=".3"/>
+      <stop offset="40%" stop-color="#6B4C7A"/>
+      <stop offset="100%" stop-color="#F2C14E" stop-opacity=".8"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="2" width="22" height="4" rx="2" fill="url(#r)"/>
+  <rect x="14" y="2.5" width="8" height="3" rx="1" fill="#FFE6A0" opacity=".5"/>
+</svg>

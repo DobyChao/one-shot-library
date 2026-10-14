@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 448" width="384" height="448" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1528"/>
+      <stop offset="50%" stop-color="#2a2438"/>
+      <stop offset="100%" stop-color="#141018"/>
+    </linearGradient>
+  </defs>
+  <rect width="384" height="448" fill="url(#sky)"/>
+  <!-- clouds -->
+  <ellipse cx="80" cy="100" rx="70" ry="20" fill="#3A3A48" opacity=".35"/>
+  <ellipse cx="300" cy="80" rx="90" ry="24" fill="#3A3A48" opacity=".3"/>
+  <ellipse cx="200" cy="140" rx="110" ry="18" fill="#E8DCC8" opacity=".08"/>
+  <!-- floating amber frames -->
+  <g>
+    <rect x="36" y="50" width="78" height="100" rx="3" fill="#C9952A" fill-opacity=".22" stroke="#E8A317" stroke-width="2" opacity=".7"/>
+    <rect x="48" y="62" width="54" height="70" fill="#3A3A48" opacity=".25"/>
+    <rect x="154" y="30" width="90" height="110" rx="3" fill="#C9952A" fill-opacity=".28" stroke="#D4A84B" stroke-width="2"/>
+    <rect x="168" y="44" width="62" height="78" fill="#141414" opacity=".3"/>
+    <ellipse cx="199" cy="80" rx="12" ry="22" fill="#E8DCC8" opacity=".2"/>
+    <rect x="278" y="60" width="68" height="88" rx="3" fill="#C9952A" fill-opacity=".2" stroke="#E8A317" stroke-width="1.5" opacity=".75"/>
+  </g>
+  <!-- gallery floor / corridor -->
+  <path d="M0 340 Q192 300 384 340 L384 448 L0 448 Z" fill="#1a1528" opacity=".85"/>
+  <path d="M40 360 L192 320 L344 360" fill="none" stroke="#E8DCC8" stroke-width="1" opacity=".2"/>
+  <path d="M80 400 L192 360 L304 400" fill="none" stroke="#C9952A" stroke-width="1" opacity=".25"/>
+  <!-- ink splat accents -->
+  <circle cx="60" cy="280" r="3" fill="#141414" opacity=".4"/>
+  <circle cx="320" cy="260" r="2.5" fill="#141414" opacity=".35"/>
+  <circle cx="180" cy="250" r="2" fill="#B83A2C" opacity=".3"/>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <circle cx="12" cy="12" r="10" fill="none" stroke="#5C4033" stroke-width="2.2"/>
+  <circle cx="12" cy="12" r="7" fill="none" stroke="#3D6B4F" stroke-width="1.4" opacity=".85"/>
+  <circle cx="12" cy="12" r="4" fill="none" stroke="#E8A317" stroke-width="1" opacity=".55"/>
+  <circle cx="12" cy="12" r="1.5" fill="#4EB8A2" opacity=".6"/>
+  <!-- year-ring tick -->
+  <path d="M12 2 L12 5" stroke="#B8E8DC" stroke-width="1.2"/>
+  <path d="M12 19 L12 22" stroke="#B8E8DC" stroke-width="1" opacity=".6"/>
+</svg>

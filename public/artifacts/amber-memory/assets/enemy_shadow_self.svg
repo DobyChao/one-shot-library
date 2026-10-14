@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 48" width="36" height="48">
+  <!-- pseudo-player silhouette, translucent -->
+  <g opacity="0.5">
+    <ellipse cx="18" cy="44" rx="8" ry="2.5" fill="#1E3A2F" opacity=".4"/>
+    <path d="M10 26 L26 26 L28 42 Q18 46 8 42 Z" fill="#B8E8DC" stroke="#4EB8A2" stroke-width="1"/>
+    <rect x="13" y="20" width="10" height="8" rx="2" fill="#B8E8DC" stroke="#4EB8A2" stroke-width=".8"/>
+    <circle cx="18" cy="13" r="7" fill="#B8E8DC" stroke="#4EB8A2" stroke-width="1"/>
+    <path d="M11 12 Q18 4 25 12" fill="#1E3A2F" opacity=".45"/>
+    <!-- ribbon ghost -->
+    <path d="M15 7 L18 3 L21 7" fill="none" stroke="#4EB8A2" stroke-width="1.2" opacity=".7"/>
+  </g>
+  <circle cx="18" cy="16" r="14" fill="none" stroke="#4EB8A2" stroke-width=".8" opacity=".25"/>
+</svg>

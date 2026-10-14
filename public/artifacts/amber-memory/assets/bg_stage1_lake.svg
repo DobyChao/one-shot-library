@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 448" width="384" height="448" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0F2A36"/>
+      <stop offset="40%" stop-color="#1A3A4A"/>
+      <stop offset="72%" stop-color="#2E5A6B"/>
+      <stop offset="100%" stop-color="#1A3A4A"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2E5A6B" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#1A3A4A" stop-opacity=".85"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="55%" r="45%">
+      <stop offset="0%" stop-color="#E8A317" stop-opacity=".18"/>
+      <stop offset="100%" stop-color="#E8A317" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="384" height="448" fill="url(#sky)"/>
+  <ellipse cx="192" cy="260" rx="180" ry="100" fill="url(#glow)"/>
+  <!-- distant mist bands -->
+  <ellipse cx="100" cy="120" rx="90" ry="18" fill="#F5D78E" opacity=".06"/>
+  <ellipse cx="280" cy="90" rx="70" ry="14" fill="#F5D78E" opacity=".05"/>
+  <!-- water surface -->
+  <path d="M0 250 Q96 230 192 248 T384 250 L384 448 L0 448 Z" fill="url(#water)"/>
+  <path d="M0 290 Q128 270 256 292 T384 288" fill="none" stroke="#E8A317" stroke-width="1" opacity=".2"/>
+  <path d="M0 330 Q96 315 192 332 T384 328" fill="none" stroke="#F5D78E" stroke-width=".8" opacity=".15"/>
+  <ellipse cx="192" cy="390" rx="230" ry="70" fill="#0F2A36" opacity=".45"/>
+  <!-- reeds left -->
+  <g fill="#6B8F5E" opacity=".75">
+    <path d="M8 300 L14 210 L20 300 Z"/>
+    <path d="M22 310 L27 225 L33 310 Z"/>
+    <path d="M38 305 L44 235 L50 305 Z"/>
+    <path d="M12 280 L16 240 L18 280" fill="#4A6B42"/>
+  </g>
+  <!-- reeds right -->
+  <g fill="#6B8F5E" opacity=".75">
+    <path d="M334 305 L340 220 L346 305 Z"/>
+    <path d="M350 315 L356 235 L362 315 Z"/>
+    <path d="M366 300 L372 230 L378 300 Z"/>
+  </g>
+  <!-- floating amber shards -->
+  <g>
+    <circle cx="70" cy="200" r="3.5" fill="#E8A317" opacity=".55"/>
+    <circle cx="120" cy="170" r="2.2" fill="#FFD966" opacity=".5"/>
+    <circle cx="180" cy="210" r="2.8" fill="#E8A317" opacity=".45"/>
+    <circle cx="230" cy="155" r="3" fill="#F5D78E" opacity=".5"/>
+    <circle cx="280" cy="190" r="2.5" fill="#E8A317" opacity=".48"/>
+    <circle cx="310" cy="230" r="2" fill="#FFD966" opacity=".42"/>
+    <circle cx="95" cy="260" r="2.4" fill="#E8A317" opacity=".4"/>
+    <circle cx="160" cy="280" r="3.2" fill="#B86E00" opacity=".35"/>
+    <circle cx="250" cy="265" r="2.6" fill="#FFD966" opacity=".45"/>
+    <circle cx="200" cy="320" r="2" fill="#F5D78E" opacity=".35"/>
+    <path d="M145 185 L149 178 L153 185 Z" fill="#E8A317" opacity=".5"/>
+    <path d="M265 210 L268 204 L271 210 Z" fill="#FFD966" opacity=".45"/>
+  </g>
+  <!-- soft shore -->
+  <ellipse cx="60" cy="400" rx="70" ry="25" fill="#1A3A4A" opacity=".5"/>
+  <ellipse cx="330" cy="405" rx="60" ry="22" fill="#1A3A4A" opacity=".45"/>
+</svg>

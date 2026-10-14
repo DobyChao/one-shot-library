@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 22" width="14" height="22">
+  <defs>
+    <linearGradient id="t" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFD966"/>
+      <stop offset="45%" stop-color="#E8A317"/>
+      <stop offset="100%" stop-color="#B86E00"/>
+    </linearGradient>
+  </defs>
+  <!-- tip down teardrop -->
+  <path d="M7 2 C11 8 12 12 12 15 C12 18.5 9.8 21 7 21 C4.2 21 2 18.5 2 15 C2 12 3 8 7 2 Z" fill="url(#t)" stroke="#B86E00" stroke-width="1"/>
+  <path d="M7 5 C9 9 9.5 12 9.2 15" fill="none" stroke="#F5D78E" stroke-width="1.4" opacity=".75" stroke-linecap="round"/>
+  <circle cx="5.5" cy="11" r="1.4" fill="#FFD966" opacity=".85"/>
+</svg>

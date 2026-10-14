@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="80" height="96">
+  <defs>
+    <linearGradient id="jade2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8FBB85"/>
+      <stop offset="100%" stop-color="#3d5c3a"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="40" cy="91" rx="18" ry="3.5" fill="#2a1e38" opacity=".4"/>
+  <circle cx="40" cy="50" r="32" fill="#D4890A" opacity=".1"/>
+  <path d="M26 40 Q40 20 54 40 L52 76 Q40 90 28 76 Z" fill="url(#jade2)" stroke="#F0C14A" stroke-width="1.4"/>
+  <!-- dual scythes open wide -->
+  <path d="M24 44 Q2 30 6 10 Q16 28 30 40" fill="none" stroke="#C0C8D4" stroke-width="3" stroke-linecap="round"/>
+  <path d="M56 44 Q78 30 74 10 Q64 28 50 40" fill="none" stroke="#C0C8D4" stroke-width="3" stroke-linecap="round"/>
+  <path d="M6 10 L2 4 M74 10 L78 4" stroke="#F0C14A" stroke-width="2" stroke-linecap="round"/>
+  <path d="M36 50 L40 44 L44 50 L40 56 Z" fill="#D4890A" stroke="#F0C14A" stroke-width="1.2"/>
+  <circle cx="40" cy="24" r="12" fill="#6F9B6A" stroke="#C0C8D4" stroke-width="1.4"/>
+  <path d="M29 20 Q26 6 36 12 Q40 2 44 12 Q54 6 51 20" fill="#3d5c3a"/>
+  <ellipse cx="36" cy="25" rx="2.2" ry="2.8" fill="#F0C14A"/>
+  <ellipse cx="44" cy="25" rx="2.2" ry="2.8" fill="#F0C14A"/>
+  <circle cx="36" cy="25" r="1" fill="#2a1e38"/>
+  <circle cx="44" cy="25" r="1" fill="#2a1e38"/>
+  <!-- petal burst -->
+  <g fill="#F0C14A" opacity=".6">
+    <ellipse cx="16" cy="60" rx="5" ry="2" transform="rotate(-30 16 60)"/>
+    <ellipse cx="64" cy="60" rx="5" ry="2" transform="rotate(30 64 60)"/>
+  </g>
+</svg>
