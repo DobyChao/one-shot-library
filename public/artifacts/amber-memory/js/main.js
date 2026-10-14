@@ -2,17 +2,61 @@
   const canvas = document.getElementById('game');
   const game = new Game(canvas);
 
+  // Use e.code for letters/Shift so Shift+Z keyup does not leave keys.z stuck
+  // (keyup while Shift held reports e.key="Z" after keydown e.key="z").
+  function setHeld(keys, e, down) {
+    const c = e.code;
+    if (c === 'ShiftLeft' || c === 'ShiftRight') {
+      keys['_' + c] = down;
+      keys.Shift = !!(keys._ShiftLeft || keys._ShiftRight);
+      return;
+    }
+    if (c === 'KeyZ') {
+      keys.z = keys.Z = down;
+      if (down) keys._zTap = true;
+      return;
+    }
+    if (c === 'KeyX') {
+      keys.x = keys.X = down;
+      if (down) keys._xTap = true;
+      return;
+    }
+    if (c === 'KeyC') {
+      keys.c = keys.C = down;
+      if (down) keys._cTap = true;
+      return;
+    }
+    if (c === 'KeyA') { keys.a = keys.A = down; return; }
+    if (c === 'KeyD') { keys.d = keys.D = down; return; }
+    if (c === 'KeyW') { keys.w = keys.W = down; return; }
+    if (c === 'KeyS') { keys.s = keys.S = down; return; }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight'
+        || e.key === 'Escape' || e.key === ' ') {
+      keys[e.key] = down;
+      if (down && e.key === 'ArrowUp') keys._upTap = true;
+      if (down && e.key === 'ArrowDown') keys._downTap = true;
+      if (down && e.key === 'Escape') keys._escTap = true;
+    }
+  }
+
   window.addEventListener('keydown', (e) => {
-    game.keys[e.key] = true;
-    if (e.key === 'z' || e.key === 'Z') game.keys._zTap = true;
-    if (e.key === 'x' || e.key === 'X') game.keys._xTap = true;
-    if (e.key === 'c' || e.key === 'C') game.keys._cTap = true;
-    if (e.key === 'ArrowUp') game.keys._upTap = true;
-    if (e.key === 'ArrowDown') game.keys._downTap = true;
-    if (e.key === 'Escape') game.keys._escTap = true;
-    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+    setHeld(game.keys, e, true);
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
+    // M：切换静音（Treat 不关音乐；?mute=1 强制静音）
+    if (e.code === 'KeyM' && !e.repeat && typeof AmberBgm !== 'undefined') {
+      if (new URLSearchParams(location.search).get('mute') === '1') return;
+      const nowMuted = AmberBgm.toggleMute();
+      game.toast(nowMuted ? 'BGM 静音' : 'BGM 开启');
+      if (!nowMuted) AmberBgm.ensure();
+    }
   });
-  window.addEventListener('keyup', (e) => { game.keys[e.key] = false; });
+  window.addEventListener('keyup', (e) => { setHeld(game.keys, e, false); });
+  window.addEventListener('blur', () => {
+    const k = game.keys;
+    for (const key of Object.keys(k)) {
+      if (typeof k[key] === 'boolean' && !key.endsWith('Tap')) k[key] = false;
+    }
+  });
 
   try {
     await loadAllAssets();
@@ -23,6 +67,23 @@
 
   const params = new URLSearchParams(location.search);
   const debugPhase = params.get('phase');
+  if (typeof AmberBgm !== 'undefined') {
+    if (params.get('mute') === '1') AmberBgm.setMuted(true);
+  }
+
+  // First keydown unlocks AudioContext (browser autoplay policy)
+  let bgmUnlocked = false;
+  function unlockBgm() {
+    if (bgmUnlocked || typeof AmberBgm === 'undefined') return;
+    bgmUnlocked = true;
+    AmberBgm.ensure();
+  }
+  window.addEventListener('keydown', unlockBgm, { once: false });
+  document.addEventListener('visibilitychange', () => {
+    if (typeof AmberBgm === 'undefined') return;
+    if (document.hidden) AmberBgm.suspend();
+    else AmberBgm.resumeIfNeeded();
+  });
   if (debugPhase) {
     if (debugPhase === 'stage2') {
       game.startStage2();

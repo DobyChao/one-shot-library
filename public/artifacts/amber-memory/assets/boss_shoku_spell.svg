@@ -1,13 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="80" height="96">
-  <ellipse cx="40" cy="91" rx="18" ry="3.5" fill="#000" opacity=".35"/>
-  <path d="M22 40 Q40 16 58 40 L56 82 Q40 94 24 82 Z" fill="#2a1838" stroke="#F8F8FF" stroke-width="1.6"/>
-  <path d="M18 48 Q2 40 8 22" fill="none" stroke="#F8F8FF" stroke-width="4" stroke-linecap="round"/>
-  <path d="M62 48 Q78 40 72 22" fill="none" stroke="#F8F8FF" stroke-width="4" stroke-linecap="round"/>
-  <circle cx="40" cy="24" r="14" fill="#F2EDE0" stroke="#B03030" stroke-width="1.5"/>
-  <ellipse cx="34" cy="25" rx="2.5" ry="3.5" fill="#0A0A0C"/>
-  <ellipse cx="46" cy="25" rx="2.5" ry="3.5" fill="#0A0A0C"/>
-  <ellipse cx="34" cy="25" rx="1" ry="2" fill="#B03030"/>
-  <ellipse cx="46" cy="25" rx="1" ry="2" fill="#B03030"/>
-  <path d="M32 33 Q40 40 48 33" fill="#B03030" opacity=".7"/>
-  <circle cx="40" cy="24" r="20" fill="none" stroke="#F8F8FF" stroke-width="1" opacity=".4"/>
+  <!-- v1.1 spell: mouth open / hungry -->
+  <ellipse cx="40" cy="91" rx="18" ry="3.5" fill="#000" opacity=".22"/>
+  <path d="M24 42 L56 42 L56 80 Q40 94 24 80 Z" fill="#1a1228" stroke="#7A6BB0" stroke-width="1.6"/>
+  <path d="M30 58 Q40 48 50 58 Q40 72 30 58 Z" fill="#0A0A0C" stroke="#F2EDE0" stroke-width="1.4"/>
+  <path d="M34 62 L36 68 L38 62 L40 68 L42 62 L44 68 L46 62" fill="none" stroke="#F2EDE0" stroke-width="1.3"/>
+  <path d="M24 46 L6 36" stroke="#7A6BB0" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M56 46 L74 36" stroke="#7A6BB0" stroke-width="5.5" stroke-linecap="round"/>
+  <ellipse cx="4" cy="34" rx="5" ry="4" fill="#E8A317" stroke="#6B3A00" stroke-width="1"/>
+  <circle cx="40" cy="24" r="13" fill="#E8DCC8" stroke="#F2EDE0" stroke-width="1.4"/>
+  <path d="M27 20 C26 4 34 0 40 -1 C46 0 54 4 53 20" fill="#0A0A0C"/>
+  <ellipse cx="35" cy="25" rx="2.6" ry="3.4" fill="#0A0A0C"/>
+  <ellipse cx="45" cy="25" rx="2.6" ry="3.4" fill="#0A0A0C"/>
+  <ellipse cx="35" cy="25" rx="0.9" ry="2" fill="#B03030"/>
+  <ellipse cx="45" cy="25" rx="0.9" ry="2" fill="#B03030"/>
+  <path d="M34 32 Q40 38 46 32" fill="none" stroke="#B03030" stroke-width="1.5" stroke-linecap="round"/>
 </svg>

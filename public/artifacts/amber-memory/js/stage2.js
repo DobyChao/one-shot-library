@@ -59,8 +59,8 @@ class Stage2Director {
           const a = angTo(en.x, en.y, game.player.x, game.player.y);
           emitFan(game.enemyBullets, en.x, en.y, a, 1, 0, 2.1, 'bullet.echo_orb');
           if (en._hold > 0 && en._hold < 1) {
-            game.enemyBullets.push(new Bullet({ x: en.x, y: en.y, angle: Math.PI, speed: 2.0, kind: 'bullet.echo_orb', reflect: 1 }));
-            game.enemyBullets.push(new Bullet({ x: en.x, y: en.y, angle: 0, speed: 2.0, kind: 'bullet.echo_orb', reflect: 1 }));
+            game.enemyBullets.push(new Bullet({ x: en.x, y: en.y, angle: Math.PI, speed: 1.8, kind: 'bullet.echo_orb', reflect: 1 }));
+            game.enemyBullets.push(new Bullet({ x: en.x, y: en.y, angle: 0, speed: 1.8, kind: 'bullet.echo_orb', reflect: 1 }));
           }
         };
       }
@@ -76,7 +76,7 @@ class Stage2Director {
           en.fireCd -= d;
           if (en.fireCd > 0) return;
           en.fireCd = 0.9;
-          game.enemyBullets.push(new Bullet({ x: en.x, y: en.y, angle: 0.15, speed: 2.0, kind: 'bullet.echo_orb', reflect: 1 }));
+          game.enemyBullets.push(new Bullet({ x: en.x, y: en.y, angle: 0.15, speed: 1.8, kind: 'bullet.echo_orb', reflect: 1 }));
         };
         const R = spawnKodama(g, W - 18, -20 - i * 30);
         R.move = (en, d) => { en.y += 1.5 * 60 * d; };
@@ -85,7 +85,7 @@ class Stage2Director {
           en.fireCd -= d;
           if (en.fireCd > 0) return;
           en.fireCd = 0.9;
-          game.enemyBullets.push(new Bullet({ x: en.x, y: en.y, angle: Math.PI - 0.15, speed: 2.0, kind: 'bullet.echo_orb', reflect: 1 }));
+          game.enemyBullets.push(new Bullet({ x: en.x, y: en.y, angle: Math.PI - 0.15, speed: 1.8, kind: 'bullet.echo_orb', reflect: 1 }));
         };
       }
     }
@@ -124,8 +124,8 @@ class Stage2Director {
       if (this._w4wall >= 2.5) {
         this._w4wall = 0;
         for (let i = 0; i < 4; i++) {
-          g.enemyBullets.push(new Bullet({ x: 8, y: 80 + i * 60, angle: 0, speed: 2.0, kind: 'bullet.echo_orb', reflect: 1 }));
-          g.enemyBullets.push(new Bullet({ x: W - 8, y: 100 + i * 60, angle: Math.PI, speed: 2.0, kind: 'bullet.echo_orb', reflect: 1 }));
+          g.enemyBullets.push(new Bullet({ x: 8, y: 80 + i * 60, angle: 0, speed: 1.8, kind: 'bullet.echo_orb', reflect: 1 }));
+          g.enemyBullets.push(new Bullet({ x: W - 8, y: 100 + i * 60, angle: Math.PI, speed: 1.8, kind: 'bullet.echo_orb', reflect: 1 }));
         }
       }
     }
@@ -173,7 +173,7 @@ class Stage2Director {
           en.fireCd -= d;
           if (en.fireCd > 0) return;
           en.fireCd = 1.5;
-          emitRing(game.enemyBullets, en.x, en.y, 10, 1.9, 'bullet.echo_orb', en._a);
+          emitRing(game.enemyBullets, en.x, en.y, 8, 1.9, 'bullet.echo_orb', en._a);
         };
       }
       for (let i = 0; i < 3; i++) {

@@ -3,7 +3,8 @@ class Player {
     this.x = W / 2; this.y = H * 0.82;
     this.speed = 4.2; this.slow = 2.0;
     this.r = 3; // hitbox
-    this.lives = 3; this.bombs = 2;
+    const treat = (typeof treatOn === 'function' && treatOn());
+    this.lives = treat ? 99 : 5; this.bombs = 3;
     this.score = 0; this.graze = 0;
     this.shotCd = 0; this.invuln = 0;
     this.alive = true;
@@ -49,11 +50,23 @@ class Player {
   }
   hit() {
     if (new URLSearchParams(location.search).get('god') === '1') return false;
+    if (typeof treatOn === 'function' && treatOn()) return false;
     if (this.invuln > 0) return false;
     this.lives -= 1;
-    this.invuln = 2.5;
+    this.invuln = 2.0;
     this.x = W / 2; this.y = H * 0.82;
     return this.lives < 0;
+  }
+  bomb(game) {
+    if (this.bombs <= 0) return false;
+    this.bombs -= 1;
+    this.invuln = Math.max(this.invuln, 0.5);
+    if (game && game.enemyBullets) {
+      for (const b of game.enemyBullets) {
+        if (b.hostile) b.alive = false;
+      }
+    }
+    return true;
   }
   draw(ctx) {
     if (this.invuln > 0 && Math.floor(this.invuln * 10) % 2 === 0) return;
@@ -82,6 +95,12 @@ class Enemy {
       fireCd: 0,
       score: 500,
     }, opts);
+    if (typeof diffMul === 'function') {
+      const fh = diffMul().fairyHp;
+      if (fh != null && fh !== 1) {
+        this.hp = Math.max(1, Math.round(this.hp * fh));
+      }
+    }
     this.maxHp = this.hp;
   }
   update(dt, game) {
@@ -194,7 +213,7 @@ class Boss {
     if (this._spAcc.clock >= 1.5) {
       this._spAcc.clock = 0;
       const bullets = [];
-      emitRing(bullets, this.x, this.y, 24, 1.4, 'bullet.sand_grain', this.phaseAge * 0.3, { r: 3 });
+      emitRing(bullets, this.x, this.y, 24, 1.4 * 0.9, 'bullet.sand_grain', this.phaseAge * 0.3, { r: 3 });
       // reverse after 0.6s → inward/tangential swirl
       for (const b of bullets) {
         const born = b;
@@ -212,7 +231,7 @@ class Boss {
         game.enemyBullets.push(born);
       }
     }
-    if (this._spAcc.rain >= 2.2) {
+    if (this._spAcc.rain >= 2.8) {
       this._spAcc.rain = 0;
       this._spAcc.side = 1 - this._spAcc.side;
       const cx = this._spAcc.side ? W * 0.22 : W * 0.78;

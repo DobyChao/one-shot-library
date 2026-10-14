@@ -554,12 +554,12 @@ class BossSumizome {
     // update circles
     for (const c of this.cinCircles) {
       c.age += dt;
-      if (!c.fired && c.age >= 0.5) {
+      if (!c.fired && c.age >= 0.65) {
         c.fired = true;
         emitRing(game.enemyBullets, c.x, c.y, 10, 2.0, 'bullet.scroll_seal');
       }
     }
-    this.cinCircles = this.cinCircles.filter(c => c.age < 0.7);
+    this.cinCircles = this.cinCircles.filter(c => c.age < 0.85);
 
     if (this._s4.circle >= 2.2) {
       this._s4.circle = 0;
@@ -598,7 +598,7 @@ class BossSumizome {
       }
     }
     this.warnLines = this.warnLines.filter(w => w.age < 0.4);
-    if (this._s4.del >= 3.0) {
+    if (this._s4.del >= 3.5) {
       this._s4.del = 0;
       this.warnLines.push({ y: game.player.y, age: 0 });
     }
@@ -636,7 +636,7 @@ class BossSumizome {
     }
     // cinabar warn circles
     for (const c of this.cinCircles) {
-      const a = Math.min(1, c.age / 0.5);
+      const a = Math.min(1, c.age / 0.65);
       ctx.strokeStyle = `rgba(184,58,44,${0.35 + a * 0.5})`;
       ctx.lineWidth = 2 + a * 2;
       ctx.beginPath(); ctx.arc(c.x, c.y, c.r * (1.15 - a * 0.15), 0, Math.PI * 2); ctx.stroke();

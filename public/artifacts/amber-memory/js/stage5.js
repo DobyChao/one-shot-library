@@ -28,7 +28,7 @@ function spawnMite(game, x, y, opts) {
 
 function pushSlowZone(game, x, y, r, life) {
   if (!game.slowZones) game.slowZones = [];
-  game.slowZones.push({ x, y, r: r || 36, life: life || 2.5, age: 0 });
+  game.slowZones.push({ x, y, r: r || 30, life: life || 2.5, age: 0 });
 }
 
 class Stage5Director {
@@ -77,7 +77,7 @@ class Stage5Director {
           en.fireCd -= d;
           if (en.fireCd > 0) return;
           en.fireCd = 1.4;
-          pushSlowZone(game, en.x, en.y + 10, 36, 2.5);
+          pushSlowZone(game, en.x, en.y + 10, 30, 2.5);
           if (Math.random() < 0.45) {
             const a = angTo(en.x, en.y, game.player.x, game.player.y);
             game.enemyBullets.push(new Bullet({
@@ -138,7 +138,7 @@ class Stage5Director {
           }));
           const mite = spawnMite(g, x, -40);
           mite.move = (en, d) => { en.y += 1.3 * 60 * d; };
-          mite.onDeath = function (game) { pushSlowZone(game, this.x, this.y, 36, 2.5); };
+          mite.onDeath = function (game) { pushSlowZone(game, this.x, this.y, 30, 2.5); };
         }
       }
     }
@@ -458,9 +458,9 @@ class BossKohaku {
     this.y = this.bonsai.y + Math.sin(ang) * this.bonsai.r * 0.55;
     this.y = Math.max(H * 0.15, Math.min(H * 0.42, this.y));
 
-    if (this._s4.shrink >= 5.0) {
+    if (this._s4.shrink >= 6.0) {
       this._s4.shrink = 0;
-      this.bonsai.r = Math.max(55, this.bonsai.r * 0.85);
+      this.bonsai.r = Math.max(70, this.bonsai.r * 0.85);
       emitRing(game.enemyBullets, this.bonsai.x, this.bonsai.y, 16, 1.5, 'bullet.scythe_arc');
     }
     // outside ring stream

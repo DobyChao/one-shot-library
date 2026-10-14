@@ -341,14 +341,15 @@ class BossTama {
       this.invuln = true;
       game.queueEcho(0.3, () => { if (game.boss === this) this.invuln = false; });
       this.x = 60 + Math.random() * (W - 120);
-      // grid of seals outside bands
+      // grid of seals outside bands (Normal: band 44px, ~20% sparser)
       for (let gx = 0; gx < 6; gx++) {
         for (let gy = 0; gy < 8; gy++) {
+          if ((gx + gy) % 5 === 0) continue; // ~20% skip
           const x = 30 + gx * ((W - 60) / 5);
           const y = 80 + gy * 40;
           let safe = false;
           for (const bx of this.safeBands) {
-            if (Math.abs(x - bx) < 18) { safe = true; break; }
+            if (Math.abs(x - bx) < 22) { safe = true; break; }
           }
           if (safe) continue;
           game.enemyBullets.push(new Bullet({
@@ -409,9 +410,9 @@ class BossTama {
     if (this.safeBands && this.safeBands.length) {
       for (const bx of this.safeBands) {
         ctx.fillStyle = 'rgba(212,168,75,0.22)';
-        ctx.fillRect(bx - 18, 60, 36, H - 80);
+        ctx.fillRect(bx - 22, 60, 44, H - 80);
         ctx.strokeStyle = 'rgba(232,163,23,0.7)';
-        ctx.strokeRect(bx - 18, 60, 36, H - 80);
+        ctx.strokeRect(bx - 22, 60, 44, H - 80);
       }
     }
     // invert line

@@ -437,10 +437,10 @@ class BossKuon {
     }
   }
   last(dt, game) {
-    // T=4.5: flow 2.2 / warn 0.5 / freeze 1.0 / shatter 0.8
+    // T≈4.7: flow 2.2 / warn 0.5 / freeze 1.2 / shatter 0.8
     if (!this._L) this._L = { fire: 0 };
     this.lastT += dt;
-    const T = { flow: 2.2, warn: 0.5, freeze: 1.0, shatter: 0.8 };
+    const T = { flow: 2.2, warn: 0.5, freeze: 1.2, shatter: 0.8 };
     const order = ['flow', 'warn', 'freeze', 'shatter'];
     const dur = T[this.lastPhase];
     if (this.lastT >= dur) {
@@ -462,7 +462,7 @@ class BossKuon {
         for (const b of game.enemyBullets) {
           if (!b._frozen) continue;
           b._frozen = false;
-          const sp = 3.2;
+          const sp = 2.6;
           if (b._fvx != null || b._fvy != null) {
             const ang = Math.atan2(b._fvy || 0, b._fvx || 0.01);
             b.vx = Math.cos(ang) * sp;
