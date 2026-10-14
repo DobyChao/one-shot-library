@@ -1,25 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="80" height="96">
-  <defs>
-    <linearGradient id="dress" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#3A3A48"/>
-      <stop offset="100%" stop-color="#141414"/>
-    </linearGradient>
-  </defs>
-  <ellipse cx="40" cy="91" rx="18" ry="3.5" fill="#141414" opacity=".35"/>
-  <path d="M24 40 Q40 22 56 40 L54 80 Q40 92 26 80 Z" fill="url(#dress)" stroke="#E8DCC8" stroke-width="1.4"/>
-  <!-- scroll / book motif -->
-  <rect x="30" y="50" width="20" height="14" rx="1" fill="#E8DCC8" opacity=".85"/>
-  <path d="M32 54 H48 M32 58 H46" stroke="#141414" stroke-width=".8"/>
-  <path d="M22 42 Q10 48 16 64" fill="none" stroke="#3A3A48" stroke-width="5" stroke-linecap="round"/>
-  <path d="M58 42 Q70 48 64 64" fill="none" stroke="#3A3A48" stroke-width="5" stroke-linecap="round"/>
-  <!-- brush in hand -->
-  <path d="M14 66 L10 78" stroke="#6B3A2A" stroke-width="2" stroke-linecap="round"/>
-  <path d="M8 80 Q10 76 12 80" fill="#141414"/>
-  <circle cx="40" cy="24" r="13" fill="#E8DCC8" stroke="#141414" stroke-width="1.3"/>
-  <path d="M26 20 Q24 6 36 12 Q40 2 44 12 Q56 6 54 20" fill="#141414"/>
-  <path d="M28 18 Q40 8 52 18" fill="#3A3A48"/>
-  <ellipse cx="35" cy="25" rx="2" ry="2.6" fill="#141414"/>
-  <ellipse cx="45" cy="25" rx="2" ry="2.6" fill="#141414"/>
-  <path d="M36 31 Q40 34 44 31" fill="none" stroke="#B83A2C" stroke-width="1"/>
-  <rect x="37" y="14" width="6" height="4" fill="#B83A2C" opacity=".85"/>
+  <!-- v1.1: Kii Sumizome – ink scribe, scroll, brush -->
+  <ellipse cx="40" cy="91" rx="18" ry="3.5" fill="#0A0A0C" opacity=".22"/>
+  <path d="M24 42 L56 42 L54 82 Q40 94 26 82 Z" fill="#2A2A38" stroke="#E8DCC8" stroke-width="1.5"/>
+  <path d="M28 42 L52 42 L50 54 L30 54 Z" fill="#3A3A48" stroke="#E8DCC8" stroke-width=".8"/>
+  <!-- open scroll -->
+  <rect x="30" y="52" width="20" height="16" rx="1.5" fill="#E8DCC8" stroke="#141414" stroke-width="1.1"/>
+  <line x1="33" y1="57" x2="47" y2="57" stroke="#141414" stroke-width="1"/>
+  <line x1="33" y1="61" x2="45" y2="61" stroke="#141414" stroke-width="1"/>
+  <line x1="33" y1="65" x2="46" y2="65" stroke="#B83A2C" stroke-width="1"/>
+  <path d="M24 46 L10 58" stroke="#2A2A38" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M56 46 L70 56" stroke="#2A2A38" stroke-width="5.5" stroke-linecap="round"/>
+  <!-- brush -->
+  <line x1="10" y1="58" x2="6" y2="76" stroke="#6B3A2A" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M4 78 L6 74 L8 78 Z" fill="#141414" stroke="#0A0A0C" stroke-width=".5"/>
+  <circle cx="40" cy="24" r="13" fill="#E8DCC8" stroke="#141414" stroke-width="1.4"/>
+  <path d="M27 20 C26 6 34 2 40 1 C46 2 54 6 53 20 C50 12 44 10 40 10 C36 10 30 12 27 20 Z" fill="#141414"/>
+  <path d="M28 16 Q40 8 52 16" fill="#3A3A48"/>
+  <rect x="37" y="13" width="6" height="4" rx=".3" fill="#B83A2C" stroke="#5A0A14" stroke-width=".5"/>
+  <ellipse cx="35" cy="26" rx="2.3" ry="2.9" fill="#141414"/>
+  <ellipse cx="45" cy="26" rx="2.3" ry="2.9" fill="#141414"/>
+  <circle cx="35.7" cy="25" r=".7" fill="#E8DCC8"/>
+  <circle cx="45.7" cy="25" r=".7" fill="#E8DCC8"/>
+  <path d="M36 32 Q40 35 44 32" fill="none" stroke="#B83A2C" stroke-width="1.2" stroke-linecap="round"/>
 </svg>

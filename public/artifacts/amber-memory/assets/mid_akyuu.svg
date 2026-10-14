@@ -1,15 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="80" height="96">
-  <!-- amber specimen glow -->
-  <ellipse cx="40" cy="50" rx="32" ry="40" fill="#C9952A" opacity=".12"/>
-  <ellipse cx="40" cy="91" rx="18" ry="3.5" fill="#141414" opacity=".3"/>
-  <path d="M28 40 Q40 26 52 40 L50 78 Q40 88 30 78 Z" fill="#E8DCC8" stroke="#B83A2C" stroke-width="1.4"/>
-  <rect x="32" y="48" width="16" height="18" rx="1" fill="#3A3A48" opacity=".55"/>
-  <path d="M34 52 H46 M34 56 H44 M34 60 H45" stroke="#E8DCC8" stroke-width=".8" opacity=".6"/>
-  <circle cx="40" cy="26" r="12" fill="#F5D78E" stroke="#141414" stroke-width="1.2"/>
-  <path d="M29 22 Q40 10 51 22" fill="#3A3A48"/>
-  <ellipse cx="36" cy="27" rx="1.8" ry="2.4" fill="#141414"/>
-  <ellipse cx="44" cy="27" rx="1.8" ry="2.4" fill="#141414"/>
-  <!-- frame corners suggesting projection -->
-  <path d="M18 18 H28 V22 H22 V28 H18 Z" fill="none" stroke="#C9952A" stroke-width="1.5" opacity=".7"/>
-  <path d="M62 18 H52 V22 H58 V28 H62 Z" fill="none" stroke="#C9952A" stroke-width="1.5" opacity=".7"/>
+  <!-- v1.1: Hieda no Akyuu projection – purple kimono, glasses, notebook -->
+  <ellipse cx="40" cy="91" rx="18" ry="3.5" fill="#141414" opacity=".22"/>
+  <!-- amber specimen frame corners -->
+  <path d="M14 12 H28 V16 H18 V26 H14 Z" fill="none" stroke="#C9952A" stroke-width="1.6"/>
+  <path d="M66 12 H52 V16 H62 V26 H66 Z" fill="none" stroke="#C9952A" stroke-width="1.6"/>
+  <path d="M14 84 H28 V80 H18 V70 H14 Z" fill="none" stroke="#C9952A" stroke-width="1.6"/>
+  <path d="M66 84 H52 V80 H62 V70 H66 Z" fill="none" stroke="#C9952A" stroke-width="1.6"/>
+  <!-- kimono -->
+  <path d="M26 42 L54 42 L52 82 Q40 92 28 82 Z" fill="#5A3A78" stroke="#2A1840" stroke-width="1.5"/>
+  <path d="M36 42 L40 70 L44 42" fill="#E8DCC8" stroke="#2A1840" stroke-width=".9"/>
+  <path d="M28 42 L38 42 L40 52 L30 48 Z" fill="#3A2860"/>
+  <path d="M42 42 L52 42 L50 48 L40 52 Z" fill="#3A2860"/>
+  <!-- notebook -->
+  <rect x="48" y="56" width="14" height="18" rx="1" fill="#E8DCC8" stroke="#141414" stroke-width="1.1"/>
+  <line x1="51" y1="61" x2="59" y2="61" stroke="#3A3A48" stroke-width=".9"/>
+  <line x1="51" y1="65" x2="58" y2="65" stroke="#3A3A48" stroke-width=".9"/>
+  <line x1="51" y1="69" x2="59" y2="69" stroke="#B83A2C" stroke-width=".9"/>
+  <path d="M26 46 L14 58" stroke="#5A3A78" stroke-width="5" stroke-linecap="round"/>
+  <path d="M54 50 L62 62" stroke="#5A3A78" stroke-width="4.5" stroke-linecap="round"/>
+  <circle cx="40" cy="26" r="12" fill="#F0C9A0" stroke="#141414" stroke-width="1.3"/>
+  <!-- short dark hair -->
+  <path d="M28 24 C28 12 34 8 40 7 C46 8 52 12 52 24 C50 18 46 16 40 16 C34 16 30 18 28 24 Z" fill="#2A2A38" stroke="#141414" stroke-width=".7"/>
+  <path d="M28 22 Q26 30 28 36" fill="#2A2A38"/>
+  <path d="M52 22 Q54 30 52 36" fill="#2A2A38"/>
+  <!-- glasses -->
+  <circle cx="35" cy="27" r="4" fill="none" stroke="#141414" stroke-width="1.3"/>
+  <circle cx="45" cy="27" r="4" fill="none" stroke="#141414" stroke-width="1.3"/>
+  <line x1="39" y1="27" x2="41" y2="27" stroke="#141414" stroke-width="1.2"/>
+  <ellipse cx="35" cy="27" rx="1.6" ry="2" fill="#141414"/>
+  <ellipse cx="45" cy="27" rx="1.6" ry="2" fill="#141414"/>
+  <circle cx="35.5" cy="26.2" r=".5" fill="#F7F2E8"/>
+  <circle cx="45.5" cy="26.2" r=".5" fill="#F7F2E8"/>
+  <path d="M37 33 Q40 35 43 33" fill="none" stroke="#8B5A2B" stroke-width="1" stroke-linecap="round"/>
 </svg>

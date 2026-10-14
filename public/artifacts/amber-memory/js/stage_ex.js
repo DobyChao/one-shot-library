@@ -698,7 +698,7 @@ class BossShoku {
         w: 120, h: 90, age: 0, life: 1.6, warn: true, dens,
       });
     }
-    if (this._e.state === 'warn' && this._e.t >= 0.4) {
+    if (this._e.state === 'warn' && this._e.t >= 0.55) {
       this._e.state = 'bite';
       this._e.t = 0;
       for (const w of this.biteWindows) w.warn = false;

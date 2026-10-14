@@ -1,5 +1,21 @@
 const W = 384, H = 448;
 
+function treatOn() {
+  try { return new URLSearchParams(location.search).get('treat') === '1'; } catch (e) { return false; }
+}
+
+/** Difficulty multipliers. Treat overrides Normal/Simple. */
+function diffMul() {
+  if (treatOn()) return { speed: 0.55, count: 0.5, fairyHp: 0.6, playerDmg: 1.5 };
+  try {
+    if (new URLSearchParams(location.search).get('simple') === '1')
+      return { speed: 0.7, count: 0.7, fairyHp: 0.75, playerDmg: 1 };
+    return { speed: 0.85, count: 0.85, fairyHp: 0.9, playerDmg: 1 };
+  } catch (e) {
+    return { speed: 0.85, count: 0.85, fairyHp: 0.9, playerDmg: 1 };
+  }
+}
+
 function deg(d) { return d * Math.PI / 180; }
 function angTo(x0, y0, x1, y1) { return Math.atan2(y1 - y0, x1 - x0); }
 function len(vx, vy) { return Math.hypot(vx, vy) || 1; }
@@ -22,8 +38,16 @@ class Bullet {
       alpha: 1,
     }, opts);
     if (opts.speed != null && opts.angle != null) {
-      this.vx = Math.cos(opts.angle) * opts.speed;
-      this.vy = Math.sin(opts.angle) * opts.speed;
+      this.vx = Math.cos(opts.angle) * this.speed;
+      this.vy = Math.sin(opts.angle) * this.speed;
+    }
+    if (this.hostile) {
+      const m = diffMul().speed;
+      if (m !== 1) {
+        this.speed *= m;
+        this.vx *= m;
+        this.vy *= m;
+      }
     }
   }
   update(dt, game) {
@@ -63,6 +87,8 @@ class Bullet {
 }
 
 function emitFan(list, x, y, aimAng, count, spreadDeg, speed, kind, extra) {
+  const mul = diffMul().count;
+  count = Math.max(1, Math.ceil(count * mul));
   const half = (count - 1) / 2;
   for (let i = 0; i < count; i++) {
     const a = aimAng + deg(spreadDeg) * (i - half);
@@ -71,6 +97,8 @@ function emitFan(list, x, y, aimAng, count, spreadDeg, speed, kind, extra) {
 }
 
 function emitRing(list, x, y, count, speed, kind, baseAng, extra) {
+  const mul = diffMul().count;
+  count = Math.max(4, Math.ceil(count * mul));
   for (let i = 0; i < count; i++) {
     const a = (baseAng || 0) + (Math.PI * 2 * i) / count;
     list.push(new Bullet(Object.assign({ x, y, angle: a, speed, kind, r: 3.5 }, extra || {})));
@@ -79,6 +107,8 @@ function emitRing(list, x, y, count, speed, kind, baseAng, extra) {
 
 /** Ring with a gap arc (degrees) starting at gapStart rad */
 function emitRingGap(list, x, y, count, speed, kind, baseAng, gapDeg, extra) {
+  const mul = diffMul().count;
+  count = Math.max(4, Math.ceil(count * mul));
   const gap = deg(gapDeg);
   for (let i = 0; i < count; i++) {
     const a = (baseAng || 0) + (Math.PI * 2 * i) / count;

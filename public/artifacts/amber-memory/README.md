@@ -4,6 +4,7 @@
 
 剧本真相源：`SCRIPT.md`  
 关卡表：`STAGE1_SLICE.md` … `STAGE6.md`、`STAGE_EX.md`  
+难度/Treat：`DIFFICULTY_TREAT.md`  
 素材清单：`assets/MANIFEST.md`
 
 ---
@@ -28,8 +29,9 @@ python3 -m http.server 8765
 | 方向键 / WASD | 移动 |
 | Z | 射击 / 确认对话 |
 | Shift | 低速（显示判定点） |
-| X | 跳过对话行 |
-| C | 标题进入 Music Room |
+| X | 战斗中 Bomb 清弹 / 跳过对话行 |
+| C | 战斗中 Bomb / 标题进入 Music Room |
+| M | 切换合成 BGM 静音（Treat 不关；`?mute=1` 强制关） |
 
 标题画面按 **Z** 开始（从 Stage 1 连贯推进至 Ex，视进度而定）。
 
@@ -42,7 +44,9 @@ python3 -m http.server 8765
 | 参数 | 作用 |
 |------|------|
 | `god=1` | 高伤 / 便于验收通关 |
-| `simple=1` | Simple 差（当前主要影响 Ex 省略箭预警 **0.65s**；全局倍率仍 backlog） |
+| `simple=1` | Simple：敌弹速/密度 ×0.7、杂鱼等效伤/HP 侧 ×0.75；Ex 省略箭预警仍 **0.65s** |
+| `treat=1` | Treat：无敌、残 99、弹速 ×0.55、密度 ×0.5、自机伤 ×1.5、常显判定、超时不罚残、开局 Bomb≥3 |
+| `mute=1` | 关闭 Web Audio 合成 BGM |
 | `phase=…` | 跳到指定段落（见下） |
 
 ### `phase` 一览
@@ -82,9 +86,12 @@ python3 -m http.server 8765
 | Stage 1–6 Boss / 符卡 / 终符 | 可玩，已验收 |
 | Extra 中 Boss + 烛 e1–e10 | 可玩，已验收 |
 | 省略箭预警 | Normal **0.5s** / Simple **0.65s**（已锁） |
+| Normal 残机经济 | 开局 **5 残 / 3 Bomb**；面清 +1 Bomb（上限 7）；中弹无敌 **2.0s** |
+| 全局倍率 | Normal 弹速/密度 ×0.85；Simple ×0.7；Treat 覆盖（见 `DIFFICULTY_TREAT.md`） |
+| Treat 余项 | 超时不罚残（本就仅切阶段）、道中伤 ×1.5、Bomb X/C、标题提示已对齐 |
 | 道中波次丰度 / 手感打磨 | backlog |
-| 全局 Simple 倍率 | backlog（目前非整包） |
-| Music Room 薄列表 | 可浏览（无音频 toast）；`?phase=music` |
+| Music Room 薄列表 | 可浏览；Z 按 id 播合成曲；`?phase=music` |
+| BGM | Web Audio 合成 17 曲（`bgm_*` id），首次按键起声；`M` / `?mute=1`；Treat 不关 |
 | 标题 UX / 画布缩放 | backlog |
 | 完整 Ending / Staff / 1CC 解锁门 | backlog（Ex 可 `?phase=ex` 强开） |
 
@@ -108,3 +115,4 @@ python3 -m http.server 8765
 2. `?phase=last&god=1`：终符凝固→碎裂。  
 3. `?phase=e2&god=1`：省略箭预警可读。  
 4. `?phase=ex&god=1`：中 Boss → 烛链 → Ex Clear。  
+5. `?treat=1`：标题见 Treat 提示；可观关到 Clear（无敌/低密/常显判定）。  

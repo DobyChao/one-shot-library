@@ -1,36 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="80" height="96">
-  <defs>
-    <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#6B3A2A"/>
-      <stop offset="100%" stop-color="#3d2218"/>
-    </linearGradient>
-    <radialGradient id="bead" cx="35%" cy="30%" r="70%">
-      <stop offset="0%" stop-color="#D4A84B"/>
-      <stop offset="100%" stop-color="#6B3A2A"/>
-    </radialGradient>
-  </defs>
-  <ellipse cx="40" cy="91" rx="20" ry="4" fill="#1A1A1A" opacity=".35"/>
-  <!-- abacus frame body -->
-  <rect x="18" y="38" width="44" height="42" rx="3" fill="url(#frame)" stroke="#D4A84B" stroke-width="1.5"/>
-  <line x1="18" y1="52" x2="62" y2="52" stroke="#D4A84B" stroke-width="1.2"/>
-  <line x1="18" y1="66" x2="62" y2="66" stroke="#D4A84B" stroke-width="1.2"/>
-  <!-- beads on rods -->
-  <g fill="url(#bead)">
-    <circle cx="28" cy="45" r="4"/><circle cx="40" cy="45" r="4"/><circle cx="52" cy="45" r="4"/>
-    <circle cx="28" cy="59" r="4"/><circle cx="40" cy="59" r="4"/><circle cx="52" cy="59" r="4"/>
-    <circle cx="34" cy="73" r="4"/><circle cx="46" cy="73" r="4"/>
-  </g>
-  <!-- arms -->
-  <path d="M18 48 Q6 44 10 62" fill="none" stroke="#6B3A2A" stroke-width="5" stroke-linecap="round"/>
-  <path d="M62 48 Q74 44 70 62" fill="none" stroke="#6B3A2A" stroke-width="5" stroke-linecap="round"/>
-  <!-- head -->
+  <!-- v1.1: Soroban Tama – abacus body, gold beads, vermilion seal -->
+  <ellipse cx="40" cy="91" rx="18" ry="3.5" fill="#1A1010" opacity=".22"/>
+  <rect x="18" y="40" width="44" height="40" rx="3" fill="#5A2E1E" stroke="#D4A84B" stroke-width="1.6"/>
+  <line x1="18" y1="53" x2="62" y2="53" stroke="#D4A84B" stroke-width="1.4"/>
+  <line x1="18" y1="66" x2="62" y2="66" stroke="#D4A84B" stroke-width="1.4"/>
+  <line x1="28" y1="40" x2="28" y2="80" stroke="#8B5A2B" stroke-width="1.2"/>
+  <line x1="40" y1="40" x2="40" y2="80" stroke="#8B5A2B" stroke-width="1.2"/>
+  <line x1="52" y1="40" x2="52" y2="80" stroke="#8B5A2B" stroke-width="1.2"/>
+  <circle cx="28" cy="46" r="4.2" fill="#D4A84B" stroke="#3d2218" stroke-width="1"/>
+  <circle cx="40" cy="46" r="4.2" fill="#D4A84B" stroke="#3d2218" stroke-width="1"/>
+  <circle cx="52" cy="46" r="4.2" fill="#C9952A" stroke="#3d2218" stroke-width="1"/>
+  <circle cx="28" cy="59" r="4.2" fill="#C9952A" stroke="#3d2218" stroke-width="1"/>
+  <circle cx="40" cy="59" r="4.2" fill="#D4A84B" stroke="#3d2218" stroke-width="1"/>
+  <circle cx="52" cy="59" r="4.2" fill="#D4A84B" stroke="#3d2218" stroke-width="1"/>
+  <circle cx="34" cy="73" r="4.2" fill="#D4A84B" stroke="#3d2218" stroke-width="1"/>
+  <circle cx="46" cy="73" r="4.2" fill="#C9952A" stroke="#3d2218" stroke-width="1"/>
+  <path d="M18 48 L6 56" stroke="#5A2E1E" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M62 48 L74 56" stroke="#5A2E1E" stroke-width="5.5" stroke-linecap="round"/>
+  <circle cx="4" cy="58" r="3.5" fill="#E8C090" stroke="#1A1010" stroke-width=".8"/>
+  <circle cx="76" cy="58" r="3.5" fill="#E8C090" stroke="#1A1010" stroke-width=".8"/>
   <circle cx="40" cy="24" r="13" fill="#6B3A2A" stroke="#D4A84B" stroke-width="1.5"/>
-  <path d="M28 20 Q24 8 34 12 Q40 4 46 12 Q56 8 52 20" fill="#3d2218"/>
-  <ellipse cx="35" cy="25" rx="2.2" ry="2.8" fill="#F5D78E"/>
-  <ellipse cx="45" cy="25" rx="2.2" ry="2.8" fill="#F5D78E"/>
-  <circle cx="35" cy="25" r="1" fill="#1A1A1A"/>
-  <circle cx="45" cy="25" r="1" fill="#1A1A1A"/>
-  <path d="M36 31 Q40 34 44 31" fill="none" stroke="#D4A84B" stroke-width="1"/>
-  <!-- vermilion seal on forehead -->
-  <rect x="37" y="14" width="6" height="5" rx="0.5" fill="#C23A2B"/>
+  <path d="M28 20 C28 8 34 4 40 3 C46 4 52 8 52 20 C49 14 44 12 40 12 C36 12 31 14 28 20 Z" fill="#3d2218"/>
+  <rect x="37" y="13" width="6" height="5" rx=".4" fill="#C23A2B" stroke="#5A0A14" stroke-width=".6"/>
+  <ellipse cx="35" cy="26" rx="2.4" ry="3" fill="#F5D78E" stroke="#1A1010" stroke-width=".5"/>
+  <ellipse cx="45" cy="26" rx="2.4" ry="3" fill="#F5D78E" stroke="#1A1010" stroke-width=".5"/>
+  <circle cx="35" cy="26" r="1" fill="#1A1010"/>
+  <circle cx="45" cy="26" r="1" fill="#1A1010"/>
+  <path d="M36 32 Q40 35 44 32" fill="none" stroke="#D4A84B" stroke-width="1.2" stroke-linecap="round"/>
 </svg>

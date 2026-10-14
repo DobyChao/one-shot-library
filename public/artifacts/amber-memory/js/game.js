@@ -22,6 +22,7 @@ class Game {
     this.messageT = 0;
     this.bgmCue = '';
     this.musicIdx = 0;
+    this._musicRoomSilent = false;
     this._musicAudio = null;
     this._musicPlayingId = null;
     this.stage = 1;
@@ -44,6 +45,7 @@ class Game {
     this.bgmCue = '道中《秋水不渡昨日之舟》';
   }
   startStage2() {
+    this.grantClearBomb();
     this.enemies = [];
     this.playerBullets = [];
     this.enemyBullets = [];
@@ -60,6 +62,11 @@ class Game {
   queueEcho(delay, fn) {
     this.echoQueue.push({ t: delay, fn });
   }
+  /** Stage clear: +1 bomb (cap 7). Call once per clear. */
+  grantClearBomb() {
+    if (!this.player) return;
+    this.player.bombs = Math.min(7, this.player.bombs + 1);
+  }
   startBoss2() {
     this.boss = new BossKyouko();
     this.boss.setPhase('enter', 1300, 0);
@@ -75,6 +82,7 @@ class Game {
     this.keys._zTap = false; this.keys._xTap = false; this.state = STATE.DIALOG;
   }
   startStage3() {
+    this.grantClearBomb();
     this.enemies = [];
     this.playerBullets = [];
     this.enemyBullets = [];
@@ -184,6 +192,7 @@ class Game {
         this.boss._a = null;
         this.toast('Nonspell');
       } else if (this.dialogMode === 'post6') {
+        this.grantClearBomb();
         this.keys._zTap = false; this.keys._xTap = false; this.state = STATE.CLEAR;
       } else if (this.dialogMode === 'preEx') {
         this.state = STATE.PLAY;
@@ -193,8 +202,10 @@ class Game {
         this.boss._e = null;
         this.toast(this.boss.spellName);
       } else if (this.dialogMode === 'postEx') {
+        this.grantClearBomb();
         this.keys._zTap = false; this.keys._xTap = false; this.state = STATE.CLEAR;
       } else {
+        this.grantClearBomb();
         this.keys._zTap = false; this.keys._xTap = false; this.state = STATE.CLEAR;
       }
       this.dialog = null;
@@ -372,6 +383,7 @@ class Game {
     this.toast('Spell Card Bonus!');
   }
   startStage4() {
+    this.grantClearBomb();
     this.enemies = [];
     this.playerBullets = [];
     this.enemyBullets = [];
@@ -514,6 +526,7 @@ class Game {
     this.toast('Spell Card Bonus!');
   }
   startStage5() {
+    this.grantClearBomb();
     this.enemies = [];
     this.playerBullets = [];
     this.enemyBullets = [];
@@ -615,6 +628,7 @@ class Game {
     this.toast('Spell Card Bonus!');
   }
   startStage6() {
+    this.grantClearBomb();
     this.enemies = [];
     this.playerBullets = [];
     this.enemyBullets = [];
@@ -728,6 +742,7 @@ class Game {
     this.toast('All Clear!');
   }
   startStageEx() {
+    this.grantClearBomb();
     this.enemies = [];
     this.playerBullets = [];
     this.enemyBullets = [];
@@ -842,9 +857,38 @@ class Game {
     this.toast('Ex Clear · 琥珀裂缝暂时合上');
   }
 
+
+  _syncBgm() {
+    if (typeof AmberBgm === 'undefined') return;
+    AmberBgm.update(0);
+    if (this.state === STATE.TITLE) {
+      AmberBgm.setBgmId('bgm_title');
+      return;
+    }
+    if (this.state === STATE.MUSIC) {
+      if (this._musicRoomSilent) return;
+      const tr = (typeof MUSIC_TRACKS !== 'undefined') ? MUSIC_TRACKS[this.musicIdx] : null;
+      if (tr) AmberBgm.setBgmId(tr.id);
+      else AmberBgm.setBgmId('bgm_title');
+      return;
+    }
+    if (this.state === STATE.CLEAR) {
+      AmberBgm.setBgmId('bgm_ending');
+      return;
+    }
+    if (this.state === STATE.GAMEOVER) {
+      AmberBgm.setCue('');
+      return;
+    }
+    // PLAY / DIALOG: Chinese bgmCue → id（道中→Boss 自动切）
+    AmberBgm.setCueFromLabel(this.bgmCue || 'bgm_title');
+  }
+
   openMusicRoom() {
     this.stopMusicPreview();
+    this._musicRoomSilent = false;
     this.musicIdx = 0;
+    this._musicPlayingId = (typeof MUSIC_TRACKS !== 'undefined' && MUSIC_TRACKS[0]) ? MUSIC_TRACKS[0].id : null;
     this.keys._zTap = false; this.keys._xTap = false;
     this.keys._upTap = false; this.keys._downTap = false;
     this.state = STATE.MUSIC;
@@ -859,31 +903,41 @@ class Game {
   tryPlayMusicTrack() {
     const tr = MUSIC_TRACKS[this.musicIdx];
     if (!tr) return;
-    if (this._musicPlayingId === tr.id && this._musicAudio && !this._musicAudio.paused) {
+    if (typeof AmberBgm === 'undefined') {
+      this.toast('尚无音频');
+      return;
+    }
+    AmberBgm.ensure();
+    if (this._musicPlayingId === tr.id && !this._musicRoomSilent) {
+      this._musicRoomSilent = true;
       this.stopMusicPreview();
+      AmberBgm.setCue('');
+      this._musicPlayingId = null;
       this.toast('停止');
       return;
     }
-    this.stopMusicPreview();
-    const tryUrls = [`audio/${tr.id}.ogg`, `audio/${tr.id}.mp3`];
+    this._musicRoomSilent = false;
+    AmberBgm.setBgmId(tr.id);
+    this._musicPlayingId = tr.id;
+    this.toast('♪ ' + tr.title);
+    // Optional file overlay (no fail toast — synth already playing)
+    if (this._musicAudio) {
+      try { this._musicAudio.pause(); } catch (e) {}
+      this._musicAudio = null;
+    }
+    const tryUrls = ['audio/' + tr.id + '.ogg', 'audio/' + tr.id + '.mp3'];
     const audio = new Audio();
     audio.loop = true;
     let i = 0;
-    const fail = () => {
-      this.stopMusicPreview();
-      this.toast('尚无音频');
-    };
     const tryNext = () => {
-      if (i >= tryUrls.length) { fail(); return; }
+      if (i >= tryUrls.length) return;
       const url = tryUrls[i++];
       audio.onerror = () => tryNext();
       audio.oncanplay = () => {
         audio.oncanplay = null;
         audio.onerror = null;
         this._musicAudio = audio;
-        this._musicPlayingId = tr.id;
-        audio.play().catch(fail);
-        this.toast('♪ ' + tr.title);
+        audio.play().catch(function () {});
       };
       audio.src = url;
       audio.load();
@@ -894,6 +948,7 @@ class Game {
 
   update(dt) {
     if (this.messageT > 0) this.messageT -= dt;
+    this._syncBgm();
     if (this.spellFlash > 0) {
       this.spellFlash -= dt;
       if (this.spellFlash <= 0.4 && this.boss && this.boss.phase === 'spell_declare') {
@@ -955,11 +1010,15 @@ class Game {
     if (this.state === STATE.MUSIC) {
       if (this.keys._upTap) {
         this.keys._upTap = false;
+        this._musicRoomSilent = false;
         this.musicIdx = (this.musicIdx + MUSIC_TRACKS.length - 1) % MUSIC_TRACKS.length;
+        this._musicPlayingId = MUSIC_TRACKS[this.musicIdx].id;
       }
       if (this.keys._downTap) {
         this.keys._downTap = false;
+        this._musicRoomSilent = false;
         this.musicIdx = (this.musicIdx + 1) % MUSIC_TRACKS.length;
+        this._musicPlayingId = MUSIC_TRACKS[this.musicIdx].id;
       }
       if (this.keys._zTap) { this.keys._zTap = false; this.tryPlayMusicTrack(); }
       if (this.keys._xTap || this.keys._escTap) {
@@ -985,9 +1044,15 @@ class Game {
         speedMul = Math.min(speedMul, 0.7);
       }
     }
-    if (speedMul < 0.55) speedMul = 0.55;
+    if (speedMul < 0.65) speedMul = 0.65;
     this.player.speedMul = speedMul;
     this.player.update(dt, this.keys, this.playerBullets);
+    if (this.keys._xTap || this.keys._cTap) {
+      const tap = this.keys._xTap || this.keys._cTap;
+      this.keys._xTap = false;
+      this.keys._cTap = false;
+      if (tap && this.player.bomb(this)) this.toast('Bomb!');
+    }
     this.director.update(dt);
 
     for (const eq of this.echoQueue) eq.t -= dt;
@@ -1016,7 +1081,8 @@ class Game {
         if (!e.alive) continue;
         if (Math.hypot(b.x - e.x, b.y - e.y) < e.r + b.r) {
           b.alive = false;
-          const dmg = new URLSearchParams(location.search).get('god') === '1' ? 60 : 12;
+          let dmg = new URLSearchParams(location.search).get('god') === '1' ? 60 : 12;
+          if (typeof diffMul === 'function') dmg *= diffMul().playerDmg;
           if (e.hurt(dmg, this)) this.player.score += e.score;
           break;
         }
@@ -1024,7 +1090,8 @@ class Game {
       if (b.alive && this.boss && this.boss.alive && !this.boss.invuln) {
         if (Math.hypot(b.x - this.boss.x, b.y - this.boss.y) < this.boss.r + b.r) {
           b.alive = false;
-          const dmgBoss = new URLSearchParams(location.search).get('god') === '1' ? 80 : 10;
+          let dmgBoss = new URLSearchParams(location.search).get('god') === '1' ? 80 : 10;
+          if (typeof diffMul === 'function') dmgBoss *= diffMul().playerDmg;
           if (this.boss.hurt(dmgBoss)) {
             this.player.score += 50000;
             if (this.boss instanceof BossKyouko) {
@@ -1158,6 +1225,11 @@ class Game {
       ctx.fillStyle = 'rgba(245,215,142,0.75)';
       ctx.font = '12px sans-serif';
       ctx.fillText('C · Music Room', W / 2, H * 0.82);
+      if (typeof treatOn === 'function' && treatOn()) {
+        ctx.fillStyle = '#7CFC00';
+        ctx.font = '12px sans-serif';
+        ctx.fillText('Treat：无敌·低密·常显判定 · ?treat=1', W / 2, H * 0.88);
+      }
       return;
     }
     if (this.state === STATE.MUSIC) {
@@ -1190,7 +1262,7 @@ class Game {
     for (const b of this.playerBullets) b.draw(ctx);
     for (const b of this.enemyBullets) b.draw(ctx);
     this.player.draw(ctx);
-    this.player.drawHitbox(ctx, this.keys.Shift);
+    this.player.drawHitbox(ctx, !!(this.keys.Shift || (typeof treatOn === 'function' && treatOn())));
 
     // HUD
     this.drawHud(ctx);
@@ -1293,15 +1365,22 @@ class Game {
 
   drawHud(ctx) {
     ctx.fillStyle = 'rgba(42,34,24,0.45)';
-    ctx.fillRect(4, 4, 130, 70);
+    ctx.fillRect(4, 4, 140, 78);
     ctx.strokeStyle = '#E8A317';
-    ctx.strokeRect(4, 4, 130, 70);
+    ctx.strokeRect(4, 4, 140, 78);
     ctx.fillStyle = '#F5D78E';
     ctx.font = '12px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('LIFE  ' + '♥'.repeat(Math.max(0, this.player.lives)), 12, 22);
-    ctx.fillText('SCORE ' + String(this.player.score).padStart(8, '0'), 12, 40);
-    ctx.fillText('GRAZE ' + this.player.graze, 12, 58);
+    const lifeLabel = (typeof treatOn === 'function' && treatOn())
+      ? 'LIFE  ∞' : ('LIFE  ' + '♥'.repeat(Math.max(0, Math.min(this.player.lives, 8))) + (this.player.lives > 8 ? '+' : ''));
+    ctx.fillText(lifeLabel, 12, 20);
+    ctx.fillText('BOMB  ' + '★'.repeat(Math.max(0, this.player.bombs)), 12, 36);
+    ctx.fillText('SCORE ' + String(this.player.score).padStart(8, '0'), 12, 52);
+    ctx.fillText('GRAZE ' + this.player.graze, 12, 68);
+    if (typeof treatOn === 'function' && treatOn()) {
+      ctx.fillStyle = '#7CFC00';
+      ctx.fillText('TREAT', 90, 20);
+    }
 
     if (this.boss && this.boss.alive && this.boss.phase !== 'enter' && this.boss.phase !== 'dialog') {
       const bw = W - 20;
